@@ -12,9 +12,26 @@
 
 
 # Libraries ---------------------------------------------------------------
+theme_simple <- function () { 
+  theme_grey() %+replace% 
+    theme(
+      axis.line=element_line(colour="black"),
+      panel.grid.minor=element_blank(), 
+      panel.grid.major=element_blank(),
+      panel.background=element_blank(), 
+      axis.title=element_text(size=28,face="bold"),
+      axis.text.x=element_text(size=24, colour="Black"),
+      axis.text.y=element_text(size=24, colour="Black"),
+      axis.ticks.length=unit(0.5,"cm"),
+      axis.ticks=element_line(size=0.5, colour="Black"),
+      panel.border=element_rect(fill=FALSE,size=0.5),
+      legend.title=element_text(size=15),
+      legend.key=element_blank()
+    )
+  
+}
 
-
-library(tidyverse)
+library("tidyverse"); theme_set(theme_simple())
 library(cowplot)
 library(readxl)
 library(gridExtra)
@@ -31,6 +48,8 @@ CAN_yield<-read_csv('data/cansim-0010017 Area,Yield,etc2.csv',na=c("","..",'x'),
 CAN_expenses_current<-read_csv('data/cansim-0020005 FERT.csv',skip=6,na=c("",'x','..'),col_types=cols())
 CAN_expenses_historic <-read_csv('data/cansim-0020015 OLD FERT.csv',skip=5,na=c("",'x','..'),col_types=cols())
 CAN_CPI<-read_csv('data/cansim-3260021 CPI.csv',skip=3,col_types=cols())
+CAN_farmprices_current<-read_xlsx('data/cansim-0020043 farm price_ee.xlsx',na=c("","..","<NA>","",'x'),skip=4)
+CAN_farmprices_historic<-read_csv('data/cansim-0010017 farm price old.csv',na=c("","..","<NA>",""),skip=3,col_types=cols())
 
 # Profit Variability ------------------------------------------------------
 
@@ -121,13 +140,13 @@ OUTPUTS<-CAN_prod %>%
   group_by(Year,Geography,Harvest.disposition) %>% 
   summarise(Value=sum(ReportedValue,na.rm=T)) %>% 
   rename(Metric=Harvest.disposition)
-YIELD<-CAN_prod %>% #LPlaceholder - identifying what ellen doing here
-  filter(Harvest.disposition=='Average yield',HarvestMetric=='(kilograms per hectare)') %>% 
+YIELD<-CAN_prod %>%
+  filter(Harvest.disposition=='Average yield') %>% 
   group_by(Year,Geography,Harvest.disposition) %>% 
   summarise(Value=(mean(ReportedValue,na.rm=T))) %>% 
   rename(Metric=Harvest.disposition)
 AREA<-CAN_prod %>% 
-  filter(Harvest.disposition=='Seeded area',HarvestMetric=='(hectares)',Crop!='Summerfallow') %>% 
+  filter(Harvest.disposition=='Seeded area',Crop!='Summerfallow') %>% 
   group_by(Year,Geography,Harvest.disposition) %>% 
   summarise(Value=(sum(ReportedValue,na.rm=T))) %>% 
   rename(Metric=Harvest.disposition)
@@ -137,4 +156,94 @@ gap2<-bind_rows(INPUTS,OUTPUTS,YIELD,AREA) %>%
   mutate(DolperHA=(InputCost.CAD2016/`Seeded area`))%>% 
   filter(InputCost.CAD2016>0,Production>0,Year>=1926,Geography=='Canada')
 
-gap2$`Seeded area`[gap2$Year==2016] / gap2$`Seeded area`[gap2$Year==1926]
+gap2$`Seeded area`[gap2$Year==2016] / gap2$`Seeded area`[gap2$Year==1926] #change in seeded area
+gap2$Production[gap2$Year==2016] / gap2$Production[gap2$Year==1926] #change in production
+gap2$InputCost.CAD2016[gap2$Year==2016] / gap2$InputCost.CAD2016[gap2$Year==1926] #change in input cost
+
+#Market Prices - Converted from 2016 CAD to 2016 USD using conversion rate of 1.379. Obtained from https://www.irs.gov/individuals/international-taxpayers/yearly-average-currency-exchange-rates
+MarketPrice_current<-CAN_farmprices_current %>% 
+  rename(Crop=`Farm products`) %>% 
+  filter(!Crop %in% c('Wheat excluding durum','Ontario wheat including payments','Ontario wheat excluding payments','Canadian Wheat Board, wheat including payments',"Canadian Wheat Board, durum including payments","Canadian Wheat Board, barley including payments",'Barley_EEBAD',"Canadian Wheat Board, selected barley including payments","Non-board wheat excluding durum",'Durum',"Canadian Wheat Board, barley excluding payments","Canadian Wheat Board, durum excluding payments","Canadian Wheat Board, selected barley excluding payments","Canadian Wheat Board, wheat excluding payments", "Not available", "Suppressed to meet the confidentiality requirements of the Statistics Act"), !is.na(Crop))%>%
+  filter(Geography %in% geo) %>%
+  gather(Year,Value,-Geography,-Crop) %>% 
+  mutate(Value=as.numeric(Value)) %>% 
+  separate(col=Year,sep='_',into=c('Year','Month'),extra='merge') %>% 
+  group_by(Crop,Year) %>% 
+  summarise(DolPerMetricTonne=mean(Value,na.rm=T))
+
+MarketPrice_historic<-CAN_farmprices_historic %>% #PLACEHOLDER identifying what ellen doing here
+  rename(Crop=`Type of crop`) %>%
+  select(-`Harvest disposition`) %>%
+  filter(Geography %in% geo) %>%
+  filter(Geography!='Canada') %>% 
+  gather(Year,Value,-Geography,-Crop)  %>%    
+  separate(col=Year,sep='X',into=c('x','Year'),extra='merge') %>% 
+  separate(col=Crop,sep=' [(]',into=c('Crop','x2'),extra='merge') %>% 
+  mutate(Crop=ifelse(Crop=='Corn for grain','Grain corn',Crop)) %>% 
+  group_by(Crop,Year) %>% 
+  summarise(DolPerMetricTonne=mean(as.numeric(Value),na.rm=T)) %>% 
+  mutate(DolPerMetricTonne=ifelse(DolPerMetricTonne==0,NaN, DolPerMetricTonne)) %>% 
+  filter(!is.nan(DolPerMetricTonne),DolPerMetricTonne>0)
+
+AvgFarmYield<-CAN_prod %>% 
+  filter(Harvest.disposition =='Average yield', HarvestMetric=='(kilograms per hectare)',Geography=='Canada',ReportedValue!='<NA>') %>% 
+  group_by(Year,Crop) %>% 
+  summarise(MetricTonneperHA=mean(ReportedValue,na.rm=T)/1000) %>% 
+  select(Crop,Year,MetricTonneperHA)
+AvgFarmYield$Crop[AvgFarmYield$Crop=='Corn for grain'] <- "Grain corn" 
+
+SumFarmArea<-CAN_prod %>% 
+  filter(Harvest.disposition=='Seeded area', HarvestMetric=='(hectares)',Geography=='Canada',ReportedValue!='<NA>') %>%
+  group_by(Crop,Year) %>% 
+  summarise(SeededArea=sum(ReportedValue,na.rm=T)) 
+SumFarmArea$Crop[SumFarmArea$Crop=='Corn for grain'] <- "Grain corn" 
+
+FarmInflation<-read_csv('./cansim-3260021 CPI.csv',skip=3,col_types=cols())%>%
+  subset(`Products and product groups`=='All-items') %>% 
+  rename(type=`Products and product groups`) %>% 
+  gather(Year,CPI,-Geography,-type) %>%
+  mutate(Year=as.numeric(Year)) %>% 
+  select(-type,-Geography)
+
+MarketPrice<- bind_rows(MarketPrice_current, MarketPrice_historic) %>% 
+  merge(AvgFarmYield,all=T) %>% 
+  merge(FarmInflation,all.x=T) %>% 
+  mutate(Dol2016perMetricTonne = ((128.4/CPI)* DolPerMetricTonne)) %>% 
+  mutate(Dol2016PerHA=(Dol2016perMetricTonne* MetricTonneperHA)) %>% 
+  filter(!is.na(CPI)) %>% 
+  merge(SumFarmArea,all.x=T) %>%
+  as_tibble()
+
+MarketPrice_index<-MarketPrice %>%
+  filter(!is.na(Dol2016perMetricTonne),Year>=1926) %>% 
+  group_by(Crop) %>% 
+  summarize(Year=min(Year)) %>% 
+  merge(MarketPrice) %>% 
+  rename(IndexYield_ton.ha=MetricTonneperHA, IndexPrice_2016dol.ton=Dol2016perMetricTonne, IndexRevenue_2016dol.ha=Dol2016PerHA, IndexArea_ha=SeededArea) %>% 
+  select(Crop, IndexYield_ton.ha, IndexPrice_2016dol.ton, IndexRevenue_2016dol.ha, IndexArea_ha) %>% 
+  merge(MarketPrice,all=T) %>% 
+  mutate(Yield_index=MetricTonneperHA/IndexYield_ton.ha, Price_index= Dol2016perMetricTonne/IndexPrice_2016dol.ton, Revenue_index= Dol2016PerHA/IndexRevenue_2016dol.ha,Area_index= SeededArea/IndexArea_ha) %>% 
+  filter(Crop!='Borage seed',Crop!='Canary seed',Crop!='Caraway seed',Crop!='Chick peas',Crop!='Coriander seed',Crop!='Fababeans',Crop!='Lentils',Crop!='Safflower',Crop!='Triticale') %>% 
+  merge(gap2 %>% 
+          filter(Geography=='Canada') %>% 
+          select(Year, InputCost.CAD2016,`Seeded area`,Geography) %>% 
+          mutate(InputCost.CAD2016perha=(InputCost.CAD2016/`Seeded area`)) %>%
+          mutate(Cost_index= InputCost.CAD2016perha/8.68195)) %>% 
+  mutate(PROFIT=((MetricTonneperHA* Dol2016perMetricTonne)-InputCost.CAD2016perha)) %>% 
+  as_tibble()
+
+Fig3Means<-MarketPrice_index %>% 
+  filter(Crop=='Barley'|Crop=='Canola'|Crop=='Flaxseed'|Crop=='Grain corn'|Crop=='Oats'|Crop=='Peas, dry'|Crop=='Rye, all'|Crop=='Soybeans'|Crop=='Wheat, all') %>% 
+  select(Year,Price_index,Yield_index,Crop,Cost_index) %>% 
+  gather(METRIC,VALUE,-Year,-Crop) %>% 
+  group_by(Year,METRIC)%>% 
+  summarise(value=mean(VALUE),se=(sd(VALUE)/sqrt(n())))
+
+Fig3Sums<-MarketPrice_index %>% filter(Crop=='Barley'|Crop=='Canola'|Crop=='Flaxseed'|Crop=='Grain corn'|Crop=='Oats'|Crop=='Peas, dry'|Crop=='Rye, all'|Crop=='Soybeans'|Crop=='Wheat, all') %>%
+  select(Year,SeededArea,Crop) %>% 
+  gather(METRIC,VALUE,-Year,-Crop) %>% 
+  group_by(Year,METRIC)%>% 
+  summarise(value=sum(VALUE),se=(sd(VALUE)/sqrt(n()))) %>% 
+  mutate(value=(value/16646500))
+
+Fig3Points<-bind_rows(Fig3Means,Fig3Sums)
