@@ -171,75 +171,107 @@ MarketPrice_current<-CAN_farmprices_current %>%
   group_by(Crop,Year) %>% 
   summarise(DolPerMetricTonne=mean(Value,na.rm=T))
 
-MarketPrice_historic<-CAN_farmprices_historic %>% #PLACEHOLDER identifying what ellen doing here
+MarketPrice_historic<-CAN_farmprices_historic %>%
   rename(Crop=`Type of crop`) %>%
   select(-`Harvest disposition`) %>%
   filter(Geography %in% geo) %>%
   filter(Geography!='Canada') %>% 
   gather(Year,Value,-Geography,-Crop)  %>%    
-  separate(col=Year,sep='X',into=c('x','Year'),extra='merge') %>% 
   separate(col=Crop,sep=' [(]',into=c('Crop','x2'),extra='merge') %>% 
   mutate(Crop=ifelse(Crop=='Corn for grain','Grain corn',Crop)) %>% 
   group_by(Crop,Year) %>% 
   summarise(DolPerMetricTonne=mean(as.numeric(Value),na.rm=T)) %>% 
-  mutate(DolPerMetricTonne=ifelse(DolPerMetricTonne==0,NaN, DolPerMetricTonne)) %>% 
-  filter(!is.nan(DolPerMetricTonne),DolPerMetricTonne>0)
+  mutate(DolPerMetricTonne=ifelse(DolPerMetricTonne==0,NA, DolPerMetricTonne)) %>% 
+  filter(!is.na(DolPerMetricTonne))
 
 AvgFarmYield<-CAN_prod %>% 
-  filter(Harvest.disposition =='Average yield', HarvestMetric=='(kilograms per hectare)',Geography=='Canada',ReportedValue!='<NA>') %>% 
+  filter(Harvest.disposition =='Average yield',Geography=='Canada',ReportedValue!='<NA>') %>% 
   group_by(Year,Crop) %>% 
   summarise(MetricTonneperHA=mean(ReportedValue,na.rm=T)/1000) %>% 
   select(Crop,Year,MetricTonneperHA)
 AvgFarmYield$Crop[AvgFarmYield$Crop=='Corn for grain'] <- "Grain corn" 
 
 SumFarmArea<-CAN_prod %>% 
-  filter(Harvest.disposition=='Seeded area', HarvestMetric=='(hectares)',Geography=='Canada',ReportedValue!='<NA>') %>%
+  filter(Harvest.disposition=='Seeded area',Geography=='Canada',ReportedValue!='<NA>') %>%
   group_by(Crop,Year) %>% 
   summarise(SeededArea=sum(ReportedValue,na.rm=T)) 
 SumFarmArea$Crop[SumFarmArea$Crop=='Corn for grain'] <- "Grain corn" 
 
-FarmInflation<-read_csv('./cansim-3260021 CPI.csv',skip=3,col_types=cols())%>%
-  subset(`Products and product groups`=='All-items') %>% 
-  rename(type=`Products and product groups`) %>% 
-  gather(Year,CPI,-Geography,-type) %>%
+FarmInflation<-CAN_CPI%>%
+  filter(`Products and product groups`=='All-items') %>% 
+  rename(Type=`Products and product groups`) %>% 
+  gather(Year,CPI,-Geography,-Type) %>%
   mutate(Year=as.numeric(Year)) %>% 
-  select(-type,-Geography)
+  select(-Type,-Geography)
 
 MarketPrice<- bind_rows(MarketPrice_current, MarketPrice_historic) %>% 
-  merge(AvgFarmYield,all=T) %>% 
-  merge(FarmInflation,all.x=T) %>% 
+  mutate(Year = as.numeric(Year)) %>%
+  full_join(AvgFarmYield, by = c("Crop", "Year")) %>% 
+  left_join(FarmInflation, by = "Year") %>% 
   mutate(Dol2016perMetricTonne = ((128.4/CPI)* DolPerMetricTonne)) %>% 
   mutate(Dol2016PerHA=(Dol2016perMetricTonne* MetricTonneperHA)) %>% 
   filter(!is.na(CPI)) %>% 
-  merge(SumFarmArea,all.x=T) %>%
-  as_tibble()
+  left_join(SumFarmArea,by = c("Crop", "Year"))
+
+
+
 
 MarketPrice_index<-MarketPrice %>%
   filter(!is.na(Dol2016perMetricTonne),Year>=1926) %>% 
   group_by(Crop) %>% 
   summarize(Year=min(Year)) %>% 
-  merge(MarketPrice) %>% 
+  left_join(MarketPrice, by = c("Crop", "Year")) %>% 
   rename(IndexYield_ton.ha=MetricTonneperHA, IndexPrice_2016dol.ton=Dol2016perMetricTonne, IndexRevenue_2016dol.ha=Dol2016PerHA, IndexArea_ha=SeededArea) %>% 
   select(Crop, IndexYield_ton.ha, IndexPrice_2016dol.ton, IndexRevenue_2016dol.ha, IndexArea_ha) %>% 
-  merge(MarketPrice,all=T) %>% 
+  full_join(MarketPrice, by = "Crop") %>% 
   mutate(Yield_index=MetricTonneperHA/IndexYield_ton.ha, Price_index= Dol2016perMetricTonne/IndexPrice_2016dol.ton, Revenue_index= Dol2016PerHA/IndexRevenue_2016dol.ha,Area_index= SeededArea/IndexArea_ha) %>% 
-  filter(Crop!='Borage seed',Crop!='Canary seed',Crop!='Caraway seed',Crop!='Chick peas',Crop!='Coriander seed',Crop!='Fababeans',Crop!='Lentils',Crop!='Safflower',Crop!='Triticale') %>% 
-  merge(gap2 %>% 
+  filter(!Crop %in% c('Borage seed','Canary seed','Caraway seed','Chick peas','Coriander seed','Fababeans','Lentils','Safflower','Triticale')) %>% 
+  right_join(gap2 %>% 
           filter(Geography=='Canada') %>% 
           select(Year, InputCost.CAD2016,`Seeded area`,Geography) %>% 
           mutate(InputCost.CAD2016perha=(InputCost.CAD2016/`Seeded area`)) %>%
-          mutate(Cost_index= InputCost.CAD2016perha/8.68195)) %>% 
-  mutate(PROFIT=((MetricTonneperHA* Dol2016perMetricTonne)-InputCost.CAD2016perha)) %>% 
-  as_tibble()
+          mutate(Cost_index= InputCost.CAD2016perha/8.68195), by = "Year") %>% 
+  mutate(PROFIT=((MetricTonneperHA* Dol2016perMetricTonne)-InputCost.CAD2016perha))
 
-Fig3Means<-MarketPrice_index %>% 
-  filter(Crop=='Barley'|Crop=='Canola'|Crop=='Flaxseed'|Crop=='Grain corn'|Crop=='Oats'|Crop=='Peas, dry'|Crop=='Rye, all'|Crop=='Soybeans'|Crop=='Wheat, all') %>% 
-  select(Year,Price_index,Yield_index,Crop,Cost_index) %>% 
+crops<-c('Barley','Canola','Flaxseed','Grain corn','Oats','Peas, dry','Rye, all','Soybeans','Wheat, all')
+
+InputProfitYieldMeans<-MarketPrice_index %>% 
+  filter(Crop %in% crops) %>% 
+  select(Year,Crop,Dol2016perMetricTonne,MetricTonneperHA,InputCost.CAD2016perha,PROFIT) %>% 
   gather(METRIC,VALUE,-Year,-Crop) %>% 
   group_by(Year,METRIC)%>% 
   summarise(value=mean(VALUE),se=(sd(VALUE)/sqrt(n())))
 
-Fig3Sums<-MarketPrice_index %>% filter(Crop=='Barley'|Crop=='Canola'|Crop=='Flaxseed'|Crop=='Grain corn'|Crop=='Oats'|Crop=='Peas, dry'|Crop=='Rye, all'|Crop=='Soybeans'|Crop=='Wheat, all') %>%
+InputProfitYieldPointsGraph<-MarketPrice_index %>% 
+  filter(Crop %in% crops) %>% 
+  select(Year,Crop,Dol2016perMetricTonne,MetricTonneperHA,InputCost.CAD2016perha,PROFIT) %>% 
+  gather(METRIC,VALUE,-Year,-Crop) %>%
+  ggplot()+
+  geom_point(aes(Year,VALUE, colour = Crop))+
+  facet_grid(METRIC~., scales = "free_y")
+
+Profitpointsgraph<-MarketPrice_index %>% 
+  filter(Crop %in% crops) %>% 
+  select(Year,Crop,PROFIT) %>% 
+  ggplot()+
+  geom_point(aes(Year,PROFIT, colour = Crop))
+
+yearprofitsdatacount<-MarketPrice_index %>% 
+  filter(Crop %in% crops) %>% 
+  select(Year,Crop,PROFIT) %>%
+  group_by(Year) %>%
+  summarise(count=length(PROFIT))
+
+InputProfitYieldmeansgraph<-InputProfitYieldMeans %>%
+  ggplot()+
+  geom_point(aes(Year,value))+
+  facet_grid(METRIC~., scales = "free_y")
+
+#when plot means does not appear that there is a change in variation. and any variation looks to be driven by market price (highly correlated for obvious reasons - profit is calculated from market price)
+#when look at all points for profit - maybe increase in variation in profits but could be artefact of more points? also why is my graph looking different from ellen's (e.g higher maximum value)
+
+Fig3Sums<-MarketPrice_index %>% 
+  filter(Crop %in% crops) %>%
   select(Year,SeededArea,Crop) %>% 
   gather(METRIC,VALUE,-Year,-Crop) %>% 
   group_by(Year,METRIC)%>% 
