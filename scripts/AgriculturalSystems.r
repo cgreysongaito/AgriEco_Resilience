@@ -135,6 +135,29 @@ INPUTS<-CAN_expenses_inf.adj %>%
   summarise(Value=sum(truedol,na.rm=T))%>% #PLACEHOLDER - if summarising by geography, how to deal with CANADA as part of geography
   mutate(Metric="InputCost.CAD2016") 
 
+INPUTSINDIV <- CAN_expenses_inf.adj %>%
+  group_by(Geography,Year,ExpenseType) %>%
+  summarise(ExpenseByType = sum (truedol)) %>%
+  filter(Geography == "Canada")
+
+INPUTSINDIVPlot <- INPUTSINDIV %>%
+  ggplot()+
+  geom_vline(xintercept = 1937) +
+  geom_vline(xintercept = 1945) +
+  geom_vline(xintercept = 1949) +
+  geom_vline(xintercept = 1953) +
+  geom_vline(xintercept = 1958) +
+  geom_vline(xintercept = 1960) +
+  geom_vline(xintercept = 1969) +
+  geom_vline(xintercept = 1973) +
+  geom_vline(xintercept = 1980) +
+  geom_vline(xintercept = 1981) +
+  geom_vline(xintercept = 1990) + #approximate
+  geom_vline(xintercept = 2001) +
+  geom_vline(xintercept = 2008) +
+  geom_point(aes(x=Year, y=ExpenseByType,colour = ExpenseType))
+
+
 OUTPUTS<-CAN_prod %>% 
   filter(Harvest.disposition=='Production') %>% 
   group_by(Year,Geography,Harvest.disposition) %>% 
