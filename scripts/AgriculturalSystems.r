@@ -140,6 +140,8 @@ INPUTSINDIV <- CAN_expenses_inf.adj %>%
   summarise(ExpenseByType = sum (truedol)) %>%
   filter(Geography == "Canada")
 
+###PLACEHOLDER calculate pesticide usage weighted by the yield for each type of crop - to identify approximate pesticide requirements of each crop (what if market price is increasing for pesticdes?)
+
 INPUTSINDIVPlot <- INPUTSINDIV %>%
   ggplot()+
   geom_vline(xintercept = 1937) +
