@@ -32,6 +32,7 @@ theme_simple <- function () {
 }
 
 library("tidyverse"); theme_set(theme_simple())
+library("magrittr")
 library(cowplot)
 library(readxl)
 library(gridExtra)
@@ -140,7 +141,25 @@ INPUTSINDIV <- CAN_expenses_inf.adj %>%
   summarise(ExpenseByType = sum (truedol)) %>%
   filter(Geography == "Canada")
 
-###PLACEHOLDER calculate pesticide usage weighted by the yield for each type of crop - to identify approximate pesticide requirements of each crop (what if market price is increasing for pesticdes?)
+AvgFarmYieldpw<-CAN_prod %>% 
+  filter(Harvest.disposition =='Average yield',Geography=='Canada',ReportedValue!='<NA>') %>% 
+  filter(Crop %in% crops) %>% 
+  group_by(Year,Crop) %>% 
+  summarise(MetricTonneperHA=mean(ReportedValue,na.rm=T)/1000) %>% 
+  select(Crop,Year,MetricTonneperHA) %>%
+  spread(Crop, MetricTonneperHA) %>%
+  rename('Grain corn'='Corn for grain')
+AvgFarmYieldpw$total<-rowSums(AvgFarmYieldpw[2:10],na.rm=TRUE)
+
+AvgFarmYieldpw %<>% mutate(barleyprop = Barley/total, canolaprop = Canola/total, cornprop=`Grain corn`/total, flaxprop = Flaxseed/total, oatsprop = Oats/total, peasprop = `Peas, dry`/total, ryeprop = `Rye, all`/total, soyprop = Soybeans/total, wheatprop= `Wheat, all`/total) %>%
+  select(Year, barleyprop,canolaprop,cornprop, flaxprop, oatsprop, peasprop,ryeprop,soyprop,wheatprop)
+
+Pestwieght <- INPUTSINDIV %>%
+  filter(ExpenseType == "Pesticides") %>%
+  mutate(ExpenseType=droplevels(ExpenseType)) %>%
+  left_join(AvgFarmYieldpw)
+  
+###PLACEHOLDER BUT pesticide amount is not standardised PER HECTARE atm
 
 INPUTSINDIVPlot <- INPUTSINDIV %>%
   ggplot()+
@@ -258,7 +277,7 @@ MarketPrice_index<-MarketPrice %>%
           mutate(Cost_index= InputCost.CAD2016perha/8.68195), by = "Year") %>% 
   mutate(PROFIT=((MetricTonneperHA* Dol2016perMetricTonne)-InputCost.CAD2016perha))
 
-crops<-c('Barley','Canola','Flaxseed','Grain corn','Oats','Peas, dry','Rye, all','Soybeans','Wheat, all')
+crops<-c('Barley','Canola','Flaxseed','Grain corn', 'Corn for grain', 'Oats','Peas, dry','Rye, all','Soybeans','Wheat, all')
 
 InputProfitYieldMeans<-MarketPrice_index %>% 
   filter(Crop %in% crops) %>% 
