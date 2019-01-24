@@ -141,26 +141,6 @@ INPUTSINDIV <- CAN_expenses_inf.adj %>%
   summarise(ExpenseByType = sum (truedol)) %>%
   filter(Geography == "Canada")
 
-AvgFarmYieldpw<-CAN_prod %>% 
-  filter(Harvest.disposition =='Average yield',Geography=='Canada',ReportedValue!='<NA>') %>% 
-  filter(Crop %in% crops) %>% 
-  group_by(Year,Crop) %>% 
-  summarise(MetricTonneperHA=mean(ReportedValue,na.rm=T)/1000) %>% 
-  select(Crop,Year,MetricTonneperHA) %>%
-  spread(Crop, MetricTonneperHA) %>%
-  rename('Grain corn'='Corn for grain')
-AvgFarmYieldpw$total<-rowSums(AvgFarmYieldpw[2:10],na.rm=TRUE)
-
-AvgFarmYieldpw %<>% mutate(barleyprop = Barley/total, canolaprop = Canola/total, cornprop=`Grain corn`/total, flaxprop = Flaxseed/total, oatsprop = Oats/total, peasprop = `Peas, dry`/total, ryeprop = `Rye, all`/total, soyprop = Soybeans/total, wheatprop= `Wheat, all`/total) %>%
-  select(Year, barleyprop,canolaprop,cornprop, flaxprop, oatsprop, peasprop,ryeprop,soyprop,wheatprop)
-
-Pestwieght <- INPUTSINDIV %>%
-  filter(ExpenseType == "Pesticides") %>%
-  mutate(ExpenseType=droplevels(ExpenseType)) %>%
-  left_join(AvgFarmYieldpw)
-  
-###PLACEHOLDER BUT pesticide amount is not standardised PER HECTARE atm
-
 INPUTSINDIVPlot <- INPUTSINDIV %>%
   ggplot()+
   geom_vline(xintercept = 1937) +
