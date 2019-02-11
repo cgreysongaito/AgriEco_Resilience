@@ -52,6 +52,11 @@ CAN_CPI<-read_csv('data/cansim-3260021 CPI.csv',skip=3,col_types=cols())
 CAN_farmprices_current<-read_xlsx('data/cansim-0020043 farm price_ee.xlsx',na=c("","..","<NA>","",'x'),skip=4)
 CAN_farmprices_historic<-read_csv('data/cansim-0010017 farm price old.csv',na=c("","..","<NA>",""),skip=3,col_types=cols())
 
+#Water and Irrigation
+CAN_IrrVol <- read_csv('data/IrrigationVolumeCan38100239.csv',na=c("","..",'x'))
+CAN_IrrCrop <- read_csv('data/IrrigationCropTypeCan38100240.csv',na=c("","..",'x'))
+CAN_IrrReason <- read_csv('data/ReasonOffFarmIrrigationSourceCan38100248.csv',na=c("","..",'x'))
+
 # Profit Variability ------------------------------------------------------
 
 CAN_prod<-CAN_yield%>%
@@ -303,3 +308,38 @@ Fig3Sums<-MarketPrice_index %>%
   mutate(value=(value/16646500))
 
 Fig3Points<-bind_rows(Fig3Means,Fig3Sums)
+
+
+
+# Water and Irrigation ----------------------------------------------------
+
+CAN_IrrVol %>%
+  filter(GEO=="Canada") %>%
+  ggplot(aes(REF_DATE, VALUE))+
+  geom_point(aes(colour=`Month of irrigation`))
+
+
+CAN_IrrVol %>%
+  filter(GEO=="Ontario", `Month of irrigation`=="Total irrigation volume") %>%
+  ggplot(aes(REF_DATE, VALUE))+
+  geom_point()
+
+CAN_IrrVol %>%
+  filter(GEO=="Great Lakes drainage region", `Month of irrigation`=="Total irrigation volume") %>%
+  ggplot(aes(REF_DATE, VALUE))+
+  geom_point()
+
+CAN_IrrCrop %>%
+  filter(`Month of irrigation`=="Total irrigation volume") %>%
+  ggplot(aes(REF_DATE, VALUE)) +
+  geom_point(aes(colour=`Crop type`))
+
+CAN_IrrReason %>%
+  filter(GEO=="Canada") %>%
+  ggplot(aes(REF_DATE, VALUE)) +
+  geom_point(aes(colour=Reason))
+
+CAN_IrrReason %>%
+  filter(GEO=="Ontario") %>%
+  ggplot(aes(REF_DATE, VALUE)) +
+  geom_point(aes(colour=Reason))
