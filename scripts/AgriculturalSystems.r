@@ -277,7 +277,7 @@ InputProfitYieldPointsGraph<-MarketPrice_index %>%
   gather(METRIC,VALUE,-Year,-Crop) %>%
   ggplot()+
   geom_point(aes(Year,VALUE, colour = Crop))+
-  facet_grid(METRIC~., scales = "free_y")
+  facet_grid(METRIC~., scales = "free_y") #Placeholder why is there just barley for inputcost?
 
 Profitpointsgraph<-MarketPrice_index %>% 
   filter(Crop %in% crops) %>% 
