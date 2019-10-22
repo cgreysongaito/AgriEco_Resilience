@@ -61,3 +61,6 @@ let
     monod_plot(0.8, 0.5)
     monod_plot(1, 0.5)
 end
+
+#note for model - Can vary r depending on the amount of water within a year. Keep k1 larger so that slope is smaller.
+#white and red noise can be created by an AR process – equation 1 in ruokolainen et al 2009
