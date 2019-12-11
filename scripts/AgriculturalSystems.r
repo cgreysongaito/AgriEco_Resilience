@@ -285,6 +285,10 @@ Profitpointsgraph<-MarketPrice_index %>%
   ggplot()+
   geom_point(aes(Year,PROFIT, colour = Crop))
 
+ggsave('figs/Profitspointsgraph.jpg')
+
+Profitpointsgraph #PLACEHOLDER fix issue with data - not creating points for 1980s on wards
+
 yearprofitsdatacount<-MarketPrice_index %>% 
   filter(Crop %in% crops) %>% 
   select(Year,Crop,PROFIT) %>%
@@ -296,6 +300,7 @@ InputProfitYieldmeansgraph<-InputProfitYieldMeans %>%
   geom_point(aes(Year,value))+
   facet_grid(METRIC~., scales = "free_y")
 
+InputProfitYieldmeansgraph
 #when plot means does not appear that there is a change in variation. and any variation looks to be driven by market price (highly correlated for obvious reasons - profit is calculated from market price)
 #when look at all points for profit - maybe increase in variation in profits but could be artefact of more points? also why is my graph looking different from ellen's (e.g higher maximum value)
 
