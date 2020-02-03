@@ -60,11 +60,11 @@ CAN_IrrReason <- read_csv('data/ReasonOffFarmIrrigationSourceCan38100248.csv',na
 # Profit Variability ------------------------------------------------------
 
 CAN_prod<-CAN_yield%>%
-  rename(Harvest.disposition=`Harvest disposition`,Crop=`Type of crop`) %>%
+  rename(Harvest.disposition = `Harvest disposition`,Crop = `Type of crop`) %>%
   filter(Geography %in% geo) %>% 
   gather(Year,ReportedValue,-Geography,-Harvest.disposition,-Crop) %>% 
-  mutate(Year=as.numeric(Year))%>%
-  separate(col= Crop,sep=' [(]',into=c('Crop','Notes'),extra='merge') %>% 
+  mutate(Year = as.numeric(Year)) %>%
+  separate(col = Crop, sep =' [(]', into = c('Crop','Notes'), extra = 'merge') %>% 
   separate(col=Harvest.disposition,sep=' [(]',into=c('Harvest.disposition','HarvestMetric'),extra='merge') %>% 
   mutate(HarvestMetric=paste("(",HarvestMetric,sep="")) %>%
   select(-Notes) %>% 
