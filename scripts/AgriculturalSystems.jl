@@ -1,5 +1,9 @@
 include("packages.jl")
+@vars C
+@var y y₀
 
+f(C) = y * C / (y₀ + C)
+SymPy.simplify(diff(f(C),C))
 
 #Monod function (without critical value)
 @with_kw mutable struct MonodPar
@@ -10,6 +14,23 @@ end
 function monod(N, p)
     @unpack r, k1 = p
     r * N / ( k1 + N )
+end
+
+
+function monod_diff(N, p)
+    @unpack r, k1 = p
+    r * k1 / (( k1 + N )^2)
+end
+
+
+let 
+    Nrange = 0.0:0.01:5.0
+    data = [monod(N,MonodPar(r=1.0)) for N in Nrange]
+    data2 = [monod_diff(N,MonodPar(r=1.0)) for N in Nrange]
+    test = figure()
+    plot(Nrange, data)
+    plot(Nrange, data2)
+    return test
 end
 
 function monod_plot(gro, k1val)
