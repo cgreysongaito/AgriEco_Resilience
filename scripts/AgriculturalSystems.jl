@@ -63,27 +63,50 @@ end
 
 function maxprofit_vals(par)
     @unpack ymax, y0, p, c = par
-    I = y0 * ((((p^2)*(ymax^2)*y0) / c) -1)
-    Y = yield(I, ymax, y0)
+    I = sqrt((p * ymax * y0)/c)-y0
+    Y = yield(I, par)
     return [I, Y]
 end
 
 #Any way to geometrically show the parameters and their effects
+#https://www.economics.utoronto.ca/osborne/2x3/tutorial/MPFRM.HTM
 #Marginal revenue versus marginal cost figures
+function avvarcost(I,par)
+    @unpack c = par
+    Y = yield(I, par)
+    return c * I / Y
+end
+###might be a way of making this more general
+function avvarcostkick(Y, par)
+    @unpack c = par
+    I = maxprofit_vals(par)[1]
+    return c * I / Y
+end #THIS IS WRONG I NEEDS TO BE CONSTANT 
+
 function margcost(I, par)
     @unpack c = par
     return c / margprod(I, par)
 end
 
+maxprofit_vals(BMPPar(ymax=5, c = 2.0))[2]
 let 
     Irange = 0.0:0.01:10.0
-    Yield = [yield(I, BMPPar(ymax=5)) for I in Irange]
-    MC = [margcost(I, BMPPar(ymax=5)) for I in Irange]
+    Yrange = 0.0:0.01:5.0
+    Yield = [yield(I, BMPPar(ymax=5, c = 2.0)) for I in Irange]
+    MC = [margcost(I, BMPPar(ymax=5, c = 2.0)) for I in Irange]
+    AVC = [avvarcost(I,BMPPar(ymax=5, c = 2.0)) for I in Irange]
+    AVCK = [avvarcostkick(Y,BMPPar(ymax=5, c = 2.0)) for Y in Yrange]
     test = figure()
     plot(Yield, MC)
-    hlines(5, 0.0, 5.0)
+    plot(Yield, AVC)
+    plot(Yrange, AVCK)
+    hlines(1, 0.0, 5.0)
+    vlines(maxprofit_vals(BMPPar(ymax=5, c = 2.0))[2]*0.65, 0.0, avvarcostkick(maxprofit_vals(BMPPar(ymax=5, c = 2.0))[2], BMPPar(ymax=5, c = 2.0)))
+    ylim(0.0, 5.0)
     return test
 end
+
+#SOMETHING IS WRONG WITH AVVARCOSTKICK stuff
 
 
 
