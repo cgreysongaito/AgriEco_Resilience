@@ -4,6 +4,7 @@ using LinearAlgebra
 using Calculus
 using DifferentialEquations
 using ForwardDiff
+using Roots
 #using DynamicalSystems
 using SymPy
 using PyPlot
