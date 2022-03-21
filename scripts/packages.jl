@@ -1,10 +1,12 @@
 #Useful packages
+using Hwloc
+using .Threads
 using Parameters
 using LinearAlgebra
 using Calculus
 using DifferentialEquations
 using ForwardDiff
 using Roots
-#using DynamicalSystems
+using Distributions
 using SymPy
 using PyPlot
