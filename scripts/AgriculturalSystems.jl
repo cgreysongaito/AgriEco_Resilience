@@ -72,6 +72,10 @@ let
     savefig(joinpath(abpath(), "figs/typeIIIparamfigure.png"))
 end
 
+function margprodII(I, par)
+    @unpack ymax, y0 = par
+    return ymax * y0 / (( y0 + I )^2)
+end
 
 function margprodIII(I, par)
     @unpack ymax, y0 = par
@@ -90,6 +94,18 @@ let
     return test
 end #KEEP to help improve code for guess for root solver
 
+function yieldII(I, par)
+    @unpack ymax, y0 = par
+    return ymax * I / (y0 + I)
+end
+
+function maxprofitII_vals(par)
+    @unpack ymax, y0, p, c = par
+    I = sqrt((p * ymax * y0)/c)-y0
+    Y = yieldII(I, par)
+    return [I, Y]
+end
+
 function maxprofitIII_param(I, par)
     @unpack y0, ymax, c, p = par
     return 2 * I * ymax * y0 / (( y0 + (I^2) )^2) - c/p
@@ -103,6 +119,22 @@ function maxprofitIII_vals(par)
 end
 
 maxprofitIII_vals(BMPPar(y0 = 0.2, ymax = 1.0, c = 0.5, p = 2.2))
+maxprofitIII_vals(BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2))
+
+
+function maxyieldIII_param(I, slope, par)
+    @unpack y0, ymax, c, p = par
+    return 2 * I * ymax * y0 / (( y0 + (I^2) )^2) - slope
+end
+
+function maxyieldIII_vals(slope, par)
+    guess = maximum([par.y0, maxprofitII_vals(par)[1]])
+    I = find_zero(I -> maxyieldIII_param(I, slope, par), guess)
+    Y = yieldIII(I, par)
+    return [I, Y]
+end
+
+maxyieldIII_vals(0.2, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2))
 
 #Any way to geometrically show the parameters and their effects
 #https://www.economics.utoronto.ca/osborne/2x3/tutorial/MPFRM.HTM
@@ -122,6 +154,12 @@ end
 function margcostIII(I, par)
     @unpack c = par
     return c / margprodIII(I, par)
+end
+
+function avvarcostkickIII_maxyield(Y, slope, par)
+    @unpack c = par
+    I = maxyieldIII_vals(slope, par)[1]
+    return c * I / Y
 end
 
 let 
@@ -252,6 +290,76 @@ let
     tight_layout()
     # return costcurveskick
     savefig(joinpath(abpath(), "figs/costcurveskick.png"))
+end 
+
+
+let 
+    par1 = BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2)
+    par2 = BMPPar(y0 = 2.0, ymax = 0.5, c = 0.5, p = 2.2)
+    par3 = BMPPar(y0 = 0.2, ymax = 1.0, c = 0.5, p = 2.2)
+    par4 = BMPPar(y0 = 0.2, ymax = 0.5, c = 0.5, p = 2.2)
+    Irange = 0.0:0.01:10.0
+    Yrange = 0.0:0.01:1.0
+    Yield1 = [yieldIII(I, par1) for I in Irange]
+    MC1 = [margcostIII(I, par1) for I in Irange]
+    AVC1 = [avvarcostIII(I,par1) for I in Irange]
+    AVCK1 = [avvarcostkickIII_maxyield(Y, 0.2, par1) for Y in Yrange]
+    Yield2 = [yieldIII(I, par2) for I in Irange]
+    MC2 = [margcostIII(I, par2) for I in Irange]
+    AVC2 = [avvarcostIII(I,par2) for I in Irange]
+    AVCK2 = [avvarcostkickIII_maxyield(Y, 0.2, par2) for Y in Yrange]
+    Yield3 = [yieldIII(I, par3) for I in Irange]
+    MC3 = [margcostIII(I, par3) for I in Irange]
+    AVC3 = [avvarcostIII(I,par3) for I in Irange]
+    AVCK3 = [avvarcostkickIII_maxyield(Y, 0.2, par3) for Y in Yrange]
+    Yield4 = [yieldIII(I, par4) for I in Irange]
+    MC4 = [margcostIII(I, par4) for I in Irange]
+    AVC4 = [avvarcostIII(I,par4) for I in Irange]
+    AVCK4 = [avvarcostkickIII_maxyield(Y, 0.2, par4) for Y in Yrange]
+    costcurveskick = figure()
+    subplot(2,2,1)
+    plot(Yield1, MC1, color="blue", label="MC")
+    plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(Yrange, AVCK1, color="green", label="AVCK")
+    hlines(par1.p, 0.0, 1.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,2,2)
+    plot(Yield2, MC2, color="blue", label="MC")
+    plot(Yield2, AVC2, color="orange", label="AVC")
+    plot(Yrange, AVCK2, color="green", label="AVCK")
+    hlines(par2.p, 0.0, 1.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,2,3)
+    plot(Yield3, MC3, color="blue", label="MC")
+    plot(Yield3, AVC3, color="orange", label="AVC")
+    plot(Yrange, AVCK3, color="green", label="AVCK")
+    hlines(par3.p, 0.0, 1.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,2,4)
+    plot(Yield4, MC4, color="blue", label="MC")
+    plot(Yield4, AVC4, color="orange", label="AVC")
+    plot(Yrange, AVCK4, color="green", label="AVCK")
+    hlines(par4.p, 0.0, 1.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    tight_layout()
+    return costcurveskick
+    # savefig(joinpath(abpath(), "figs/costcurveskick.png"))
 end 
 
 #Programming of time series of profit
@@ -429,24 +537,8 @@ SymPy.simplify(diff(f(C),C))
 
 SymPy.simplify((-c * ((sqrt((p * y * y₀)/c))-y₀)) / ((y * ((sqrt((p * y * y₀)/c))-y₀)) / (y₀ + ((sqrt((p * y * y₀)/c))-y₀)) )^2)
 
-function yieldII(I, par)
-    @unpack ymax, y0 = par
-    return ymax * I / (y0 + I)
-end
-
-function maxprofitII_vals(par)
-    @unpack ymax, y0, p, c = par
-    I = sqrt((p * ymax * y0)/c)-y0
-    Y = yieldII(I, par)
-    return [I, Y]
-end
 
 maxprofitII_vals(BMPPar(y0=0.2, ymax=1.0, p=2.2, c=0.5))[1]
-
-function margprodII(I, par)
-    @unpack ymax, y0 = par
-    return ymax * y0 / (( y0 + I )^2)
-end
 
 #Any way to geometrically show the parameters and their effects
 #https://www.economics.utoronto.ca/osborne/2x3/tutorial/MPFRM.HTM
