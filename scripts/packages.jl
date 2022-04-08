@@ -8,5 +8,6 @@ using DifferentialEquations
 using ForwardDiff
 using Roots
 using Distributions
+using Random
 using SymPy
 using PyPlot
