@@ -151,26 +151,71 @@ end
 
 #Cumulative distribution
 
-function cumulativeprob_profit(iter, length, par, r)
+function termprofit_sims_unscaled(iter, par, r, var, length)
     data = zeros(iter)
     @threads for i in 1:iter
-        @inbounds data[i] = sum(timeseries_profit(length, par, r, i))
+        @inbounds data[i] = sum(timeseries_profit_unscaled(par, r, var, length, i))
     end
     return data
 end
-    
+
+function counttermprof(data, value)
+    count = 0
+    for i in 1:length(data)
+        if data[i] < value
+            count += 1
+        end
+    end
+    return count
+end
+
+function cumulativeprob(data, stepsize)
+    range = minimum(data):stepsize:maximum(data)
+    cumulprob = zeros(length(range))
+    for (tpi, tpnum) in enumerate(range)
+        cumulprob[tpi] = counttermprof(data, tpnum) / length(data)
+    end
+    return [range, cumulprob]
+end
+
+let 
+    data = cumulativeprob(termprofit_sims_unscaled(100, BMPPar(y0 = 2.0, ymax = 0.8, c = 0.5, p = 2.2), 0.9, 0.1, 50), 0.1)
+    test = figure()
+    plot(data[1], data[2])
+    return test
+end
+cumulativeprob(testdata, 0.1)
+
+
+function termprofit_sims_scaled_debt(iter, par, r, var, length)
+    data = zeros(iter)
+    @threads for i in 1:iter
+        @inbounds data[i] = timeseries_profit_scaled_debt(par, r, var, length, i)
+    end
+    return data
+end
+
+termprofit_sims_scaled_debt(100, BMPPar(y0 = 2.0, ymax = 3.0, c = 0.5, p = 2.2), 0.0, 0.1, 50)
+
+let 
+    data = cumulativeprob(termprofit_sims_scaled_debt(100, BMPPar(y0 = 2.0, ymax = 2.0, c = 0.5, p = 2.2), 0.0, 0.1, 50), 0.1)
+    test = figure()
+    plot(data[1], data[2])
+    return test
+end
+#again problem with using scaled noise - when profit always positive - term profit is always the same.
+
 cumulativeprob_profit(100, 50, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.8)
 
 timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.0, 2)
-timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.0, 90)
+timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.0, 137)
 timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.9, 2)
-timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.9, 90)
+timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.9, 137)
 
 sum(timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.0, 2))
-sum(timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.0, 90))
+sum(timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.0, 137))
 sum(timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.9, 2))
-sum(timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.9, 90))
+sum(timeseries_profit(5, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.9, 137))
 
-sum(timeseries_profit(2, BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.0, 2))
 
 #random iter is still returning the same sum and profit. regardless of correlation in noise

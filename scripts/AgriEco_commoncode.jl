@@ -105,11 +105,12 @@ function profit(I, Y, par)
     return p * Y - c * I
 end
 
-function noise_creation(r, len)
-    white = rand(Normal(0.0, 0.25), Int64(len))
+function scaled_noise_creation(r, var, len)
+    white = rand(Normal(0.0, 1.0), Int64(len))
+    white[1] = white[1] * var
     intnoise = [white[1]]
     for i in 2:Int64(len)
-        intnoise = append!(intnoise, r * intnoise[i-1] + white[i] )
+        intnoise = append!(intnoise, r * intnoise[i-1] + var * white[i] )
     end
     c = std(white)/std(intnoise)
     meanintnoise = mean(intnoise)
@@ -120,17 +121,35 @@ function noise_creation(r, len)
     return scalednoise
 end
 
-
-let 
-    Random.seed!(4)
-    test = figure()
-    plot(1.0:1.0:5.0, noise_creation(0.9, 5) )
-    return test
+function unscaled_noise_creation(r, var, len)
+    white = rand(Normal(0.0, 1.0), Int64(len))
+    white[1] = white[1] * var
+    intnoise = [white[1]]
+    for i in 2:Int64(len)
+        intnoise = append!(intnoise, r * intnoise[i-1] + var * white[i] )
+    end
+    return intnoise
 end
 
-function timeseries_profit(length, par, r, seed)
+# let 
+#     Random.seed!(4)
+#     test = figure()
+#     plot(1.0:1.0:5.0, unscaled_noise_creation(0.9, 0.1, 5) )
+#     return test
+# end
+
+# function test_noise(seed,length, r)
+#     Random.seed!(seed)
+#     return sum(noise_creation(r, length))
+# end
+
+# test_noise(1, 1000, 0.9)
+# test_noise(6, 1000, 0.9)
+# test_noise(45, 1000, 0.9)
+
+function timeseries_profit_unscaled(par, r, var, length, seed)
     Random.seed!(seed)
-    noise = noise_creation(r, length)
+    noise = unscaled_noise_creation(r, var, length)
     vals = maxprofitIII_vals(par)
     prof = zeros(length)
     for i in 1:length
@@ -139,7 +158,36 @@ function timeseries_profit(length, par, r, seed)
     return prof
 end
 
-timeseries_profit(50, par, r, seed)
+function timeseries_profit_scaled_debt(par, r, var, length, seed)
+    Random.seed!(seed)
+    noise = scaled_noise_creation(r, var, length)
+    vals = maxprofitIII_vals(par)
+    prof = zeros(length)
+    termprofit = zeros(length)
+    prof[1] = profit(vals[1], vals[2]+noise[1], par)
+    termprofit[1] = prof[1]
+    for i in 2:length
+        prof[i] = profit(vals[1], vals[2]+noise[i], par)
+        if termprofit[i-1] < 0.0
+            termprofit[i] = prof[i] + (1.1 * termprofit[i-1]) #pay off "debt" from last year
+        else
+            termprofit[i] = prof[i] + termprofit[i-1]
+        end
+    end
+    return termprofit[end] ####NEED TO ADD FEEDBACK
+end
+
+let 
+    test = figure()
+    plot(1:1:50, timeseries_profit_scaled_debt(BMPPar(y0 = 2.0, ymax = 0.8, c = 0.5, p = 2.2), 0.0, 0.1, 50, 154))
+    xlim(1,50)
+    ylim(-10, 10)
+    return test
+end
+timeseries_profit_scaled_debt(BMPPar(y0 = 2.0, ymax = 0.8, c = 0.5, p = 2.2), 0.0, 0.1, 50, 12)
+
+
+# timeseries_profit(50, par, r, seed)
 
 function cv_calc(data)
     stddev = std(data)
