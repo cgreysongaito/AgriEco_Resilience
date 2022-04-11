@@ -49,6 +49,27 @@ let
     return test
 end
 
+#Trying out AVCK slope numerical analysis
+
+testrange = 0.0:0.01:1.0
+
+function isapproxAVCK(Yrange, Y)
+    for i in 1:length(Yrange)
+        if isapprox(Yrange[i], Y, atol=0.01) == true
+            return i
+        end
+    end
+end
+
+function AVCKslope(par, Yrange)
+    data = [avvarcostkickIII(Y,par) for Y in Yrange]
+    Yindex = isapproxAVCK(Yrange, maxprofitIII_vals(par)[2])
+    slope = (data[Yindex+1] - data[Yindex]) / (Yrange[Yindex+1] - Yrange[Yindex])
+    return slope
+end
+
+AVCKslope(BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.0:0.01:1.0)
+    
 
 #Trying out "profit margin" numerical analysis
 function unitmargin(par)

@@ -177,14 +177,14 @@ function timeseries_profit_scaled_debt(par, r, var, length, seed)
     return termprofit[end] ####NEED TO ADD FEEDBACK
 end
 
-let 
-    test = figure()
-    plot(1:1:50, timeseries_profit_scaled_debt(BMPPar(y0 = 2.0, ymax = 0.8, c = 0.5, p = 2.2), 0.0, 0.1, 50, 154))
-    xlim(1,50)
-    ylim(-10, 10)
-    return test
-end
-timeseries_profit_scaled_debt(BMPPar(y0 = 2.0, ymax = 0.8, c = 0.5, p = 2.2), 0.0, 0.1, 50, 12)
+# let 
+#     test = figure()
+#     plot(1:1:50, timeseries_profit_scaled_debt(BMPPar(y0 = 2.0, ymax = 0.8, c = 0.5, p = 2.2), 0.0, 0.1, 50, 154))
+#     xlim(1,50)
+#     ylim(-10, 10)
+#     return test
+# end
+# timeseries_profit_scaled_debt(BMPPar(y0 = 2.0, ymax = 0.8, c = 0.5, p = 2.2), 0.0, 0.1, 50, 12)
 
 
 # timeseries_profit(50, par, r, seed)
