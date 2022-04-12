@@ -50,26 +50,106 @@ let
 end
 
 #Trying out AVCK slope numerical analysis
-
-testrange = 0.0:0.01:1.0
-
-function isapproxAVCK(Yrange, Y)
-    for i in 1:length(Yrange)
-        if isapprox(Yrange[i], Y, atol=0.01) == true
+function isapprox_index(data, val)
+    for i in 1:length(data)
+        if isapprox(data[i], val, atol=0.01) == true
             return i
         end
     end
 end
 
-function AVCKslope(par, Yrange)
+function AVCKslope(par)
+    Yrange = 0.0:0.01:par.ymax
     data = [avvarcostkickIII(Y,par) for Y in Yrange]
-    Yindex = isapproxAVCK(Yrange, maxprofitIII_vals(par)[2])
+    Yindex = isapprox_index(Yrange, maxprofitIII_vals(par)[2])
     slope = (data[Yindex+1] - data[Yindex]) / (Yrange[Yindex+1] - Yrange[Yindex])
     return slope
 end
 
-AVCKslope(BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2), 0.0:0.01:1.0)
-    
+function AVCKslopedata(y0range, ymaxrange)
+    Irange = 0.0:0.01:10.0
+    y0range = y0range
+    ymaxrange = ymaxrange
+    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
+    @threads for y0i in eachindex(y0range)
+        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
+            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = 2.2)
+            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p
+                data[y0i,ymaxi] = NaN
+            else
+                data[y0i,ymaxi] = AVCKslope(par)
+            end
+        end
+    end
+    return [y0range, ymaxrange, data]
+end
+
+
+let 
+    data = AVCKslopedata(0.8:0.01:2.0, 0.8:0.01:2.0)
+    test = figure()
+    pcolor(data[1], data[2], data[3])
+    colorbar()
+    xlabel("ymax")
+    ylabel("y0")
+    return test
+end
+#bigger effect of ymax on slope. but effect of yo happens when ymax is small.
+
+#Trying out how to minimize crossing of AVCK with MR line
+function AVCK_MR(par)
+    Yrange = 0.0:0.01:par.ymax
+    data = [avvarcostkickIII(Y,par) for Y in Yrange]
+    Yindex = isapprox_index(data, par.p)
+    minyield = Yrange[Yindex]
+    return minyield
+end
+
+function AVCK_MRdata(y0range, ymaxrange, p)
+    Irange = 0.0:0.01:10.0
+    y0range = y0range
+    ymaxrange = ymaxrange
+    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
+    @threads for y0i in eachindex(y0range)
+        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
+            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = p)
+            if minimum([margcostIII(I, par) for I in Irange]) >= p || minimum([avvarcostIII(I, par) for I in Irange]) >= p
+                data[y0i,ymaxi] = NaN
+            else
+                data[y0i,ymaxi] = AVCK_MR(par)
+            end
+        end
+    end
+    return [y0range, ymaxrange, data]
+end
+
+let 
+    data = AVCK_MRdata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2)
+    test = figure()
+    pcolor(data[1], data[2], data[3])
+    xlabel("ymax")
+    ylabel("y0")
+    colorbar()
+    return test
+end
+#Is minimizing of AVCK and MR just the same as minimizing of AVC line at input decision? I think so but how to prove. If same, then we already have the answer (ymax and yo)
+
+let 
+    data1 = [1/X for X in 0.0:0.1:10.0]
+    data2 = [2/X for X in 0.0:0.1:10.0]
+    data3 = [5/X for X in 0.0:0.1:10.0]
+    test = figure()
+    plot(0.0:0.1:10.0, data1, label = "1")
+    plot(0.0:0.1:10.0, data2, label = "2")
+    plot(0.0:0.1:10.0, data3, label = "5")
+    legend()
+    return test
+end
+
+maxprofitIII_vals(BMPPar(ymax = 1.0, y0 = 2.0, c = 0.5, p = 2.2))
+maxprofitIII_vals(BMPPar(ymax = 1.0, y0 = 0.2, c = 0.5, p = 2.2))
+maxprofitIII_vals(BMPPar(ymax = 0.5, y0 = 2.0, c = 0.5, p = 2.2))
+maxprofitIII_vals(BMPPar(ymax = 0.5, y0 = 0.2, c = 0.5, p = 2.2))
 
 #Trying out "profit margin" numerical analysis
 function unitmargin(par)
@@ -78,14 +158,10 @@ function unitmargin(par)
     return par.p-unitcost
 end
 
-
-test = Array{Float64}(undef, 2, 3)
-test[2,2]
-
-function unitmargindata(p)
+function unitmargindata(y0range, ymaxrange, p)
     Irange = 0.0:0.01:10.0
-    y0range = 0.001:0.01:2.0
-    ymaxrange = 0.001:0.01:2.0
+    y0range = y0range
+    ymaxrange = ymaxrange
     data = Array{Float64}(undef, length(y0range), length(ymaxrange))
     @threads for y0i in eachindex(y0range)
         @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
@@ -97,19 +173,54 @@ function unitmargindata(p)
             end
         end
     end
-    return data
+    return [y0range, ymaxrange, data]
 end
 
-unitmargindata(2.2)
-
 let 
+    data = unitmargindata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2)
     test = figure()
-    pcolor(collect(0.001:0.01:2.0), collect(0.001:0.01:2.0), unitmargindata(2.2))
+    pcolor(data[1], data[2], data[3])
     xlabel("ymax")
     ylabel("y0")
+    colorbar()
     return test
 end
 
+
+function mincosts(par)
+    vals = maxprofitIII_vals(par)
+    unitcost = avvarcostIII(vals[1],par)
+    return unitcost
+end
+
+function mincostsdata(y0range, ymaxrange)
+    Irange = 0.0:0.01:10.0
+    y0range = y0range
+    ymaxrange = ymaxrange
+    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
+    @threads for y0i in eachindex(y0range)
+        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
+            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = 2.2)
+            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p #may not need this line because minimising
+                data[y0i,ymaxi] = NaN
+            else
+                data[y0i,ymaxi] = mincosts(par)
+            end
+        end
+    end
+    return [y0range, ymaxrange, data]
+end
+
+let 
+    data = mincostsdata(0.5:0.01:2.0, 0.5:0.01:2.0)
+    test = figure()
+    pcolor(data[1], data[2], data[3])
+    xlabel("ymax")
+    ylabel("y0")
+    colorbar()
+    return test
+end
+#ymax has the biggest effect on minimizing costs (further from p) but not at smaller ymax values then y0 becomes important
 
 #Trying out noise in cost of inputs
 let 
