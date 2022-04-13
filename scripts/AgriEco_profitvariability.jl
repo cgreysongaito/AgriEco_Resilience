@@ -52,7 +52,7 @@ end
 #Trying out AVCK slope numerical analysis
 function isapprox_index(data, val)
     for i in 1:length(data)
-        if isapprox(data[i], val, atol=0.01) == true
+        if isapprox(data[i], val, atol=0.05) == true
             return i
         end
     end
@@ -123,6 +123,8 @@ function AVCK_MRdata(y0range, ymaxrange, p)
     return [y0range, ymaxrange, data]
 end
 
+AVCK_MRdata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2)
+
 let 
     data = AVCK_MRdata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2)
     test = figure()
@@ -133,6 +135,7 @@ let
     return test
 end
 #Is minimizing of AVCK and MR just the same as minimizing of AVC line at input decision? I think so but how to prove. If same, then we already have the answer (ymax and yo)
+#Not quite because can have minimized AVC but still max yield is low pushing down optimal decision and inputs going in.
 
 let 
     data1 = [1/X for X in 0.0:0.1:10.0]
@@ -150,6 +153,39 @@ maxprofitIII_vals(BMPPar(ymax = 1.0, y0 = 2.0, c = 0.5, p = 2.2))
 maxprofitIII_vals(BMPPar(ymax = 1.0, y0 = 0.2, c = 0.5, p = 2.2))
 maxprofitIII_vals(BMPPar(ymax = 0.5, y0 = 2.0, c = 0.5, p = 2.2))
 maxprofitIII_vals(BMPPar(ymax = 0.5, y0 = 0.2, c = 0.5, p = 2.2))
+
+maxprofitIII_vals(BMPPar(ymax = 1.0, y0 = 2.0, c = 0.5, p = 2.2))[2] - AVCK_MR(BMPPar(ymax = 1.0, y0 = 2.0, c = 0.5, p = 2.2))
+
+#Trying out maximizing of AVCK MC distance
+function AVCK_MCdata(y0range, ymaxrange)
+    Irange = 0.0:0.01:10.0
+    y0range = y0range
+    ymaxrange = ymaxrange
+    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
+    for (y0i, y0num) in enumerate(y0range)
+        for (ymaxi, ymaxnum) in enumerate(ymaxrange)
+            par = BMPPar(ymax = ymaxnum, y0 = y0num, c = 0.5, p = 2.2)
+            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p || maxprofitIII_vals(par)[2] == AVCK_MR(par)
+                data[y0i,ymaxi] = NaN
+            else
+                data[y0i,ymaxi] = maxprofitIII_vals(par)[2] - AVCK_MR(par)
+            end
+        end
+    end
+    return [y0range, ymaxrange, data]
+end
+
+AVCK_MCdata(0.5:0.1:2.0, 0.5:0.1:2.0)
+
+let 
+    data = AVCK_MCdata(0.5:0.1:2.0, 0.5:0.1:2.0, 2.2)
+    test = figure()
+    pcolor(data[1], data[2], data[3])
+    xlabel("ymax")
+    ylabel("y0")
+    colorbar()
+    return test
+end
 
 #Trying out "profit margin" numerical analysis
 function unitmargin(par)
