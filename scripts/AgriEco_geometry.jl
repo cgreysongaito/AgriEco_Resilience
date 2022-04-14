@@ -179,35 +179,38 @@ let
 end 
 
 
+# Trying out visulisation of max yield curves
 let 
     par1 = BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2)
     par2 = BMPPar(y0 = 2.0, ymax = 0.5, c = 0.5, p = 2.2)
     par3 = BMPPar(y0 = 0.2, ymax = 1.0, c = 0.5, p = 2.2)
     par4 = BMPPar(y0 = 0.2, ymax = 0.5, c = 0.5, p = 2.2)
+    maxyieldslope = 0.15
     Irange = 0.0:0.01:10.0
     Yrange = 0.0:0.01:1.0
     Yield1 = [yieldIII(I, par1) for I in Irange]
     MC1 = [margcostIII(I, par1) for I in Irange]
     AVC1 = [avvarcostIII(I,par1) for I in Irange]
-    AVCK1 = [avvarcostkickIII_maxyield(Y, 0.2, par1) for Y in Yrange]
+    AVCK1 = [avvarcostkickIII_maxyield(Y, maxyieldslope, par1) for Y in Yrange]
     Yield2 = [yieldIII(I, par2) for I in Irange]
     MC2 = [margcostIII(I, par2) for I in Irange]
     AVC2 = [avvarcostIII(I,par2) for I in Irange]
-    AVCK2 = [avvarcostkickIII_maxyield(Y, 0.2, par2) for Y in Yrange]
+    AVCK2 = [avvarcostkickIII_maxyield(Y, maxyieldslope, par2) for Y in Yrange]
     Yield3 = [yieldIII(I, par3) for I in Irange]
     MC3 = [margcostIII(I, par3) for I in Irange]
     AVC3 = [avvarcostIII(I,par3) for I in Irange]
-    AVCK3 = [avvarcostkickIII_maxyield(Y, 0.2, par3) for Y in Yrange]
+    AVCK3 = [avvarcostkickIII_maxyield(Y, maxyieldslope, par3) for Y in Yrange]
     Yield4 = [yieldIII(I, par4) for I in Irange]
     MC4 = [margcostIII(I, par4) for I in Irange]
     AVC4 = [avvarcostIII(I,par4) for I in Irange]
-    AVCK4 = [avvarcostkickIII_maxyield(Y, 0.2, par4) for Y in Yrange]
+    AVCK4 = [avvarcostkickIII_maxyield(Y, maxyieldslope, par4) for Y in Yrange]
     costcurveskick = figure()
     subplot(2,2,1)
     plot(Yield1, MC1, color="blue", label="MC")
     plot(Yield1, AVC1, color="orange", label="AVC")
     plot(Yrange, AVCK1, color="green", label="AVCK")
     hlines(par1.p, 0.0, 1.0, colors="black", label = "MR")
+    vlines(maxyieldIII_vals(maxyieldslope, par1)[2], 0.0, 4.0, label = "MxY")
     legend()
     ylim(0.0, 4.0)
     xlim(0.0, 1.0)
@@ -218,6 +221,7 @@ let
     plot(Yield2, AVC2, color="orange", label="AVC")
     plot(Yrange, AVCK2, color="green", label="AVCK")
     hlines(par2.p, 0.0, 1.0, colors="black", label = "MR")
+    vlines(maxyieldIII_vals(maxyieldslope, par2)[2], 0.0, 4.0, label = "MxY")
     legend()
     ylim(0.0, 4.0)
     xlim(0.0, 1.0)
@@ -228,6 +232,7 @@ let
     plot(Yield3, AVC3, color="orange", label="AVC")
     plot(Yrange, AVCK3, color="green", label="AVCK")
     hlines(par3.p, 0.0, 1.0, colors="black", label = "MR")
+    vlines(maxyieldIII_vals(maxyieldslope, par3)[2], 0.0, 4.0, label = "MxY")
     legend()
     ylim(0.0, 4.0)
     xlim(0.0, 1.0)
@@ -238,6 +243,7 @@ let
     plot(Yield4, AVC4, color="orange", label="AVC")
     plot(Yrange, AVCK4, color="green", label="AVCK")
     hlines(par4.p, 0.0, 1.0, colors="black", label = "MR")
+    vlines(maxyieldIII_vals(maxyieldslope, par4)[2], 0.0, 4.0, label = "MxY")
     legend()
     ylim(0.0, 4.0)
     xlim(0.0, 1.0)
@@ -247,6 +253,8 @@ let
     return costcurveskick
     # savefig(joinpath(abpath(), "figs/costcurveskick.png"))
 end 
+
+
 
 
 # monod

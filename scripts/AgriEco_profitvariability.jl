@@ -50,14 +50,6 @@ let
 end
 
 #Trying out AVCK slope numerical analysis
-function isapprox_index(data, val)
-    for i in 1:length(data)
-        if isapprox(data[i], val, atol=0.05) == true
-            return i
-        end
-    end
-end
-
 function AVCKslope(par)
     Yrange = 0.0:0.01:par.ymax
     data = [avvarcostkickIII(Y,par) for Y in Yrange]
@@ -100,6 +92,14 @@ end
 function AVCK_MR(par)
     Yrange = 0.0:0.01:par.ymax
     data = [avvarcostkickIII(Y,par) for Y in Yrange]
+    Yindex = isapprox_index(data, par.p)
+    minyield = Yrange[Yindex]
+    return minyield
+end
+
+function AVCKmaxyield_MR(par, slope)
+    Yrange = 0.0:0.01:par.ymax
+    data = [avvarcostkickIII_maxyield(Y, slope, par) for Y in Yrange]
     Yindex = isapprox_index(data, par.p)
     minyield = Yrange[Yindex]
     return minyield
@@ -179,6 +179,114 @@ AVCK_MCdata(0.5:0.1:2.0, 0.5:0.1:2.0)
 
 let 
     data = AVCK_MCdata(0.5:0.1:2.0, 0.5:0.1:2.0, 2.2)
+    test = figure()
+    pcolor(data[1], data[2], data[3])
+    xlabel("ymax")
+    ylabel("y0")
+    colorbar()
+    return test
+end
+
+#Trying out comparing AVCK_MR/YieldChoice distance between max profit and max yield
+function compare_distance(par, maxyieldslope)
+    maxprofitdistance = maxprofitIII_vals(par)[2] - AVCK_MR(par)
+    maxyielddistance = maxyieldIII_vals(maxyieldslope, par)[2] - AVCKmaxyield_MR(par, maxyieldslope)
+    return [maxprofitdistance, maxyielddistance]
+end
+
+compare_distance(BMPPar(ymax = 0.7, y0 = 0.5, c = 0.5, p = 2.2), 0.2)
+
+function check_compare_distance(y0range, ymaxrange, maxyieldslope)
+    Irange = 0.0:0.01:10.0
+    y0range = y0range
+    ymaxrange = ymaxrange
+    count = 0
+    for (y0i, y0num) in enumerate(y0range)
+        for (ymaxi, ymaxnum) in enumerate(ymaxrange)
+            par = BMPPar(ymax = ymaxnum, y0 = y0num, c = 0.5, p = 2.2)
+            distance = compare_distance(par, maxyieldslope)
+            if distance[1] < distance[2]
+                count += 1
+                return [ymaxnum, y0num]
+            end
+        end
+    end
+    # return count/(length(y0range)*length(ymaxrange))
+end
+
+compare_distance(BMPPar(ymax = 1.0, y0 = 0.5, c = 0.5, p = 2.2), 0.18)
+
+check_compare_distance(0.5:0.1:2.0, 0.5:0.1:2.0, 0.18)
+#maxing yield (instead of maxing profit) always makes farms more vulnerable to yield kicks (negative profit) because avck line is closer to yield decision
+#THIS HAPPENS WHEN? BUT there seems to be a sweet spot depending on the slope of the hueristic decision after which max profit distance can be l
+
+let 
+    par1 = BMPPar(y0 = 0.5, ymax = 1.0, c = 0.5, p = 2.2)
+    maxyieldslope = 0.15
+    Irange = 0.0:0.01:10.0
+    Yrange = 0.0:0.01:1.0
+    Yield1 = [yieldIII(I, par1) for I in Irange]
+    MC1 = [margcostIII(I, par1) for I in Irange]
+    AVC1 = [avvarcostIII(I,par1) for I in Irange]
+    AVCK1 = [avvarcostkickIII(Y, par1) for Y in Yrange]
+    AVCK2 = [avvarcostkickIII_maxyield(Y, maxyieldslope, par1) for Y in Yrange]
+    costcurveskick = figure()
+    plot(Yield1, MC1, color="blue", label="MC")
+    plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(Yrange, AVCK1, color="green", label="AVCK")
+    plot(Yrange, AVCK2, color="red", label="AVCKMxY")
+    hlines(par1.p, 0.0, 1.0, colors="black", label = "MR")
+    vlines(maxyieldIII_vals(maxyieldslope, par1)[2], 0.0, 4.0, label = "MxY")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    return costcurveskick
+    # savefig(joinpath(abpath(), "figs/costcurveskick.png"))
+end 
+
+#Trying out compare slopes of AVCK between max profit and max yield
+function AVCKslope_maxyield(par, maxyieldslope)
+    Yrange = 0.0:0.01:par.ymax
+    data = [avvarcostkickIII_maxyield(Y,maxyieldslope,par) for Y in Yrange]
+    Yindex = isapprox_index(Yrange, maxyieldIII_vals(maxyieldslope, par)[2])
+    slope = (data[Yindex+1] - data[Yindex]) / (Yrange[Yindex+1] - Yrange[Yindex])
+    return slope
+end
+
+function compare_slopes(par, maxyieldslope)
+    maxprofitslope = AVCKslope(par)
+    maxyslope = AVCKslope_maxyield(par, maxyieldslope)
+    return [maxprofitslope, maxyslope]
+end
+
+compare_slopes(BMPPar(y0 = 1.0, ymax = 2.0, c = 0.5, p = 2.2), 0.1)
+
+function compare_slopes_data(y0range, ymaxrange, maxyieldslope)
+    Irange = 0.0:0.01:10.0
+    y0range = y0range
+    ymaxrange = ymaxrange
+    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
+    @threads for y0i in eachindex(y0range)
+        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
+            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = 2.2)
+            slopes = compare_slopes(par, maxyieldslope)
+            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p
+                data[y0i,ymaxi] = NaN
+            else
+                data[y0i,ymaxi] = abs(slopes[1])-abs(slopes[2])
+            end
+        end
+    end
+    return [y0range, ymaxrange, data]
+end
+
+compare_slopes_data(0.5:0.1:2.0, 0.5:0.1:2.0, 0.1)
+#Most of the time max yield causes higher variability (larger AVCK slope) compared to max profit. except when ymax is low and the opposite is true
+
+let 
+    data = compare_slopes_data(0.8:0.1:2.0, 0.8:0.1:2.0, 0.1)
     test = figure()
     pcolor(data[1], data[2], data[3])
     xlabel("ymax")

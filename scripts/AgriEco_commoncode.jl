@@ -2,6 +2,14 @@ function abpath()
     replace(@__DIR__, "scripts" => "")
 end 
 
+function isapprox_index(data, val)
+    for i in 1:length(data)
+        if isapprox(data[i], val, atol=0.05) == true
+            return i
+        end
+    end
+end
+
 #white and red noise can be created by an AR process – equation 1 in ruokolainen et al 2009
 
 # Yield model
