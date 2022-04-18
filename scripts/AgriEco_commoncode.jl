@@ -89,22 +89,34 @@ function avvarcostIII(I,par)
     return c * I / Y
 end
 
-function avvarcostkickIII(Y, par)
+function avvarcostkickIII(Y, par, profityield, maxyieldslope::Float64=0.1)
     @unpack c = par
-    I = maxprofitIII_vals(par)[1]
+    if profityield == "profit"
+        I = maxprofitIII_vals(par)[1]
+    elseif profityield == "yield"
+        I = maxyieldIII_vals(maxyieldslope, par)[1]
+    else
+        error("profityield variable must be either \"profit\" or \"yield\".")
+    end
     return c * I / Y
-end ###might be a way of making this more general
+end 
+
+# function avvarcostkickIII_maxprofit(Y, par)
+#     @unpack c = par
+#     I = maxprofitIII_vals(par)[1]
+#     return c * I / Y
+# end ###might be a way of making this more general
 
 function margcostIII(I, par)
     @unpack c = par
     return c / margprodIII(I, par)
 end
 
-function avvarcostkickIII_maxyield(Y, slope, par)
-    @unpack c = par
-    I = maxyieldIII_vals(slope, par)[1]
-    return c * I / Y
-end
+# function avvarcostkickIII_maxyield(Y, slope, par)
+#     @unpack c = par
+#     I = maxyieldIII_vals(slope, par)[1]
+#     return c * I / Y
+# end
 
 
 #Programming of time series of profit
