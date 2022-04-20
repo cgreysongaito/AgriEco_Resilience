@@ -14,21 +14,19 @@ function AVCK_MRdata(y0range, ymaxrange, p, profityield, maxyieldslope::Float64=
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
-    @threads for y0i in eachindex(y0range)
-        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
-            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = p)
+    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+    @threads for ymaxi in eachindex(ymaxrange)
+        @inbounds for (y0i, y0num) in enumerate(y0range)
+            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = 2.2)
             if minimum([margcostIII(I, par) for I in Irange]) >= p || minimum([avvarcostIII(I, par) for I in Irange]) >= p
-                data[y0i,ymaxi] = NaN
+                data[ymaxi, y0i] = NaN
             else
-                data[y0i,ymaxi] = AVCK_MR(profityield, par, maxyieldslope)
+                data[ymaxi, y0i] = AVCK_MR(profityield, par, maxyieldslope)
             end
         end
     end
-    return [y0range, ymaxrange, data]
+    return [ymaxrange, y0range, data]
 end
-
-AVCK_MRdata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2, "profit")
 
 let 
     data = AVCK_MRdata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2, "profit")
@@ -60,21 +58,25 @@ function AVCK_MCdata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldsl
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
-    @threads for y0i in eachindex(y0range)
-        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
-            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = p)
-            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p || maxprofitIII_vals(par)[2] == AVCK_MR(par)
-                data[y0i,ymaxi] = NaN
+    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+    @threads for ymaxi in eachindex(ymaxrange)
+        @inbounds for (y0i, y0num) in enumerate(y0range)
+            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
+            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p || maxprofitIII_vals(par)[2] == AVCK_MR(profityield, par)
+                data[ymaxi, y0i] = NaN
             elseif profityield == "profit"
-                data[y0i,ymaxi] = maxprofitIII_vals(par)[2] - AVCK_MR(profityield, par)
+                data[ymaxi, y0i] = maxprofitIII_vals(par)[2] - AVCK_MR(profityield, par)
             else
-                data[y0i,ymaxi] = maxyieldIII_vals(maxyieldslope, par)[2] - AVCK_MR(profityield, par, maxyieldslope)
+                data[ymaxi, y0i] = maxyieldIII_vals(maxyieldslope, par)[2] - AVCK_MR(profityield, par, maxyieldslope)
             end
         end
     end
-    return [y0range, ymaxrange, data]
+    return [ymaxrange, y0range, data]
 end
+
+AVCK_MR("yield", BMPPar(y0 = 2.0, ymax = 1.5, c = 0.5, p = 2.2))
+
+
 
 let 
     data_maxprofit = AVCK_MCdata(0.8:0.01:2.0, 0.8:0.01:2.0, "profit")
@@ -83,13 +85,13 @@ let
     subplot(1,2,1)
     pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3])
     colorbar()
-    xlabel("ymax")
-    ylabel("y0")
+    ylabel("ymax")
+    xlabel("y0")
     subplot(1,2,2)
     pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3])
     colorbar()
-    xlabel("ymax")
-    ylabel("y0")
+    ylabel("ymax")
+    xlabel("y0")
     tight_layout()
     # return AVCK_MCfig
     savefig(joinpath(abpath(), "figs/AVCK_MCfig.png"))
@@ -103,33 +105,31 @@ function compare_distance(par, maxyieldslope::Float64=0.1)
     return [maxprofitdistance, maxyielddistance]
 end
 
-compare_distance(BMPPar(ymax = 0.7, y0 = 0.5, c = 0.5, p = 2.2))
-
 function compare_distance_data(y0range, ymaxrange, p::Float64=2.2, maxyieldslope::Float64=0.1)
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
-    @threads for y0i in eachindex(y0range)
-        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
-            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = p)
+    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+    @threads for ymaxi in eachindex(ymaxrange)
+        @inbounds for (y0i, y0num) in enumerate(y0range)
+            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
             distances = compare_slopes(par, maxyieldslope)
             if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p
-                data[y0i,ymaxi] = NaN
+                data[ymaxi, y0i] = NaN
             else
-                data[y0i,ymaxi] = distances[1]-distances[2]
+                data[ymaxi, y0i] = distances[1]-distances[2]
             end
         end
     end
-    return [y0range, ymaxrange, data]
+    return [ymaxrange, y0range, data]
 end
 
 let 
     data = compare_distance_data(0.8:0.01:2.0, 0.8:0.01:2.0)
     comparedistancefig = figure()
     pcolor(data[1], data[2], data[3])
-    xlabel("ymax")
-    ylabel("y0")
+    ylabel("ymax")
+    xlabel("y0")
     colorbar()
     # return comparedistancefig
     savefig(joinpath(abpath(), "figs/comparedistancefig.png"))
@@ -181,18 +181,18 @@ function unitmargindata(y0range, ymaxrange, profityield, p::Float64=2.2)
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
-    @threads for y0i in eachindex(y0range)
-        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
-            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = p)
+    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+    @threads for ymaxi in eachindex(ymaxrange)
+        @inbounds for (y0i, y0num) in enumerate(y0range)
+            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
             if minimum([margcostIII(I, par) for I in Irange]) >= p || minimum([avvarcostIII(I, par) for I in Irange]) >= p
-                data[y0i,ymaxi] = NaN
+                data[ymaxi, y0i] = NaN
             else
-                data[y0i,ymaxi] = unitmargin(profityield, par)
+                data[ymaxi, y0i] = unitmargin(profityield, par)
             end
         end
     end
-    return [y0range, ymaxrange, data]
+    return [ymaxrange, y0range, data]
 end
 
 let 
@@ -222,18 +222,18 @@ function mincostsdata(y0range, ymaxrange, profityield, p::Float64=2.2)
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
-    @threads for y0i in eachindex(y0range)
-        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
-            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = p)
+    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+    @threads for ymaxi in eachindex(ymaxrange)
+        @inbounds for (y0i, y0num) in enumerate(y0range)
+            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
             if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p #may not need this line because minimising
-                data[y0i,ymaxi] = NaN
+                data[ymaxi, y0i] = NaN
             else
-                data[y0i,ymaxi] = mincosts(profityield, par)
+                data[ymaxi, y0i] = mincosts(profityield, par)
             end
         end
     end
-    return [y0range, ymaxrange, data]
+    return [ymaxrange, y0range, data]
 end
 
 let 
@@ -243,13 +243,13 @@ let
     subplot(1,2,1)
     pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3])
     colorbar()
-    xlabel("ymax")
-    ylabel("y0")
+    ylabel("ymax")
+    xlabel("y0")
     subplot(1,2,2)
     pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3])
     colorbar()
-    xlabel("ymax")
-    ylabel("y0")
+    ylabel("ymax")
+    xlabel("y0")
     tight_layout()
     # return mincostsfig
     savefig(joinpath(abpath(), "figs/mincostsfig.png"))

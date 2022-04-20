@@ -20,18 +20,18 @@ function AVCKslopedata(y0range, ymaxrange, profityield, maxyieldslope::Float64=0
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
-    @threads for y0i in eachindex(y0range)
-        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
-            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = 2.2)
+    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+    @threads for ymaxi in eachindex(ymaxrange)
+        @inbounds for (y0i, y0num) in enumerate(y0range)
+            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = 2.2)
             if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p
-                data[y0i,ymaxi] = NaN
+                data[ymaxi, y0i] = NaN
             else
-                data[y0i,ymaxi] = AVCKslope(profityield, par, maxyieldslope)
+                data[ymaxi, y0i] = AVCKslope(profityield, par, maxyieldslope)
             end
         end
     end
-    return [y0range, ymaxrange, data]
+    return [ymaxrange, y0range, data]
 end
 
 
@@ -42,13 +42,13 @@ let
     subplot(1,2,1)
     pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3])
     colorbar()
-    xlabel("ymax")
-    ylabel("y0")
+    ylabel("ymax")
+    xlabel("y0")
     subplot(1,2,2)
     pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3])
     colorbar()
-    xlabel("ymax")
-    ylabel("y0")
+    ylabel("ymax")
+    xlabel("y0")
     tight_layout()
     # return AVCKslopefig
     savefig(joinpath(abpath(), "figs/AVCKslopefig.png"))
@@ -66,19 +66,19 @@ function compare_slopes_data(y0range, ymaxrange, maxyieldslope::Float64=0.1)
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(y0range), length(ymaxrange))
-    @threads for y0i in eachindex(y0range)
-        @inbounds for (ymaxi, ymaxnum) in enumerate(ymaxrange)
-            par = BMPPar(ymax = ymaxnum, y0 = y0range[y0i], c = 0.5, p = 2.2)
+    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+    @threads for ymaxi in eachindex(ymaxrange)
+        @inbounds for (y0i, y0num) in enumerate(y0range)
+            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = 2.2)
             slopes = compare_slopes(par, maxyieldslope)
             if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p
-                data[y0i,ymaxi] = NaN
+                data[ymaxi, y0i] = NaN
             else
-                data[y0i,ymaxi] = abs(slopes[1])-abs(slopes[2])
+                data[ymaxi, y0i] = abs(slopes[1])-abs(slopes[2])
             end
         end
     end
-    return [y0range, ymaxrange, data]
+    return [ymaxrange, y0range, data]
 end
 #Most of the time max yield causes higher variability (larger AVCK slope) compared to max profit. except when ymax is low and the opposite is true
 
@@ -86,8 +86,8 @@ let
     data = compare_slopes_data(0.8:0.01:2.0, 0.8:0.01:2.0)
     compareslopesfig = figure()
     pcolor(data[1], data[2], data[3])
-    xlabel("ymax")
-    ylabel("y0")
+    ylabel("ymax")
+    xlabel("y0")
     colorbar()
     # return compareslopesfig
     savefig(joinpath(abpath(), "figs/compareslopesfig.png"))
