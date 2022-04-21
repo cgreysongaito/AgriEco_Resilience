@@ -40,18 +40,18 @@ let
     data_maxyield = AVCKslopedata(0.8:0.01:2.0, 0.8:0.01:2.0, "yield")
     AVCKslopefig = figure(figsize=(8,3))
     subplot(1,2,1)
-    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3])
+    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3], vmin=-4.5, vmax=0.0)
     colorbar()
     ylabel("ymax")
     xlabel("y0")
     subplot(1,2,2)
-    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3])
+    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3], vmin=-4.5, vmax=0.0)
     colorbar()
     ylabel("ymax")
     xlabel("y0")
     tight_layout()
-    # return AVCKslopefig
-    savefig(joinpath(abpath(), "figs/AVCKslopefig.png"))
+    return AVCKslopefig
+    # savefig(joinpath(abpath(), "figs/AVCKslopefig.png"))
 end
 #bigger effect of ymax on slope. but effect of yo happens when ymax is small.
 
@@ -81,6 +81,8 @@ function compare_slopes_data(y0range, ymaxrange, maxyieldslope::Float64=0.1)
     return [ymaxrange, y0range, data]
 end
 #Most of the time max yield causes higher variability (larger AVCK slope) compared to max profit. except when ymax is low and the opposite is true
+
+compare_slopes_data(0.8:0.1:2.0, 0.8:0.1:2.0)[3]
 
 let 
     data = compare_slopes_data(0.8:0.01:2.0, 0.8:0.01:2.0)
