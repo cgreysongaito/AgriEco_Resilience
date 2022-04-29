@@ -74,21 +74,19 @@ function AVCK_MCdata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldsl
     return [ymaxrange, y0range, data]
 end
 
-AVCK_MR("yield", BMPPar(y0 = 2.0, ymax = 1.5, c = 0.5, p = 2.2))
-
-
-
 let 
     data_maxprofit = AVCK_MCdata(0.8:0.01:2.0, 0.8:0.01:2.0, "profit")
     data_maxyield = AVCK_MCdata(0.8:0.01:2.0, 0.8:0.01:2.0, "yield")
     AVCK_MCfig = figure(figsize=(8,3))
     subplot(1,2,1)
-    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3])
+    title("Maximum profit")
+    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3], vmin=0.0, vmax=1.2)
     colorbar()
     ylabel("ymax")
     xlabel("y0")
     subplot(1,2,2)
-    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3])
+    title("Maximum yield")
+    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3], vmin=0.0, vmax=1.2)
     colorbar()
     ylabel("ymax")
     xlabel("y0")
@@ -241,12 +239,14 @@ let
     data_maxyield = mincostsdata(0.8:0.01:2.0, 0.8:0.01:2.0, "yield")
     mincostsfig = figure(figsize=(8,3))
     subplot(1,2,1)
-    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3])
+    title("Maximum profit")
+    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3], vmin=0.6, vmax=1.8)
     colorbar()
     ylabel("ymax")
     xlabel("y0")
     subplot(1,2,2)
-    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3])
+    title("Maximum yield")
+    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3], vmin=0.6, vmax=1.8)
     colorbar()
     ylabel("ymax")
     xlabel("y0")

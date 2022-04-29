@@ -1,6 +1,9 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
 
+#Is resilience boundary just a function of how much profit you get each year. or the distance between AVC and MR line - larger the distance faster the return time
+#vertical lines - this distance is essentially the negative yield caused by max of vertical line - so if distance of AVC and MR dictates the length of vertical lines
+
 #Trying out resilience boundary - where minimum time required to get back to positive terminal equity
 function minτ_termprofit(k, par, type)
     if type == "II"

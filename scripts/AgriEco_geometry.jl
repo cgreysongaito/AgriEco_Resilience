@@ -106,8 +106,7 @@ let
     tight_layout()
     # return costcurves
     savefig(joinpath(abpath(), "figs/costcurves.png"))
-end       
-
+end            
 
 let 
     par1 = BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2)
@@ -181,6 +180,43 @@ let
     # return costcurveskick
     savefig(joinpath(abpath(), "figs/costcurveskick.png"))
 end 
+
+let 
+    par1 = BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2)
+    Irange = 0.0:0.01:10.0
+    Yrange = 0.0:0.01:1.0
+    Yield1 = [yieldIII(I, par1) for I in Irange]
+    MC1 = [margcostIII(I, par1) for I in Irange]
+    AVC1 = [avvarcostIII(I,par1) for I in Irange]
+    AVCK_profit = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
+    AVCK_yield = [avvarcostkickIII(Y, par1, "yield") for Y in Yrange]
+    costcurves = figure(figsize=(8,3.8))
+    subplot(1,2,1)
+    plot(Yield1, MC1, color="blue", label="MC")
+    plot(Yield1, AVC1, color="orange", label="AVC")
+    hlines(par1.p, 0.0, 1.0, colors="black", label = "MR")
+    plot(Yrange, AVCK_profit, color="green", label="DAVC")
+    vlines(maxprofitIII_vals(par1)[2], 0.0, 4.0, colors="red", label="Max Profit\nInput Decision")
+    ylim(0.0, 4.0)
+    xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    legend()
+    subplot(1,2,2)
+    plot(Yield1, MC1, color="blue", label="MC")
+    plot(Yield1, AVC1, color="orange", label="AVC")
+    hlines(par1.p, 0.0, 1.0, colors="black", label = "MR")
+    plot(Yrange, AVCK_yield, color="green", label="DAVC")
+    vlines(maxyieldIII_vals(0.1, par1)[2], 0.0, 4.0, colors="red", label="Max Yield\nInput Decision")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    tight_layout()
+    # return costcurves
+    savefig(joinpath(abpath(), "figs/costcurves_schematic.png"))
+end
 
 let 
     par1 = BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 2.2)
