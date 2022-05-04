@@ -10,35 +10,35 @@ function AVCK_MR(profityield, par, maxyieldslope::Float64=0.1)
     return minyield
 end
 
-function AVCK_MRdata(y0range, ymaxrange, p, profityield, maxyieldslope::Float64=0.1)
-    Irange = 0.0:0.01:10.0
-    y0range = y0range
-    ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
-    @threads for ymaxi in eachindex(ymaxrange)
-        @inbounds for (y0i, y0num) in enumerate(y0range)
-            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = 2.2)
-            if minimum([margcostIII(I, par) for I in Irange]) >= p || minimum([avvarcostIII(I, par) for I in Irange]) >= p
-                data[ymaxi, y0i] = NaN
-            else
-                data[ymaxi, y0i] = AVCK_MR(profityield, par, maxyieldslope)
-            end
-        end
-    end
-    return [ymaxrange, y0range, data]
-end
+# function AVCK_MRdata(y0range, ymaxrange, p, profityield, maxyieldslope::Float64=0.1)
+#     Irange = 0.0:0.01:10.0
+#     y0range = y0range
+#     ymaxrange = ymaxrange
+#     data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+#     @threads for ymaxi in eachindex(ymaxrange)
+#         @inbounds for (y0i, y0num) in enumerate(y0range)
+#             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = 2.2)
+#             if minimum([margcostIII(I, par) for I in Irange]) >= p || minimum([avvarcostIII(I, par) for I in Irange]) >= p
+#                 data[ymaxi, y0i] = NaN
+#             else
+#                 data[ymaxi, y0i] = AVCK_MR(profityield, par, maxyieldslope)
+#             end
+#         end
+#     end
+#     return [ymaxrange, y0range, data]
+# end
 
-let 
-    data = AVCK_MRdata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2, "profit")
-    test = figure()
-    pcolor(data[1], data[2], data[3])
-    xlabel("ymax")
-    ylabel("y0")
-    colorbar()
-    return test
-end
-#Is minimizing of AVCK and MR just the same as minimizing of AVC line at input decision? I think so but how to prove. If same, then we already have the answer (ymax and yo)
-#Not quite because can have minimized AVC but still max yield is low pushing down optimal decision and inputs going in.
+# let 
+#     data = AVCK_MRdata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2, "profit")
+#     test = figure()
+#     pcolor(data[1], data[2], data[3])
+#     xlabel("ymax")
+#     ylabel("y0")
+#     colorbar()
+#     return test
+# end
+# #Is minimizing of AVCK and MR just the same as minimizing of AVC line at input decision? I think so but how to prove. If same, then we already have the answer (ymax and yo)
+# #Not quite because can have minimized AVC but still max yield is low pushing down optimal decision and inputs going in.
 
 let 
     data1 = [1/X for X in 0.0:0.1:10.0]
@@ -51,7 +51,20 @@ let
     legend()
     return test
 end
-#minimizing AVCK is just by the inputs put in because of a/x where a is the c*I.
+# #minimizing AVCK is just by the inputs put in because of a/x where a is the c*I.
+let 
+    data1 = [-1/(X^2) for X in 0.0:0.1:10.0]
+    data2 = [-2/(X^2) for X in 0.0:0.1:10.0]
+    data3 = [-5/(X^2) for X in 0.0:0.1:10.0]
+    test = figure()
+    plot(0.0:0.1:10.0, data1, label = "1")
+    plot(0.0:0.1:10.0, data2, label = "2")
+    plot(0.0:0.1:10.0, data3, label = "5")
+    ylim(-100.0, 0.0)
+    legend()
+    return test
+end
+
 
 #Trying out maximizing of AVCK MC distance
 function AVCK_MCdata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldslope::Float64=0.1)
@@ -62,11 +75,13 @@ function AVCK_MCdata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldsl
     @threads for ymaxi in eachindex(ymaxrange)
         @inbounds for (y0i, y0num) in enumerate(y0range)
             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p || maxprofitIII_vals(par)[2] == AVCK_MR(profityield, par)
+            if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p || maxprofitIII_vals(par)[2] == AVCK_MR(profityield, par)
                 data[ymaxi, y0i] = NaN
             elseif profityield == "profit"
                 data[ymaxi, y0i] = maxprofitIII_vals(par)[2] - AVCK_MR(profityield, par)
-            else
+            elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
+                data[ymaxi, y0i] = NaN
+            else    
                 data[ymaxi, y0i] = maxyieldIII_vals(maxyieldslope, par)[2] - AVCK_MR(profityield, par, maxyieldslope)
             end
         end
@@ -75,8 +90,8 @@ function AVCK_MCdata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldsl
 end
 
 let 
-    data_maxprofit = AVCK_MCdata(0.8:0.01:2.0, 0.8:0.01:2.0, "profit")
-    data_maxyield = AVCK_MCdata(0.8:0.01:2.0, 0.8:0.01:2.0, "yield")
+    data_maxprofit = AVCK_MCdata(0.8:0.1:2.0, 0.8:0.1:2.0, "profit")
+    data_maxyield = AVCK_MCdata(0.8:0.1:2.0, 0.8:0.1:2.0, "yield")
     AVCK_MCfig = figure(figsize=(8,3))
     subplot(1,2,1)
     title("Maximum profit")
@@ -91,8 +106,8 @@ let
     ylabel("ymax")
     xlabel("y0")
     tight_layout()
-    # return AVCK_MCfig
-    savefig(joinpath(abpath(), "figs/AVCK_MCfig.png"))
+    return AVCK_MCfig
+    # savefig(joinpath(abpath(), "figs/AVCK_MCfig.png"))
 end
 
 
@@ -111,10 +126,10 @@ function compare_distance_data(y0range, ymaxrange, p::Float64=2.2, maxyieldslope
     @threads for ymaxi in eachindex(ymaxrange)
         @inbounds for (y0i, y0num) in enumerate(y0range)
             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            distances = compare_slopes(par, maxyieldslope)
-            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p
+            if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
                 data[ymaxi, y0i] = NaN
             else
+                distances = compare_distance(par)
                 data[ymaxi, y0i] = distances[1]-distances[2]
             end
         end
@@ -123,7 +138,7 @@ function compare_distance_data(y0range, ymaxrange, p::Float64=2.2, maxyieldslope
 end
 
 let 
-    data = compare_distance_data(0.8:0.01:2.0, 0.8:0.01:2.0)
+    data = compare_distance_data(0.8:0.01:2.0, 0.8:0.01:2.0, 2.2)
     comparedistancefig = figure()
     pcolor(data[1], data[2], data[3])
     ylabel("ymax")

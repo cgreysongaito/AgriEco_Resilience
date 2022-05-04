@@ -405,6 +405,37 @@ let
 end 
 
 
+[yieldIII(I, BMPPar(y0 = 0.9, ymax = 0.9, c = 0.5, p = 1.2)) for I in 0.0:0.01:10.0]
+[avvarcostkickIII(Y, BMPPar(y0 = 0.9, ymax = 0.9, c = 0.5, p = 1.2), "profit") for Y in 0.0:0.01:1.0]
+
+#finding different combinations of parameters to test geometry
+let 
+    par1 = BMPPar(y0 = 1.8, ymax = 0.9, c = 0.5, p = 2.2)
+    Irange = 0.0:0.01:10.0
+    Yrange = 0.0:0.01:1.0
+    Yield1 = [yieldIII(I, par1) for I in Irange]
+    MC1 = [margcostIII(I, par1) for I in Irange]
+    AVC1 = [avvarcostIII(I,par1) for I in Irange]
+    AVCK1 = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
+    AVCK2 = [avvarcostkickIII(Y, par1, "yield") for Y in Yrange]
+    costcurves = figure()
+    plot(Yield1, MC1, color="blue", label="MC")
+    plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(Yrange, AVCK1, color="green", label="AVCK Profit")
+    plot(Yrange, AVCK2, color="black", label="AVCK Yield")
+    hlines(par1.p, 0.0, 1.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    return costcurves
+    # savefig(joinpath(abpath(), "figs/costcurves.png"))
+end    
+
+# Close to AVC - BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 1.5)
+# Below AVC - close to MC - BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 1.2)
+
 
 
 # monod
