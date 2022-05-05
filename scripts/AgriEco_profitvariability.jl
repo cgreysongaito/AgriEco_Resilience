@@ -24,7 +24,9 @@ function AVCKslopedata(y0range, ymaxrange, profityield, p::Float64 = 2.2, maxyie
     @threads for ymaxi in eachindex(ymaxrange)
         @inbounds for (y0i, y0num) in enumerate(y0range)
             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p
+            if minimum(filter(!isnan, [margcostIII(I, par) for I in Irange])) >= par.p || minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
+                data[ymaxi, y0i] = NaN
+            elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
                 data[ymaxi, y0i] = NaN
             else
                 data[ymaxi, y0i] = AVCKslope(profityield, par, maxyieldslope)
@@ -36,24 +38,24 @@ end
 
 
 let 
-    data_maxprofit = AVCKslopedata(0.8:0.1:2.0, 0.8:0.1:2.0, "profit", 1.2)
-    data_maxyield = AVCKslopedata(0.8:0.1:2.0, 0.8:0.1:2.0, "yield", 1.2)
+    data_maxprofit = AVCKslopedata(0.8:0.01:2.0, 0.8:0.01:2.0, "profit", 2.2)
+    data_maxyield = AVCKslopedata(0.8:0.01:2.0, 0.8:0.01:2.0, "yield", 2.2)
     AVCKslopefig = figure(figsize=(8,3))
     subplot(1,2,1)
     title("Maximum profit")
-    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3]) #, vmin=-4.5, vmax=0.0)
+    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3], vmin=-4.5, vmax=-0.5)
     colorbar()
     ylabel("ymax")
     xlabel("y0")
     subplot(1,2,2)
     title("Maximum yield")
-    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3]) #, vmin=-4.5, vmax=0.0)
+    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3], vmin=-4.5, vmax=-0.5)
     colorbar()
     ylabel("ymax")
     xlabel("y0")
     tight_layout()
-    return AVCKslopefig
-    # savefig(joinpath(abpath(), "figs/AVCKslopefig.png"))
+    # return AVCKslopefig
+    savefig(joinpath(abpath(), "figs/AVCKslopefig.png"))
 end
 #bigger effect of ymax on slope. but effect of yo happens when ymax is small.
 

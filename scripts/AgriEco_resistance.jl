@@ -90,8 +90,8 @@ function AVCK_MCdata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldsl
 end
 
 let 
-    data_maxprofit = AVCK_MCdata(0.8:0.1:2.0, 0.8:0.1:2.0, "profit")
-    data_maxyield = AVCK_MCdata(0.8:0.1:2.0, 0.8:0.1:2.0, "yield")
+    data_maxprofit = AVCK_MCdata(0.8:0.01:2.0, 0.8:0.01:2.0, "profit")
+    data_maxyield = AVCK_MCdata(0.8:0.01:2.0, 0.8:0.01:2.0, "yield")
     AVCK_MCfig = figure(figsize=(8,3))
     subplot(1,2,1)
     title("Maximum profit")
@@ -106,8 +106,8 @@ let
     ylabel("ymax")
     xlabel("y0")
     tight_layout()
-    return AVCK_MCfig
-    # savefig(joinpath(abpath(), "figs/AVCK_MCfig.png"))
+    # return AVCK_MCfig
+    savefig(joinpath(abpath(), "figs/AVCK_MCfig.png"))
 end
 
 
@@ -219,11 +219,11 @@ let
 end
 
 
-function mincosts(profityield, par)
+function mincosts(profityield, par, maxyieldslope::Float64 = 0.1)
     if profityield == "profit"
         vals = maxprofitIII_vals(par)
     elseif profityield == "yield"
-        vals = maxprofitIII_vals(par)
+        vals = maxyieldIII_vals(maxyieldslope, par)
     else
         error("profityield variable must be either \"profit\" or \"yield\".")
     end
@@ -231,7 +231,7 @@ function mincosts(profityield, par)
     return unitcost
 end
 
-function mincostsdata(y0range, ymaxrange, profityield, p::Float64=2.2)
+function mincostsdata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldslope::Float64 = 0.1)
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
@@ -239,7 +239,9 @@ function mincostsdata(y0range, ymaxrange, profityield, p::Float64=2.2)
     @threads for ymaxi in eachindex(ymaxrange)
         @inbounds for (y0i, y0num) in enumerate(y0range)
             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            if minimum([margcostIII(I, par) for I in Irange]) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p #may not need this line because minimising
+            if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p #may not need this line because minimising
+                data[ymaxi, y0i] = NaN
+            elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
                 data[ymaxi, y0i] = NaN
             else
                 data[ymaxi, y0i] = mincosts(profityield, par)
@@ -270,3 +272,29 @@ let
     savefig(joinpath(abpath(), "figs/mincostsfig.png"))
 end
 #ymax has the biggest effect on minimizing costs (further from p) but not at smaller ymax values then y0 becomes important
+
+
+#trying out multidimensional measure
+
+function AVCK_MC_multidimensionaldata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldslope::Float64=0.1)
+    Irange = 0.0:0.01:10.0
+    y0range = y0range
+    ymaxrange = ymaxrange
+    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+    @threads for ymaxi in eachindex(ymaxrange)
+        @inbounds for (y0i, y0num) in enumerate(y0range)
+            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
+            pardist = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.6, p = p+0.1)
+            if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p || maxprofitIII_vals(par)[2] == AVCK_MR(profityield, par)
+                data[ymaxi, y0i] = NaN
+            elseif profityield == "profit"
+                data[ymaxi, y0i] = (maxprofitIII_vals(par)[2] - AVCK_MR(profityield, par)) - (maxprofitIII_vals(par)[2] - AVCK_MR(profityield, par))
+            elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
+                data[ymaxi, y0i] = NaN
+            else    
+                data[ymaxi, y0i] = (maxyieldIII_vals(maxyieldslope, par)[2] - AVCK_MR(profityield, par, maxyieldslope)) - (maxyieldIII_vals(maxyieldslope, pardist)[2] - AVCK_MR(profityield, pardist, maxyieldslope))
+            end
+        end
+    end
+    return [ymaxrange, y0range, data]
+end

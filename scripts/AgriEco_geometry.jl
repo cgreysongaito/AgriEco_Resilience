@@ -410,9 +410,9 @@ end
 
 #finding different combinations of parameters to test geometry
 let 
-    par1 = BMPPar(y0 = 1.8, ymax = 0.9, c = 0.5, p = 2.2)
+    par1 = BMPPar(y0 = 0.8, ymax = 0.9, c = 0.5, p = 2.2)
     Irange = 0.0:0.01:10.0
-    Yrange = 0.0:0.01:1.0
+    Yrange = 0.0:0.01:par1.ymax
     Yield1 = [yieldIII(I, par1) for I in Irange]
     MC1 = [margcostIII(I, par1) for I in Irange]
     AVC1 = [avvarcostIII(I,par1) for I in Irange]
@@ -423,19 +423,74 @@ let
     plot(Yield1, AVC1, color="orange", label="AVC")
     plot(Yrange, AVCK1, color="green", label="AVCK Profit")
     plot(Yrange, AVCK2, color="black", label="AVCK Yield")
-    hlines(par1.p, 0.0, 1.0, colors="black", label = "MR")
+    hlines(par1.p, 0.0, par1.ymax, colors="black", label = "MR")
     legend()
     ylim(0.0, 4.0)
-    xlim(0.0, 1.0)
+    xlim(0.0, par1.ymax)
     xlabel("Yield (Q)")
     ylabel("Revenue & Cost")
-    return costcurves
-    # savefig(joinpath(abpath(), "figs/costcurves.png"))
+    # return costcurves
+    savefig(joinpath(abpath(), "figs/costcurves_recipx.png"))
 end    
 
 # Close to AVC - BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 1.5)
 # Below AVC - close to MC - BMPPar(y0 = 2.0, ymax = 1.0, c = 0.5, p = 1.2)
 
+let 
+    par1 = BMPPar(y0 = 0.8, ymax = 0.9, c = 0.5, p = 2.2)
+    Irange = 0.0:0.01:10.0
+    Yrange = 0.0:0.01:par1.ymax
+    Yield1 = [yieldIII(I, par1) for I in Irange]
+    MC1 = [margcostIII(I, par1) for I in Irange]
+    AVC1 = [avvarcostIII(I,par1) for I in Irange]
+    AVCK1 = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
+    # AVCK2 = [avvarcostkickIII(Y, par1, "yield") for Y in Yrange]
+    costcurves = figure()
+    # plot(Yield1, MC1, color="blue", label="MC")
+    # plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(Yrange, AVCK1, color="green", label="AVCK Profit")
+    # plot(Yrange, AVCK2, color="black", label="AVCK Yield")
+    hlines(par1.p, 0.0, par1.ymax, colors="black", label = "MR")
+    hlines(par1.p+0.5, 0.0, par1.ymax, colors="black", linestyles="dashed")
+    hlines(par1.p-0.5, 0.0, par1.ymax, colors="black", linestyles="dashed")
+    vlines(maxprofitIII_vals(par1)[2], 0.0, 4.0, colors="red", label="Max profit")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, par1.ymax)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    # return costcurves
+    savefig(joinpath(abpath(), "figs/DAVCpluspricedisturbance.png"))
+end 
+
+let 
+    par1 = BMPPar(y0 = 0.8, ymax = 0.9, c = 0.5, p = 2.2)
+    Irange = 0.0:0.01:10.0
+    Yrange = 0.0:0.01:par1.ymax
+    Yield1 = [yieldIII(I, par1) for I in Irange]
+    MC1 = [margcostIII(I, par1) for I in Irange]
+    AVC1 = [avvarcostIII(I,par1) for I in Irange]
+    AVCK1 = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
+    AVCK2 = [par1.c * (maxprofitIII_vals(par1)[1]+0.5) / Y for Y in Yrange]
+    AVCK3 = [par1.c * (maxprofitIII_vals(par1)[1]-0.5) / Y for Y in Yrange]
+    # AVCK2 = [avvarcostkickIII(Y, par1, "yield") for Y in Yrange]
+    costcurves = figure()
+    # plot(Yield1, MC1, color="blue", label="MC")
+    # plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(Yrange, AVCK1, color="green", label="AVCK Profit")
+    plot(Yrange, AVCK2, color="green", linestyle= "dashed")
+    plot(Yrange, AVCK3, color="green", linestyle= "dashed")
+    # plot(Yrange, AVCK2, color="black", label="AVCK Yield")
+    hlines(par1.p, 0.0, par1.ymax, colors="black", label = "MR")
+    vlines(maxprofitIII_vals(par1)[2], 0.0, 4.0, colors="red", label="Max profit")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, par1.ymax)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    # return costcurves
+    savefig(joinpath(abpath(), "figs/DAVCpluscostdisturbance.png"))
+end 
 
 
 # monod
