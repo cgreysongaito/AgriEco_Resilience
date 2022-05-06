@@ -275,8 +275,35 @@ end
 
 
 #trying out multidimensional measure
+function avvarcostkickIII(Y, par, profityield, maxyieldslope::Float64=0.1)
+    @unpack c = par
+    if profityield == "profit"
+        I = maxprofitIII_vals(par)[1]
+    elseif profityield == "yield"
+        I = maxyieldIII_vals(maxyieldslope, par)[1]
+    else
+        error("profityield variable must be either \"profit\" or \"yield\".")
+    end
+    return c * I / Y
+end 
 
-function AVCK_MC_multidimensionaldata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldslope::Float64=0.1)
+
+function AVCK_MR_multidist(profityield, par, dist, maxyieldslope::Float64=0.1)
+    Yrange = 0.0:0.01:par.ymax
+    if profityield == "profit"
+        data = [(par.c+dist) * maxprofitIII_vals(par)[1] / Y  for Y in Yrange]
+    elseif profityield == "yield"
+        data = [(par.c+dist) * maxyieldIII_vals(maxyieldslope, par)[1] / Y  for Y in Yrange]
+    else
+        error("profityield variable must be either \"profit\" or \"yield\".")
+    end
+    Yindex = isapprox_index(data, par.p-dist)
+    minyield = Yrange[Yindex]
+    return minyield
+end
+
+
+function AVCK_MC_multidist_data(y0range, ymaxrange, profityield, dist, p::Float64=2.2, maxyieldslope::Float64=0.1)
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
@@ -284,17 +311,40 @@ function AVCK_MC_multidimensionaldata(y0range, ymaxrange, profityield, p::Float6
     @threads for ymaxi in eachindex(ymaxrange)
         @inbounds for (y0i, y0num) in enumerate(y0range)
             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            pardist = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.6, p = p+0.1)
             if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p || maxprofitIII_vals(par)[2] == AVCK_MR(profityield, par)
                 data[ymaxi, y0i] = NaN
             elseif profityield == "profit"
-                data[ymaxi, y0i] = (maxprofitIII_vals(par)[2] - AVCK_MR(profityield, par)) - (maxprofitIII_vals(par)[2] - AVCK_MR(profityield, par))
+                data[ymaxi, y0i] = (maxprofitIII_vals(par)[2] - AVCK_MR(profityield, par)) - (maxprofitIII_vals(par)[2] - AVCK_MR_multidist(profityield, par, dist))
             elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
                 data[ymaxi, y0i] = NaN
             else    
-                data[ymaxi, y0i] = (maxyieldIII_vals(maxyieldslope, par)[2] - AVCK_MR(profityield, par, maxyieldslope)) - (maxyieldIII_vals(maxyieldslope, pardist)[2] - AVCK_MR(profityield, pardist, maxyieldslope))
+                data[ymaxi, y0i] = (maxyieldIII_vals(maxyieldslope, par)[2] - AVCK_MR(profityield, par, maxyieldslope)) - (maxyieldIII_vals(maxyieldslope, par)[2] - AVCK_MR_multidist(profityield, par, dist))
             end
         end
     end
     return [ymaxrange, y0range, data]
 end
+
+
+let 
+    data_maxprofit = AVCK_MC_multidist_data(0.8:0.01:2.0, 0.8:0.01:2.0, "profit", 0.1)
+    data_maxyield = AVCK_MC_multidist_data(0.8:0.01:2.0, 0.8:0.01:2.0, "yield", 0.1)
+    AVCK_MCfig = figure(figsize=(8,3))
+    subplot(1,2,1)
+    title("Maximum profit")
+    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3])#, vmin=0.0, vmax=1.2)
+    colorbar()
+    ylabel("ymax")
+    xlabel("y0")
+    subplot(1,2,2)
+    title("Maximum yield")
+    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3])#, vmin=0.0, vmax=1.2)
+    colorbar()
+    ylabel("ymax")
+    xlabel("y0")
+    tight_layout()
+    return AVCK_MCfig
+    # savefig(joinpath(abpath(), "figs/AVCK_MCfig.png"))
+end
+
+#Something is wrong? why is larger distance (no dist - dist) for increasing ymax
