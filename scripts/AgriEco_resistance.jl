@@ -2,10 +2,11 @@ include("packages.jl")
 include("AgriEco_commoncode.jl")
 
 #Trying out how to minimize crossing of AVCK with MR line
-function AVCK_MR(profityield, par, maxyieldslope::Float64=0.1)
-    Yrange = 0.0:0.01:par.ymax
-    data = [avvarcostkickIII(Y, par, profityield, maxyieldslope) for Y in Yrange]
-    Yindex = isapprox_index(data, par.p)
+function AVCK_MR(par, dist, inputs)
+    @unpack c, p, ymax = par
+    Yrange = 0.0:0.01:ymax
+    data = [(c+dist) * inputs / Y  for Y in Yrange]
+    Yindex = isapprox_index(data, p-dist)
     minyield = Yrange[Yindex]
     return minyield
 end
@@ -275,7 +276,7 @@ end
 
 
 #trying out multidimensional measure
-function avvarcostkickIII(Y, par, profityield, maxyieldslope::Float64=0.1)
+function avvarcost_multikickIII(Y, par, profityield, dist, maxyieldslope::Float64=0.1)
     @unpack c = par
     if profityield == "profit"
         I = maxprofitIII_vals(par)[1]
@@ -284,19 +285,13 @@ function avvarcostkickIII(Y, par, profityield, maxyieldslope::Float64=0.1)
     else
         error("profityield variable must be either \"profit\" or \"yield\".")
     end
-    return c * I / Y
-end 
+    return (c+dist) * I / Y
+end
 
 
-function AVCK_MR_multidist(profityield, par, dist, maxyieldslope::Float64=0.1)
+function AVCK_MR_multidist(par, dist, inputs)
     Yrange = 0.0:0.01:par.ymax
-    if profityield == "profit"
-        data = [(par.c+dist) * maxprofitIII_vals(par)[1] / Y  for Y in Yrange]
-    elseif profityield == "yield"
-        data = [(par.c+dist) * maxyieldIII_vals(maxyieldslope, par)[1] / Y  for Y in Yrange]
-    else
-        error("profityield variable must be either \"profit\" or \"yield\".")
-    end
+    data = [(par.c+dist) * inputs / Y  for Y in Yrange]
     Yindex = isapprox_index(data, par.p-dist)
     minyield = Yrange[Yindex]
     return minyield
@@ -311,14 +306,16 @@ function AVCK_MC_multidist_data(y0range, ymaxrange, profityield, dist, p::Float6
     @threads for ymaxi in eachindex(ymaxrange)
         @inbounds for (y0i, y0num) in enumerate(y0range)
             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p || maxprofitIII_vals(par)[2] == AVCK_MR(profityield, par)
+            if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p
                 data[ymaxi, y0i] = NaN
             elseif profityield == "profit"
-                data[ymaxi, y0i] = (maxprofitIII_vals(par)[2] - AVCK_MR(profityield, par)) - (maxprofitIII_vals(par)[2] - AVCK_MR_multidist(profityield, par, dist))
+                inputyield_profit = maxprofitIII_vals(par)
+                data[ymaxi, y0i] = (inputyield_profit[2] - AVCK_MR(par, 0.0, inputyield_profit[1])) - (inputyield_profit[2] - AVCK_MR(par, dist, inputyield_profit[1]))
             elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
                 data[ymaxi, y0i] = NaN
-            else    
-                data[ymaxi, y0i] = (maxyieldIII_vals(maxyieldslope, par)[2] - AVCK_MR(profityield, par, maxyieldslope)) - (maxyieldIII_vals(maxyieldslope, par)[2] - AVCK_MR_multidist(profityield, par, dist))
+            else
+                inputyield_yield = maxyieldIII_vals(maxyieldslope, par)
+                data[ymaxi, y0i] = (inputyield_yield[2] - AVCK_MR(par, 0.0, inputyield_yield[1])) - (inputyield_yield[2] - AVCK_MR(par, dist, inputyield_yield[1]))
             end
         end
     end
@@ -327,8 +324,8 @@ end
 
 
 let 
-    data_maxprofit = AVCK_MC_multidist_data(0.8:0.01:2.0, 0.8:0.01:2.0, "profit", 0.1)
-    data_maxyield = AVCK_MC_multidist_data(0.8:0.01:2.0, 0.8:0.01:2.0, "yield", 0.1)
+    data_maxprofit = AVCK_MC_multidist_data(0.8:0.1:2.0, 0.8:0.1:2.0, "profit", 0.1)
+    data_maxyield = AVCK_MC_multidist_data(0.8:0.1:2.0, 0.8:0.1:2.0, "yield", 0.1)
     AVCK_MCfig = figure(figsize=(8,3))
     subplot(1,2,1)
     title("Maximum profit")
@@ -348,3 +345,85 @@ let
 end
 
 #Something is wrong? why is larger distance (no dist - dist) for increasing ymax
+#Also where you are on the starting price before disturbance will have an effect on the distance changes
+
+let 
+    par1 = BMPPar(y0 = 0.9, ymax = 1.9, c = 0.5, p = 2.2)
+    par2 = BMPPar(y0 = 1.9, ymax = 1.9, c = 0.5, p = 2.2)
+    par3 = BMPPar(y0 = 0.9, ymax = 0.9, c = 0.5, p = 2.2)
+    par4 = BMPPar(y0 = 1.9, ymax = 0.9, c = 0.5, p = 2.2)
+    Irange = 0.0:0.01:10.0
+    Yrange = 0.0:0.01:par1.ymax
+    Yield1 = [yieldIII(I, par1) for I in Irange]
+    MC1 = [margcostIII(I, par1) for I in Irange]
+    AVC1 = [avvarcostIII(I,par1) for I in Irange]
+    AVCK1a = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
+    AVCK1b = [avvarcost_multikickIII(Y, par1, "profit", 0.1) for Y in Yrange]
+    Yield2 = [yieldIII(I, par2) for I in Irange]
+    MC2 = [margcostIII(I, par2) for I in Irange]
+    AVC2 = [avvarcostIII(I,par2) for I in Irange]
+    AVCK2a = [avvarcostkickIII(Y, par2, "profit") for Y in Yrange]
+    AVCK2b = [avvarcost_multikickIII(Y, par2, "profit", 0.1) for Y in Yrange]
+    Yield3 = [yieldIII(I, par3) for I in Irange]
+    MC3 = [margcostIII(I, par3) for I in Irange]
+    AVC3 = [avvarcostIII(I,par3) for I in Irange]
+    AVCK3a = [avvarcostkickIII(Y, par3, "profit") for Y in Yrange]
+    AVCK3b = [avvarcost_multikickIII(Y, par3, "profit", 0.1) for Y in Yrange]
+    Yield4 = [yieldIII(I, par4) for I in Irange]
+    MC4 = [margcostIII(I, par4) for I in Irange]
+    AVC4 = [avvarcostIII(I,par4) for I in Irange]
+    AVCK4a = [avvarcostkickIII(Y, par4, "profit") for Y in Yrange]
+    AVCK4b = [avvarcost_multikickIII(Y, par4, "profit", 0.1) for Y in Yrange]
+    costcurves = figure()
+    subplot(2,2,1)
+    plot(Yield1, MC1, color="blue", label="MC")
+    # plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(Yrange, AVCK1a, color="green", label="AVCK Normal")
+    plot(Yrange, AVCK1b, color="black", label="AVCK Multi")
+    hlines(par1.p, 0.0, par1.ymax, colors="black", label = "MR - Normal")
+    hlines(par1.p-0.1, 0.0, par1.ymax, colors="red", label = "MR - Multi")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 2.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,2,2)
+    plot(Yield2, MC2, color="blue", label="MC")
+    # plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(Yrange, AVCK2a, color="green", label="AVCK Normal")
+    plot(Yrange, AVCK2b, color="black", label="AVCK Multi")
+    hlines(par2.p, 0.0, par2.ymax, colors="black", label = "MR - Normal")
+    hlines(par2.p-0.1, 0.0, par2.ymax, colors="red", label = "MR - Multi")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 2.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,2,3)
+    plot(Yield3, MC3, color="blue", label="MC")
+    # plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(Yrange, AVCK3a, color="green", label="AVCK Normal")
+    plot(Yrange, AVCK3b, color="black", label="AVCK Multi")
+    hlines(par3.p, 0.0, par3.ymax, colors="black", label = "MR - Normal")
+    hlines(par3.p-0.1, 0.0, par3.ymax, colors="red", label = "MR - Multi")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 2.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,2,4)
+    plot(Yield4, MC4, color="blue", label="MC")
+    # plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(Yrange, AVCK4a, color="green", label="AVCK Normal")
+    plot(Yrange, AVCK4b, color="black", label="AVCK Multi")
+    hlines(par4.p, 0.0, par4.ymax, colors="black", label = "MR - Normal")
+    hlines(par4.p-0.1, 0.0, par4.ymax, colors="red", label = "MR - Multi")
+    legend()
+    ylim(0.0, 4.0)
+    xlim(0.0, 2.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    tight_layout()
+    return costcurves
+    # savefig(joinpath(abpath(), "figs/costcurves_recipx.png"))
+end   
