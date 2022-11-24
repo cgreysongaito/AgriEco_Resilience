@@ -125,7 +125,7 @@ function profit(I, Y, par)
     return p * Y - c * I
 end
 
-function scaled_noise_creation(r, var, len)
+function scaled_noise_creation(r, var, midpoint, len)
     white = rand(Normal(0.0, 1.0), Int64(len))
     white[1] = white[1] * var
     intnoise = [white[1]]
@@ -136,7 +136,7 @@ function scaled_noise_creation(r, var, len)
     meanintnoise = mean(intnoise)
     scalednoise = zeros(Int64(len))
     for i in 1:Int64(len)
-        scalednoise[i] = c * (intnoise[i] - meanintnoise)
+        scalednoise[i] = c * (intnoise[i] - meanintnoise) + midpoint
     end
     return scalednoise
 end
