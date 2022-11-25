@@ -129,10 +129,21 @@ function insolvency_sim(yieldinputspar, assetsdebtpar, maxyears)
         currentamortizeschedule = amortizeschedule_update(currentamortizeschedule, assetupdate_data[2], yr, interestrate, maxyears)
         liabilities_vec[yr+1] = currentamortizeschedule[yr+1, 5]
     end
-    # return hcat(years_vec, illiquid_assets_vec, liquid_assets_vec, liabilities_vec)
-    return currentamortizeschedule  
+    return hcat(years_vec, illiquid_assets_vec, liquid_assets_vec, liabilities_vec)
+    # return currentamortizeschedule  
 end
+
+yieldinputs_testdata = yieldinputs_staticdata(YieldInputsPar(), 10)
+revenue_calc(yieldinputs_testdata[10, 2], yieldinputs_testdata[10, 3])
+expenses_calc(yieldinputs_testdata[10, 4], yieldinputs_testdata[10, 5])
 
 #Bug in my code Year 4
 test = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 test2 = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
+
+
+#data
+#https://www.cmegroup.com/
+#https://www.dtnpf.com/agriculture/web/ag/crops/article/2022/11/23/fertilizer-prices-mainly-lower
+#http://omafra.gov.on.ca/english/busdev/facts/pub60.htm
+#https://gfo.ca/marketing/daily-commodity-report/
