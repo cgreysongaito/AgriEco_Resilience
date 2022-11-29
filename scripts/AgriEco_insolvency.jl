@@ -147,3 +147,7 @@ test2 = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 #https://www.dtnpf.com/agriculture/web/ag/crops/article/2022/11/23/fertilizer-prices-mainly-lower
 #http://omafra.gov.on.ca/english/busdev/facts/pub60.htm
 #https://gfo.ca/marketing/daily-commodity-report/
+#http://www.omafra.gov.on.ca/english/stats/agriculture_summary.htm#farm - statistics
+# https://data.ers.usda.gov/reports.aspx?ID=17838 -  debt to asset ratios
+#https://www.ers.usda.gov/topics/farm-economy/farm-sector-income-finances/
+#https://www.ers.usda.gov/data-products/farm-income-and-wealth-statistics/documentation-for-the-farm-sector-financial-ratios/#dtoa
