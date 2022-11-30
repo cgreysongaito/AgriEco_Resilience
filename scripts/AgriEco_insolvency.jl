@@ -151,3 +151,17 @@ test2 = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 # https://data.ers.usda.gov/reports.aspx?ID=17838 -  debt to asset ratios
 #https://www.ers.usda.gov/topics/farm-economy/farm-sector-income-finances/
 #https://www.ers.usda.gov/data-products/farm-income-and-wealth-statistics/documentation-for-the-farm-sector-financial-ratios/#dtoa
+
+#https://www.ers.usda.gov/data-products/farm-income-and-wealth-statistics/documentation-for-the-farm-sector-financial-ratios/
+
+
+#Debt to asset ratio
+#US about 0.11-0.14 https://data.ers.usda.gov/reports.aspx?ID=17838
+#Canada about 0.15-1.16 https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601
+
+#Debt outstanding Canada
+#https://publications.gc.ca/Collection/Statcan/21-014-XIE/21-014-XIE2004001.pdf
+
+#Average profits to debt payments
+
+
