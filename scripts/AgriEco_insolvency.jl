@@ -159,9 +159,29 @@ test2 = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 #US about 0.11-0.14 https://data.ers.usda.gov/reports.aspx?ID=17838
 #Canada about 0.15-1.16 https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601
 
+
+#loans outstanding to cash income
+#https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210028501
+
 #Debt outstanding Canada
 #https://publications.gc.ca/Collection/Statcan/21-014-XIE/21-014-XIE2004001.pdf
 
-#Average profits to debt payments
+#Average profits to debt payments OR USE DEBT SERVICING COVERAGE RATIO
+#https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210010201 - has interest payments for crop farms
+#https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210028501 - has change in liabilities
+#COULD USE DSCR to calculate approximate debt payments - from https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html
+
+#debt structure (current liabilities/total liabilities)
+
+
+#check parameters
+#1 with ratio of debt to asset ratio
+#2 with ratio of debt to profits
+#3 with ratio of profits to debt payments
+
+
+#Sensitivity analyses
+#interest rates
+#amortization schedule (debt payments)
 
 
