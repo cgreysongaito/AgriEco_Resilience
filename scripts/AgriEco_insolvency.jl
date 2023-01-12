@@ -142,7 +142,36 @@ test = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 test2 = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 
 
-#data
+##Setting parameters##
+# Debt:Asset 0.162 2021 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601) Solvency Ratio: Debt
+# Average Debt 700,000. 2021 Total Debt Outstanding/Number of farms  129,038,322,000/189,874 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005101)/(https://www.gov.mb.ca/agriculture/markets-and-statistics/ag-census/pubs/census-manitoba-profile-2021.pdf)
+# Starting assets 700000/0.162 = 4320000
+# Starting liquid assets set by Liquidity Current Ratio (Current assets:Current liabilities) 2021 2.303 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601)
+# Average number of acres per farm 800 acres (https://www.foodfocusguelph.ca/post/average-farm-size-has-stopped-growing)
+#Averag number of acres for crop land
+# Beginning liquid assets = 800 * 700 * 2.303 = 1,289,680
+
+# Debt servicing coverage ratio = 1.91 (https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html)
+
+#Average operating expenses (2020) 400,000 (https://www150.statcan.gc.ca/n1/daily-quotidien/220325/cg-a001-eng.htm)
+
+#Changes
+#May need to lower average number of acres per crop farm - because includes pasture (and pushes expenses too high)
+
+#check parameters
+#debt structure (current liabilities/total liabilities) 0.17 - which means long term liabilities at the moment seems too small
+#1 with ratio of debt to asset ratio
+#2 with ratio of debt to profits
+#3 with ratio of revenue to debt payments (debt servicing coverage ratio)
+
+
+#Sensitivity analyses
+#interest rates
+#amortization schedule (debt payments)
+
+
+# Data Links
+#OMAFRA publication 60 - http://omafra.gov.on.ca/english/busdev/facts/pub60.pdf
 #https://www.cmegroup.com/
 #https://www.dtnpf.com/agriculture/web/ag/crops/article/2022/11/23/fertilizer-prices-mainly-lower
 #http://omafra.gov.on.ca/english/busdev/facts/pub60.htm
@@ -174,14 +203,8 @@ test2 = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 #debt structure (current liabilities/total liabilities)
 
 
-#check parameters
-#1 with ratio of debt to asset ratio
-#2 with ratio of debt to profits
-#3 with ratio of profits to debt payments
+#explanation of balance sheet (Stats Can)
+#https://www150.statcan.gc.ca/n1/pub/21-016-x/2011001/technote-notetech2-eng.htm
 
-
-#Sensitivity analyses
-#interest rates
-#amortization schedule (debt payments)
-
-
+#net operating income
+# https://www150.statcan.gc.ca/n1/daily-quotidien/220325/dq220325a-eng.htm
