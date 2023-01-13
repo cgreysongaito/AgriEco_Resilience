@@ -144,7 +144,7 @@ test2 = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 
 ##Setting parameters##
 # Debt:Asset 0.162 2021 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601) Solvency Ratio: Debt
-# Average Debt 700,000. 2021 Total Debt Outstanding/Number of farms  129,038,322,000/189,874 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005101)/(https://www.gov.mb.ca/agriculture/markets-and-statistics/ag-census/pubs/census-manitoba-profile-2021.pdf)
+# Average Debt (current and long-term) 700,000. 2021 Total Debt Outstanding/Number of farms  129,038,322,000/189,874 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005101)/(https://www.gov.mb.ca/agriculture/markets-and-statistics/ag-census/pubs/census-manitoba-profile-2021.pdf)
 # Starting assets 700000/0.162 = 4320000
 # Starting liquid assets set by Liquidity Current Ratio (Current assets:Current liabilities) 2021 2.303 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601)
 # Average number of acres per farm 800 acres (https://www.foodfocusguelph.ca/post/average-farm-size-has-stopped-growing)
@@ -154,6 +154,143 @@ test2 = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 # Debt servicing coverage ratio = 1.91 (https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html)
 
 #Average operating expenses (2020) 400,000 (https://www150.statcan.gc.ca/n1/daily-quotidien/220325/cg-a001-eng.htm)
+
+##Setting parameters Version 1 (Top down) (debt structure method)##
+# Average Debt (current and long-term) 700,000. 2021 Total Debt Outstanding/Number of farms  129,038,322,000/189,874 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005101)/(https://www.gov.mb.ca/agriculture/markets-and-statistics/ag-census/pubs/census-manitoba-profile-2021.pdf)
+# Debt:Asset 0.162 2021 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601) Solvency Ratio: Debt
+# Starting assets 700000/0.162 = 4,320,000
+# Debt structure ratio (current/total liabilities) = 0.157
+# Current liabilities = 0.157*700000 = 109900   long-term liabilities = 700000-109900 = 590100 
+# Starting liquid assets set by Liquidity Current Ratio (Current assets:Current liabilities) 2021 2.303 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601)
+# Starting liquid assets = 109900*2.303 = 253099.7
+
+# interest rate = 3 for overnight policy rate + 1 for bank loan
+
+# Debt servicing coverage ratio (income/debt service) = 1.91 (https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html)
+# 109900 * 1.04 = 114296
+# amortized portion = 37773.5
+amortization_calc(590100, 0, 4, 25)
+# income = operating expenses / 0.76 = 526315
+# DSCR = 526315/(114296+37773.5) = 3.46
+
+# Expenses method
+# Average operating expenses (2020) 400,000 (https://www150.statcan.gc.ca/n1/daily-quotidien/220325/cg-a001-eng.htm)
+# Debt servicing coverage ratio (income/debt service) = 1.91 (https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html)
+# 40000 * 1.04 = 416000
+# amortized portion = 37773.5
+amortization_calc(590100, 0, 4, 25)
+# income = operating expenses / 0.76 = 526315
+# DSCR = 526315/(416000+37773.5) = 1.16
+
+##Setting parameters Version 2 (Top down) Expenses method + half of operating expenses funded by loan and half from current assets##
+# Average Debt (current and long-term) 700,000. 2021 Total Debt Outstanding/Number of farms  129,038,322,000/189,874 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005101)/(https://www.gov.mb.ca/agriculture/markets-and-statistics/ag-census/pubs/census-manitoba-profile-2021.pdf)
+# Debt:Asset 0.162 2021 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601) Solvency Ratio: Debt
+# Starting assets 700000/0.162 = 4,320,000
+# Starting liquid assets = 600*700*0.5*2.303 =~ 483630
+# Operating expenses = 400000
+# Current liabilities = 200000   
+# long-term liabilities = 700000-200000 = 500000
+# ratio of current liabilities to current assets to pay for operating expenses = 0.5
+
+# interest rate = 3 for overnight policy rate + 1 for bank loan
+
+# Debt servicing coverage ratio (income/debt service) = 1.91 (https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html)
+# 200,000 *1.04 = 208000
+# amortized portion = 32006.0
+amortization_calc(500000, 0, 4, 25)
+# income = operating expenses / 0.76 = 526315
+# DSCR = 526315/(208000+32006.0) = 2.19
+
+
+## Setting parameters version 3 (Bottom Up) ##
+# Average operating expenses (2020) 400,000 (https://www150.statcan.gc.ca/n1/daily-quotidien/220325/cg-a001-eng.htm)
+# Current liabilities = 400,000
+# Debt structure ratio (current/total liabilities) = 0.157
+# total liabilities = 400,000/0.157 = 2,547,770
+# long term liabilities = 2,547,770-400000 = 2,147,770
+# Debt:Asset 0.162 2021 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601) Solvency Ratio: Debt
+# Total assets = total debt/0.162 = 15,726,975
+# Starting liquid assets set by Liquidity Current Ratio (Current assets:Current liabilities) 2021 2.303 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601)
+# Starting liquid assets = 400,000*2.303 = 921,200
+# Starting illiquid assets = 15,726,975 - 921,200 = 14,805,775
+
+# interest rate = 3 for overnight policy rate + 1 for bank loan
+
+# Debt servicing coverage ratio (income/debt service) = 1.91 (https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html)
+# 400,000 *1.04 = 416000
+# amortized portion = 137,483
+amortization_calc(2147770, 0, 4, 25)
+# income = operating expenses / 0.76 = 526315
+# DSCR = 526315/(416000+137483) = 0.95
+
+## Setting parameters version 4 (Bottom Up) half of operating expenses funded by loan and half from current assets ##
+# Average operating expenses (2020) 400,000 (https://www150.statcan.gc.ca/n1/daily-quotidien/220325/cg-a001-eng.htm)
+# Ratio of using operating loan versus current assets to pay for operating expense = 0.5?
+# Current liabilities = 200,000
+# Debt structure ratio (current/total liabilities) = 0.157
+# total liabilities = 200,000/0.157 = 1,273,885
+# long term liabilities = 1,273,885-200,000 = 1,073,885
+# Debt:Asset 0.162 2021 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601) Solvency Ratio: Debt
+# Total assets = 1,273,885/0.162 = 7,863,487
+# Starting liquid assets set by Liquidity Current Ratio (Current assets:Current liabilities) 2021 2.303 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601)
+# Starting liquid assets = 200,000*2.303 = 460,600
+# Starting illiquid assets = 7,863,487 - 460,600 = 7,402,887
+
+# interest rate = 3 for overnight policy rate + 1 for bank loan
+
+# Debt servicing coverage ratio (income/debt service) = 1.91 (https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html)
+# 200,000 *1.04 = 208000
+# amortized portion = 68741
+amortization_calc(1073885, 0, 4, 25)
+# income = operating expenses / 0.76 = 526315
+# DSCR = 526315/(208000+68741) = 1.901
+
+
+## Setting parameters version 4 (Bottom Up) 0.25 of operating expenses funded by loan and 0.75 from current assets ##
+# Average operating expenses (2020) 400,000 (https://www150.statcan.gc.ca/n1/daily-quotidien/220325/cg-a001-eng.htm)
+# Ratio of using operating loan versus current assets to pay for operating expense = 0.25
+# Current liabilities = 100,000
+# Debt structure ratio (current/total liabilities) = 0.157
+# total liabilities = 100,000/0.157 = 636,942
+# long term liabilities = 636,942-100,000 = 536,942
+# Debt:Asset 0.162 2021 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601) Solvency Ratio: Debt
+# Total assets = 636,942/0.162 = 3,931,740
+# Starting liquid assets set by Liquidity Current Ratio (Current assets:Current liabilities) 2021 2.303 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601)
+# Starting liquid assets = 100,000*2.303 = 230,300
+# Starting illiquid assets = 3,931,740 - 230,300 = 3701440
+
+# interest rate = 3 for overnight policy rate + 1 for bank loan
+
+# Debt servicing coverage ratio (income/debt service) = 1.91 (https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html)
+# 100,000 *1.04 = 104000
+# amortized portion = 34370.7
+amortization_calc(536942, 0, 4, 25)
+# income = operating expenses / 0.76 = 526315
+# DSCR = 526315/(104000+34370.7) = 3.80
+
+
+## Setting parameters version 4 (Bottom Up) 0.4 of operating expenses funded by loan and 0.6 from current assets ##
+# Average operating expenses (2020) 400,000 (https://www150.statcan.gc.ca/n1/daily-quotidien/220325/cg-a001-eng.htm)
+# Ratio of using operating loan versus current assets to pay for operating expense = 0.4
+# Current liabilities = 160000
+# Debt structure ratio (current/total liabilities) = 0.157
+# total liabilities = 160,000/0.157 = 1,019,108
+# long term liabilities = 1,019,108-160,000 = 859108
+# Debt:Asset 0.162 2021 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601) Solvency Ratio: Debt
+# Total assets = 1,019,108/0.162 = 6,290,790
+# Starting liquid assets set by Liquidity Current Ratio (Current assets:Current liabilities) 2021 2.303 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210005601)
+# Starting liquid assets = 160,000*2.303 = 368480
+# Starting illiquid assets = 6,290,790 - 368480 = 5,922,310
+
+# interest rate = 3 for overnight policy rate + 1 for bank loan
+
+# Debt servicing coverage ratio (income/debt service) = 1.91 (https://www.fcc-fac.ca/en/knowledge/economics/debt-service-coverage-ratio-anchoring-farm-financial-fitness.html)
+# 160,000 *1.04 = 166400
+# amortized portion = 54993.2
+amortization_calc(859108, 0, 4, 25)
+# income = operating expenses / 0.76 = 526315
+# DSCR = 526315/(166400+54993.2) = 2.37
+
 
 #Changes
 #May need to lower average number of acres per crop farm - because includes pasture (and pushes expenses too high)
@@ -171,6 +308,15 @@ test2 = insolvency_sim(YieldInputsPar(), AssetsDebtPar(), 10)
 
 
 # Data Links
+#Average debt and assets per grain farm in Canada***** -https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210010201
+
+# Land in crops = 93,595,208 acres
+# number of grain oilseed farms = 154,549 (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210015301)
+# average number of acres = 93595208/154,549 = 600 acres (https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3210015301)
+# number of farms = https://www150.statcan.gc.ca/n1/daily-quotidien/220511/dq220511a-eng.htm
+
+#operating revenue to operating expenses (https://www150.statcan.gc.ca/n1/daily-quotidien/220511/t004a-eng.htm)
+
 #OMAFRA publication 60 - http://omafra.gov.on.ca/english/busdev/facts/pub60.pdf
 #https://www.cmegroup.com/
 #https://www.dtnpf.com/agriculture/web/ag/crops/article/2022/11/23/fertilizer-prices-mainly-lower
