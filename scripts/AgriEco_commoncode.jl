@@ -125,31 +125,35 @@ function profit(I, Y, par)
     return p * Y - c * I
 end
 
-function scaled_noise_creation(r, var, midpoint, len)
-    white = rand(Normal(0.0, 1.0), Int64(len))
-    white[1] = white[1] * var
+function noise_creation(μ, σ, corr, len, seed)
+    Random.seed!(seed)
+    white = rand(Normal(0.0, σ), Int64(len))
     intnoise = [white[1]]
     for i in 2:Int64(len)
-        intnoise = append!(intnoise, r * intnoise[i-1] + var * white[i] )
+        intnoise = append!(intnoise, corr * intnoise[i-1] + white[i] )
     end
     c = std(white)/std(intnoise)
     meanintnoise = mean(intnoise)
     scalednoise = zeros(Int64(len))
     for i in 1:Int64(len)
-        scalednoise[i] = c * (intnoise[i] - meanintnoise) + midpoint
+        scalednoise[i] = c * (intnoise[i] - meanintnoise)
     end
-    return scalednoise
+    recentrednoise = zeros(Int64(len))
+    for i in 1:Int64(len)
+        recentrednoise[i] = scalednoise[i]+μ
+    end
+    return recentrednoise
 end
 
-function unscaled_noise_creation(r, var, len)
-    white = rand(Normal(0.0, 1.0), Int64(len))
-    white[1] = white[1] * var
-    intnoise = [white[1]]
-    for i in 2:Int64(len)
-        intnoise = append!(intnoise, r * intnoise[i-1] + var * white[i] )
-    end
-    return intnoise
-end
+# function unscaled_noise_creation(r, var, len)
+#     white = rand(Normal(0.0, 1.0), Int64(len))
+#     white[1] = white[1] * var
+#     intnoise = [white[1]]
+#     for i in 2:Int64(len)
+#         intnoise = append!(intnoise, r * intnoise[i-1] + var * white[i] )
+#     end
+#     return intnoise
+# end
 
 # let 
 #     Random.seed!(4)
