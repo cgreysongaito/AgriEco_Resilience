@@ -1,18 +1,7 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
 
-function param_ratio(par)
-    @unpack y0, ymax, p, c = par
-    return (ymax * p) / (2 * sqrt(y0) * c)
-end
 
-function calc_c(r, ymax, y0, p)
-    return (ymax * p) / (2 * sqrt(y0) * r)
-end
-
-function calc_y0(r, ymax, c, p)
-    return ((ymax * p) / (2 * c * r) )^2
-end
 
 param_ratio(BMPPar(y0 = 2.0, ymax = 1.0, c = 0.85, p = 2.2))
 param_ratio(BMPPar(y0 = 2.0, ymax = 0.5, c = 0.5, p = 2.2))

@@ -13,12 +13,20 @@ end
 #white and red noise can be created by an AR process – equation 1 in ruokolainen et al 2009
 
 # Yield model
-@with_kw mutable struct BMPPar
-    ymax = 1.0
-    y0 = 1.0
-    p = 1.0
-    c = 1.0
+@with_kw mutable struct FarmBasePar
+    ymax = 174.0
+    y0 = 10
+    p = 6.70
+    c = 139
 end
+
+
+# @with_kw mutable struct BMPPar
+#     ymax = 1.0
+#     y0 = 1.0
+#     p = 1.0
+#     c = 1.0
+# end
 
 function yieldIII(I, par)
     @unpack ymax, y0 = par
@@ -47,17 +55,17 @@ end
 #     return test
 # end #KEEP to help improve code for guess for root solver
 
-function yieldII(I, par)
-    @unpack ymax, y0 = par
-    return ymax * I / (y0 + I)
-end
+# function yieldII(I, par)
+#     @unpack ymax, y0 = par
+#     return ymax * I / (y0 + I)
+# end
 
-function maxprofitII_vals(par)
-    @unpack ymax, y0, p, c = par
-    I = sqrt((p * ymax * y0)/c)-y0
-    Y = yieldII(I, par)
-    return [I, Y]
-end
+# function maxprofitII_vals(par)
+#     @unpack ymax, y0, p, c = par
+#     I = sqrt((p * ymax * y0)/c)-y0
+#     Y = yieldII(I, par)
+#     return [I, Y]
+# end
 
 function maxprofitIII_param(I, par)
     @unpack y0, ymax, c, p = par
@@ -65,10 +73,24 @@ function maxprofitIII_param(I, par)
 end
 
 function maxprofitIII_vals(par)
-    guess = maximum([par.y0, maxprofitII_vals(par)[1]])
-    I = find_zero(I -> maxprofitIII_param(I, par), guess)
-    Y = yieldIII(I, par)
-    return [I, Y]
+    Irange = 0.0:0.01:Int64(round(3*par.y0))
+    MC = [margcostIII(I, par) for I in Irange]
+    if minimum(MC) >= par.p
+        return [0,0]
+    else
+        try
+        I = find_zero(I -> maxprofitIII_param(I, par), 2 * sqrt(par.y0))
+        Y = yieldIII(I, par)
+        [I, Y]
+        catch err
+            if isa(err, Roots.ConvergenceFailed)
+                smallerguess = (sqrt(par.y0) + find_zero(I -> maxprofitIII_param(I, par), 0.0))/2
+                I = find_zero(I -> maxprofitIII_param(I, par), smallerguess)
+                Y = yieldIII(I, par)
+                [I, Y]
+            end
+        end
+    end
 end
 
 function maxyieldIII_param(I, slope, par)
@@ -241,9 +263,21 @@ end ###might be a way of making this more general
 
 function margcostII(I, par)
     @unpack c = par
-    return c / margprod(I, par)
+    return c / margprodII(I, par)
 end
 
+#Useful functions for setting up parameters
+function param_ratio(par)
+    @unpack y0, ymax, p, c = par
+    return (ymax * p) / (2 * sqrt(y0) * c)
+end
 
+function calc_c(rev_exp_ratio, ymax, y0, p)
+    return (ymax * p) / (2 * sqrt(y0) * rev_exp_ratio)
+end
+
+function calc_y0(rev_exp_ratio, ymax, c, p)
+    return ((ymax * p) / (2 * c * rev_exp_ratio) )^2
+end
 
     
