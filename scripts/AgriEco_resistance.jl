@@ -2,14 +2,27 @@ include("packages.jl")
 include("AgriEco_commoncode.jl")
 
 #Trying out how to minimize crossing of AVCK with MR line
-function AVCK_MR(par, dist, inputs)
+function AVCK_MR(par, dist, combo, inputs)
     @unpack c, p, ymax = par
+    if combo == "++"
+        distcombo = [dist, dist]
+    elseif combo == "--"
+        distcombo = [-dist, -dist]
+    elseif combo == "+-"
+        distcombo = [dist,-dist]
+    elseif combo =="-+"
+        distcombo = [-dist,dist]
+    else
+        error("Ensure combo is ++, --, +-, -+")
+    end
     Yrange = 0.0:0.01:ymax
-    data = [(c+dist) * inputs / Y  for Y in Yrange]
-    Yindex = isapprox_index(data, p-dist)
+    data = [(c+distcombo[2]) * inputs / Y  for Y in Yrange]
+    Yindex = isapprox_index(data, p+distcombo[1])
     minyield = Yrange[Yindex]
     return minyield
 end
+
+#^ all comibinations of ++ -- +- -+ and spit out the answers in this - or maybe in a different function (function above just calculates initial - another function does all four)
 
 # function AVCK_MRdata(y0range, ymaxrange, p, profityield, maxyieldslope::Float64=0.1)
 #     Irange = 0.0:0.01:10.0
@@ -289,16 +302,16 @@ function avvarcost_multikickIII(Y, par, profityield, dist, maxyieldslope::Float6
 end
 
 
-function AVCK_MR_multidist(par, dist, inputs)
-    Yrange = 0.0:0.01:par.ymax
-    data = [(par.c+dist) * inputs / Y  for Y in Yrange]
-    Yindex = isapprox_index(data, par.p-dist)
-    minyield = Yrange[Yindex]
-    return minyield
-end
+# function AVCK_MR_multidist(par, dist, inputs)
+#     Yrange = 0.0:0.01:par.ymax
+#     data = [(par.c+dist) * inputs / Y  for Y in Yrange]
+#     Yindex = isapprox_index(data, par.p-dist)
+#     minyield = Yrange[Yindex]
+#     return minyield
+# end
 
 
-function AVCK_MC_multidist_data(y0range, ymaxrange, profityield, dist, p::Float64=2.2, maxyieldslope::Float64=0.1)
+function AVCK_MC_multidist_data(y0range, ymaxrange, profityield, dist, combo, p::Float64=2.2, maxyieldslope::Float64=0.1)
     Irange = 0.0:0.01:10.0
     y0range = y0range
     ymaxrange = ymaxrange
@@ -310,39 +323,73 @@ function AVCK_MC_multidist_data(y0range, ymaxrange, profityield, dist, p::Float6
                 data[ymaxi, y0i] = NaN
             elseif profityield == "profit"
                 inputyield_profit = maxprofitIII_vals(par)
-                data[ymaxi, y0i] = (inputyield_profit[2] - AVCK_MR(par, 0.0, inputyield_profit[1])) - (inputyield_profit[2] - AVCK_MR(par, dist, inputyield_profit[1]))
+                origdistance = inputyield_profit[2] - AVCK_MR(par, 0.0, combo, inputyield_profit[1])
+                newdistance = inputyield_profit[2] - AVCK_MR(par, dist, combo, inputyield_profit[1])
+                data[ymaxi, y0i] = newdistance/origdistance
             elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
                 data[ymaxi, y0i] = NaN
             else
                 inputyield_yield = maxyieldIII_vals(maxyieldslope, par)
-                data[ymaxi, y0i] = (inputyield_yield[2] - AVCK_MR(par, 0.0, inputyield_yield[1])) - (inputyield_yield[2] - AVCK_MR(par, dist, inputyield_yield[1]))
+                origdistance = inputyield_yield[2] - AVCK_MR(par, 0.0, combo, inputyield_yield[1])
+                newdistance = inputyield_yield[2] - AVCK_MR(par, dist, combo, inputyield_yield[1])
+                data[ymaxi, y0i] = newdistance/origdistance
             end
         end
     end
     return [ymaxrange, y0range, data]
 end
 
+@with_kw mutable struct BMPPar
+    ymax = 1.0
+    y0 = 2.0
+    p = 2.2
+    c = 0.5
+end
 
 let 
-    data_maxprofit = AVCK_MC_multidist_data(0.8:0.1:2.0, 0.8:0.1:2.0, "profit", 0.1)
-    data_maxyield = AVCK_MC_multidist_data(0.8:0.1:2.0, 0.8:0.1:2.0, "yield", 0.1)
-    AVCK_MCfig = figure(figsize=(8,3))
-    subplot(1,2,1)
-    title("Maximum profit")
-    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3])#, vmin=0.0, vmax=1.2)
+    data_maxprofit11 = AVCK_MC_multidist_data(0.8:0.1:2.0, 0.8:0.1:2.0, "profit", 0.1, "++")
+    data_maxprofit00 = AVCK_MC_multidist_data(0.8:0.1:2.0, 0.8:0.1:2.0, "profit", 0.1, "--")
+    data_maxprofit10 = AVCK_MC_multidist_data(0.8:0.1:2.0, 0.8:0.1:2.0, "profit", 0.1, "+-")
+    data_maxprofit01 = AVCK_MC_multidist_data(0.8:0.1:2.0, 0.8:0.1:2.0, "profit", 0.1, "-+")
+    # data_maxyield = AVCK_MC_multidist_data(0.8:0.1:2.0, 0.8:0.1:2.0, "yield", 0.1)
+    AVCK_MCfig = figure(figsize=(12,8))
+    subplot(2,2,1)
+    title("Maximum profit ++")
+    pcolor(data_maxprofit11[1], data_maxprofit11[2], data_maxprofit11[3])#, vmin=0.0, vmax=1.2)
     colorbar()
     ylabel("ymax")
     xlabel("y0")
-    subplot(1,2,2)
-    title("Maximum yield")
-    pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3])#, vmin=0.0, vmax=1.2)
+    subplot(2,2,2)
+    title("Maximum profit --")
+    pcolor(data_maxprofit00[1], data_maxprofit00[2], data_maxprofit00[3])#, vmin=0.0, vmax=1.2)
     colorbar()
     ylabel("ymax")
     xlabel("y0")
+    subplot(2,2,3)
+    title("Maximum profit +-")
+    pcolor(data_maxprofit10[1], data_maxprofit10[2], data_maxprofit10[3])#, vmin=0.0, vmax=1.2)
+    colorbar()
+    ylabel("ymax")
+    xlabel("y0")
+    subplot(2,2,4)
+    title("Maximum profit -+")
+    pcolor(data_maxprofit01[1], data_maxprofit01[2], data_maxprofit01[3])#, vmin=0.0, vmax=1.2)
+    colorbar()
+    ylabel("ymax")
+    xlabel("y0")
+    # subplot(1,2,2)
+    # title("Maximum yield")
+    # pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3])#, vmin=0.0, vmax=1.2)
+    # colorbar()
+    # ylabel("ymax")
+    # xlabel("y0")
     tight_layout()
     return AVCK_MCfig
     # savefig(joinpath(abpath(), "figs/AVCK_MCfig.png"))
 end
+
+#need to change parameters - but unit change in cost (either negative or postive) seems to have the larger effect
+
 
 #Something is wrong? why is larger distance (no dist - dist) for increasing ymax
 #Also where you are on the starting price before disturbance will have an effect on the distance changes
