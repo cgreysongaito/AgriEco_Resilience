@@ -22,8 +22,6 @@ function AVCK_MR(par, dist, combo, inputs)
     return minyield
 end
 
-#^ all comibinations of ++ -- +- -+ and spit out the answers in this - or maybe in a different function (function above just calculates initial - another function does all four)
-
 # function AVCK_MRdata(y0range, ymaxrange, p, profityield, maxyieldslope::Float64=0.1)
 #     Irange = 0.0:0.01:10.0
 #     y0range = y0range
@@ -389,10 +387,11 @@ let
 end
 
 #need to change parameters - but unit change in cost (either negative or postive) seems to have the larger effect
+#increase profit by a unit makes the situations slightly better but cost unit change determines the most 
+# why?
 
 
-#Something is wrong? why is larger distance (no dist - dist) for increasing ymax
-#Also where you are on the starting price before disturbance will have an effect on the distance changes
+
 
 let 
     par1 = BMPPar(y0 = 0.9, ymax = 1.9, c = 0.5, p = 2.2)
