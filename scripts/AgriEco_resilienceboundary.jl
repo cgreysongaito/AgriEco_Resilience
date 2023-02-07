@@ -1,16 +1,14 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
 
-#Is resilience boundary just a function of how much profit you get each year. or the distance between AVC and MR line - larger the distance faster the return time
-#vertical lines - this distance is essentially the negative yield caused by max of vertical line - so if distance of AVC and MR dictates the length of vertical lines
+#figured out that there is no difference between resilience boundary and resistance to negative yield. they are the same thing (i.e yield kick resistance/resilience determined by distance from AVCK to MR/MC point)
+
+#Is resilience boundary just a function of how much profit you get each year. or the distance between AVCK and MR line - larger the distance faster the return time
+#vertical lines - this distance is essentially the negative yield caused by max of vertical line - so if distance of AVCK and MR intersection dictates the length of vertical lines TRUE
 
 #Trying out resilience boundary - where minimum time required to get back to positive terminal equity
-function minτ_termprofit(k, par, type)
-    if type == "II"
-        vals = maxprofitII_vals(par)
-    else
-        vals = maxprofitIII_vals(par)
-    end
+function minτ_termprofit(k, par)
+    vals = maxprofitIII_vals(par)
     termprofit = profit(vals[1], vals[2]*k, par)
     minτ = 0
     while termprofit <= 0
@@ -20,7 +18,7 @@ function minτ_termprofit(k, par, type)
     return minτ
 end
 
-function res_bound(krange, par, type)
+function res_bound(krange, par)
     vals = maxprofitIII_vals(par)
     checkprof = profit(vals[1], vals[2], par)
     if checkprof < 0
@@ -28,7 +26,7 @@ function res_bound(krange, par, type)
     end
     minτ = zeros(length(krange))
     for (ki, knum) in enumerate(krange)
-        minτ[ki] = minτ_termprofit(knum, par, type)
+        minτ[ki] = minτ_termprofit(knum, par)
     end
     return minτ
 end
@@ -65,3 +63,5 @@ let
     # return resbound
     savefig(joinpath(abpath(), "figs/resbound.png"))
 end
+
+#What happens when add price and cost disturbance
