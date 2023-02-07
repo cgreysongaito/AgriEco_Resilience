@@ -124,22 +124,22 @@ function maxyieldIII_param(I, slope, par)
 end
 
 function maxyieldIII_vals(slope, par)
-    guess = maximum([par.y0, maxprofitII_vals(par)[1]])
-    I = find_zero(I -> maxyieldIII_param(I, slope, par), guess)
+    try
+    I = find_zero(I -> maxyieldIII_param(I, slope, par), 2 * sqrt(par.y0))
     Y = yieldIII(I, par)
-    return [I, Y]
+    [I, Y]
+    catch err
+        if isa(err, Roots.ConvergenceFailed)
+            smallerguess = (sqrt(par.y0) + find_zero(I -> maxyieldIII_param(I, slope, par), 0.0))/2
+            I = find_zero(I -> maxyieldIII_param(I, slope, par), smallerguess)
+            Y = yieldIII(I, par)
+            [I, Y]
+        end
+    end
 end
 
-# function maxprofitII_vals(par)
-#     @unpack ymax, y0, p, c = par
-#     I = sqrt((p * ymax * y0)/c)-y0
-#     Y = yieldII(I, par)
-#     return [I, Y]
-# end
-
-
 ### Yield disturbance function
-function avvarcostkickIII(Y, par, profityield, maxyieldslope::Float64=0.1)
+function avvarcostkickIII(Y, par, profityield, maxyieldslope::Float64=1.0)
     @unpack c = par
     if profityield == "profit"
         I = maxprofitIII_vals(par)[1]
@@ -150,12 +150,6 @@ function avvarcostkickIII(Y, par, profityield, maxyieldslope::Float64=0.1)
     end
     return c * I / Y
 end 
-
-# function avvarcostkickII(Y, par)
-#     @unpack c = par
-#     I = maxprofitII_vals(par)[1]
-#     return c * I / Y
-# end
 
 ### Noise creation function
 
