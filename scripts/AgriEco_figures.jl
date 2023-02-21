@@ -76,3 +76,26 @@ let
     # return costcurveskick 
     savefig(joinpath(abpath(), "figs/costcurveskick_b_weeksink.png")) 
 end
+
+
+#Figure profit variability (with yield disturbance)
+
+profitvar133 = AVCKslope_revexpcon_data(1.33, 120.0:1.0:180.0)
+profitvar110 = AVCKslope_revexpcon_data(1.10, 120.0:1.0:180.0)
+profitvar090 = AVCKslope_revexpcon_data(0.95, 120.0:1.0:180.0)
+
+let 
+    ymaxrange = 120.0:1.0:180.0
+    profitvarfigure = figure()
+    plot(profitvar133[:,1], profitvar133[:,2], color="blue", label="Rev/Exp = 1.33")
+    plot(profitvar110[:,1], profitvar110[:,2], color="red", label="Rev/Exp = 1.10")
+    plot(profitvar090[:,1], profitvar090[:,2], color="orange", label="Rev/Exp = 0.95")
+    xlabel("Ymax")
+    ylabel("Profit Variability (DAVC Slope)")
+    legend()
+    # return profitvarfigure
+    savefig(joinpath(abpath(), "figs/profitvarfigure.png")) 
+end
+
+calc_y0(0.95,130.0,139,6.70)
+maxprofitIII_vals(FarmBasePar(ymax = 130.0, y0 = 10.876759, p = 6.70, c = 139) )

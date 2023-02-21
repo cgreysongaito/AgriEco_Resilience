@@ -522,6 +522,8 @@ let
     plot(y0data133, ymaxrange, color="blue", label="rev/exp = 1.33")
     plot(y0data110, ymaxrange, color="orange", label="rev/exp = 1.10")
     plot(y0data090, ymaxrange, color="purple", label="rev/exp = 0.90")
+    xlabel("y0")
+    ylabel("ymax")
     legend()
     return revexpparamfigure
 end

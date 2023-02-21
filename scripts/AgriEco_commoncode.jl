@@ -97,24 +97,60 @@ function maxprofitIII_param(I, par)
     return 2 * I * ymax * y0 / (( y0 + (I^2) )^2) - c/p
 end
 
+# function maxprofitIII_vals_original(par)
+#     Irange = 0.0:0.01:Int64(round(3*par.y0))
+#     MC = [margcostIII(I, par) for I in Irange]
+#     if minimum(MC) >= par.p
+#         return [0,0]
+#     else
+#         try
+#         I = find_zero(I -> maxprofitIII_param(I, par), 2 * sqrt(par.y0))
+#         Y = yieldIII(I, par)
+#         [I, Y]
+#         catch err
+#             if isa(err, Roots.ConvergenceFailed)
+#                 smallerguess = (sqrt(par.y0) + find_zero(I -> maxprofitIII_param(I, par), 0.0))/2
+#                 I = find_zero(I -> maxprofitIII_param(I, par), smallerguess)
+#                 Y = yieldIII(I, par)
+#                 [I, Y]
+#             end
+#         end
+#     end
+# end
+
+
+function testIzeros(testwidth, par)
+    testIrange = 0.0:testwidth:par.y0
+    dataI = zeros(length(testIrange))
+    for Ii in eachindex(testIrange)
+        try
+        dataI[Ii] = find_zero(I -> maxprofitIII_param(I, par), testIrange[Ii])
+        catch err
+            if isa(err, Roots.ConvergenceFailed)
+                dataI[Ii]  = NaN
+            end
+        end
+    end
+    intersects = unique(trunc.(filter(!isnan, dataI), digits=7))
+    if length(intersects) > 2 || length(intersects) < 1
+        error("Something is wrong with finding zeros function")
+    elseif length(intersects) == 2
+        I = maximum(intersects)
+        Y = yieldIII(I, par)
+        return [I, Y]
+    else
+        testIzeros(testwidth*0.5, par)
+    end
+end
+
 function maxprofitIII_vals(par)
+    testwidth = trunc(par.y0/4, digits=0)
     Irange = 0.0:0.01:Int64(round(3*par.y0))
     MC = [margcostIII(I, par) for I in Irange]
     if minimum(MC) >= par.p
         return [0,0]
     else
-        try
-        I = find_zero(I -> maxprofitIII_param(I, par), 2 * sqrt(par.y0))
-        Y = yieldIII(I, par)
-        [I, Y]
-        catch err
-            if isa(err, Roots.ConvergenceFailed)
-                smallerguess = (sqrt(par.y0) + find_zero(I -> maxprofitIII_param(I, par), 0.0))/2
-                I = find_zero(I -> maxprofitIII_param(I, par), smallerguess)
-                Y = yieldIII(I, par)
-                [I, Y]
-            end
-        end
+        return testIzeros(testwidth, par)
     end
 end
 

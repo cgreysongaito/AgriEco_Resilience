@@ -1,8 +1,8 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
 
-#Trying out how to minimize crossing of AVCK with MR line
-function AVCK_MR(par, dist, combo, inputs)
+# #Trying out how to minimize crossing of AVCK with MR line
+function AVCK_MR_multidimension(par, dist, combo, inputs)
     @unpack c, p, ymax = par
     if combo == "++"
         distcombo = [dist, dist]
@@ -22,60 +22,68 @@ function AVCK_MR(par, dist, combo, inputs)
     return minyield
 end
 
-# function AVCK_MRdata(y0range, ymaxrange, p, profityield, maxyieldslope::Float64=0.1)
-#     Irange = 0.0:0.01:10.0
-#     y0range = y0range
-#     ymaxrange = ymaxrange
-#     data = Array{Float64}(undef, length(ymaxrange), length(y0range))
-#     @threads for ymaxi in eachindex(ymaxrange)
-#         @inbounds for (y0i, y0num) in enumerate(y0range)
-#             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = 2.2)
-#             if minimum([margcostIII(I, par) for I in Irange]) >= p || minimum([avvarcostIII(I, par) for I in Irange]) >= p
-#                 data[ymaxi, y0i] = NaN
-#             else
-#                 data[ymaxi, y0i] = AVCK_MR(profityield, par, maxyieldslope)
-#             end
-#         end
-#     end
-#     return [ymaxrange, y0range, data]
-# end
+###NOTE NEED TO OVERHAUL maxprofitIIIvals and subsequent functions because doing this calculation multiple times needlessly
+function AVCK_MR(profityield, par,  maxyieldslope::Float64=0.1)
+    Yrange = 0.0:0.01:par.ymax
+    data = [avvarcostkickIII(Y, par, profityield, maxyieldslope) for Y in Yrange]
+    Yindex = isapprox_index(data, par.p)
+    return Yrange[Yindex]
+end
+
+# # function AVCK_MRdata(y0range, ymaxrange, p, profityield, maxyieldslope::Float64=0.1)
+# #     Irange = 0.0:0.01:10.0
+# #     y0range = y0range
+# #     ymaxrange = ymaxrange
+# #     data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+# #     @threads for ymaxi in eachindex(ymaxrange)
+# #         @inbounds for (y0i, y0num) in enumerate(y0range)
+# #             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = 2.2)
+# #             if minimum([margcostIII(I, par) for I in Irange]) >= p || minimum([avvarcostIII(I, par) for I in Irange]) >= p
+# #                 data[ymaxi, y0i] = NaN
+# #             else
+# #                 data[ymaxi, y0i] = AVCK_MR(profityield, par, maxyieldslope)
+# #             end
+# #         end
+# #     end
+# #     return [ymaxrange, y0range, data]
+# # end
+
+# # let 
+# #     data = AVCK_MRdata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2, "profit")
+# #     test = figure()
+# #     pcolor(data[1], data[2], data[3])
+# #     xlabel("ymax")
+# #     ylabel("y0")
+# #     colorbar()
+# #     return test
+# # end
+# # #Is minimizing of AVCK and MR just the same as minimizing of AVC line at input decision? I think so but how to prove. If same, then we already have the answer (ymax and yo)
+# # #Not quite because can have minimized AVC but still max yield is low pushing down optimal decision and inputs going in.
 
 # let 
-#     data = AVCK_MRdata(0.5:0.01:2.0, 0.5:0.01:2.0, 2.2, "profit")
+#     data1 = [1/X for X in 0.0:0.1:10.0]
+#     data2 = [2/X for X in 0.0:0.1:10.0]
+#     data3 = [5/X for X in 0.0:0.1:10.0]
 #     test = figure()
-#     pcolor(data[1], data[2], data[3])
-#     xlabel("ymax")
-#     ylabel("y0")
-#     colorbar()
+#     plot(0.0:0.1:10.0, data1, label = "1")
+#     plot(0.0:0.1:10.0, data2, label = "2")
+#     plot(0.0:0.1:10.0, data3, label = "5")
+#     legend()
 #     return test
 # end
-# #Is minimizing of AVCK and MR just the same as minimizing of AVC line at input decision? I think so but how to prove. If same, then we already have the answer (ymax and yo)
-# #Not quite because can have minimized AVC but still max yield is low pushing down optimal decision and inputs going in.
-
-let 
-    data1 = [1/X for X in 0.0:0.1:10.0]
-    data2 = [2/X for X in 0.0:0.1:10.0]
-    data3 = [5/X for X in 0.0:0.1:10.0]
-    test = figure()
-    plot(0.0:0.1:10.0, data1, label = "1")
-    plot(0.0:0.1:10.0, data2, label = "2")
-    plot(0.0:0.1:10.0, data3, label = "5")
-    legend()
-    return test
-end
-# #minimizing AVCK is just by the inputs put in because of a/x where a is the c*I.
-let 
-    data1 = [-1/(X^2) for X in 0.0:0.1:10.0]
-    data2 = [-2/(X^2) for X in 0.0:0.1:10.0]
-    data3 = [-5/(X^2) for X in 0.0:0.1:10.0]
-    test = figure()
-    plot(0.0:0.1:10.0, data1, label = "1")
-    plot(0.0:0.1:10.0, data2, label = "2")
-    plot(0.0:0.1:10.0, data3, label = "5")
-    ylim(-100.0, 0.0)
-    legend()
-    return test
-end
+# # #minimizing AVCK is just by the inputs put in because of a/x where a is the c*I.
+# let 
+#     data1 = [-1/(X^2) for X in 0.0:0.1:10.0]
+#     data2 = [-2/(X^2) for X in 0.0:0.1:10.0]
+#     data3 = [-5/(X^2) for X in 0.0:0.1:10.0]
+#     test = figure()
+#     plot(0.0:0.1:10.0, data1, label = "1")
+#     plot(0.0:0.1:10.0, data2, label = "2")
+#     plot(0.0:0.1:10.0, data3, label = "5")
+#     ylim(-100.0, 0.0)
+#     legend()
+#     return test
+# end
 
 
 #Trying out maximizing of AVCK MC distance
@@ -86,7 +94,7 @@ function AVCK_MCdata(y0range, ymaxrange, profityield, p::Float64=2.2, maxyieldsl
     data = Array{Float64}(undef, length(ymaxrange), length(y0range))
     @threads for ymaxi in eachindex(ymaxrange)
         @inbounds for (y0i, y0num) in enumerate(y0range)
-            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
+            par = FarmBasePar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
             if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || minimum([avvarcostIII(I, par) for I in Irange]) >= par.p || maxprofitIII_vals(par)[2] == AVCK_MR(profityield, par)
                 data[ymaxi, y0i] = NaN
             elseif profityield == "profit"

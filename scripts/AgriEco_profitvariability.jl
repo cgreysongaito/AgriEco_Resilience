@@ -2,6 +2,7 @@ include("packages.jl")
 include("AgriEco_commoncode.jl")
 
 #Trying out AVCK slope numerical analysis
+#NOTE this function is calculating maxprofitIIIvals twice in the same function
 function AVCKslope(profityield, par, maxyieldslope::Float64=0.1)
     Yrange = 0.0:0.01:par.ymax
     data = [avvarcostkickIII(Y, par, profityield, maxyieldslope) for Y in Yrange]
@@ -16,25 +17,25 @@ function AVCKslope(profityield, par, maxyieldslope::Float64=0.1)
     return slope
 end
 
-function AVCKslopedata(y0range, ymaxrange, profityield, p::Float64 = 2.2, maxyieldslope::Float64 = 0.1)
-    Irange = 0.0:0.01:10.0
-    y0range = y0range
-    ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
-    @threads for ymaxi in eachindex(ymaxrange)
-        for (y0i, y0num) in enumerate(y0range)
-            par = FarmBasePar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            if minimum(filter(!isnan, [margcostIII(I, par) for I in Irange])) >= par.p || minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
-                data[ymaxi, y0i] = NaN
-            elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
-                data[ymaxi, y0i] = NaN
-            else
-                data[ymaxi, y0i] = AVCKslope(profityield, par, maxyieldslope)
-            end
-        end
-    end
-    return [ymaxrange, y0range, data]
-end
+# function AVCKslopedata(y0range, ymaxrange, profityield, p::Float64 = 2.2, maxyieldslope::Float64 = 0.1)
+#     Irange = 0.0:0.01:10.0
+#     y0range = y0range
+#     ymaxrange = ymaxrange
+#     data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+#     @threads for ymaxi in eachindex(ymaxrange)
+#         for (y0i, y0num) in enumerate(y0range)
+#             par = FarmBasePar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
+#             if minimum(filter(!isnan, [margcostIII(I, par) for I in Irange])) >= par.p || minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
+#                 data[ymaxi, y0i] = NaN
+#             elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
+#                 data[ymaxi, y0i] = NaN
+#             else
+#                 data[ymaxi, y0i] = AVCKslope(profityield, par, maxyieldslope)
+#             end
+#         end
+#     end
+#     return [ymaxrange, y0range, data]
+# end
 
 function AVCKslope_revexpcon_data(revexpratio, ymaxrange, pval::Float64 =  6.70, cval::Float64 = 139.0)
     Irange = 0.0:0.01:40.0
@@ -42,8 +43,8 @@ function AVCKslope_revexpcon_data(revexpratio, ymaxrange, pval::Float64 =  6.70,
     @threads for ymaxi in eachindex(ymaxrange)
         y0val = calc_y0(revexpratio, ymaxrange[ymaxi], cval, pval)
         par = FarmBasePar(ymax = ymaxrange[ymaxi], y0 = y0val, c = cval, p = pval)
-        if minimum(filter(!isnan, [margcostIII(I, par) for I in Irange])) >= par.p || minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
-            data[ymaxi, y0i] = NaN
+        if minimum(filter(!isnan, [margcostIII(I, par) for I in Irange])) >= par.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
+            data[ymaxi, 2] = NaN
         else
             data[ymaxi, 1] = ymaxrange[ymaxi]
             data[ymaxi, 2] = AVCKslope("profit", par)
@@ -52,122 +53,110 @@ function AVCKslope_revexpcon_data(revexpratio, ymaxrange, pval::Float64 =  6.70,
     return data
 end
 
-AVCKslope_revexpcon_data(1.33, 120.0:1.0:180.0)
+# let 
+#     data_maxprofit = AVCKslopedata(0.8:0.01:2.0, 0.8:0.01:2.0, "profit", 2.2)
+#     # data_maxyield = AVCKslopedata(0.8:0.01:2.0, 0.8:0.01:2.0, "yield", 2.2)
+#     AVCKslopefig = figure(figsize=(8,3))
+#     # subplot(1,2,1)
+#     title("Maximum profit")
+#     pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3], vmin=-4.5, vmax=-0.5)
+#     colorbar()
+#     ylabel("Maximize potential yield")
+#     xlabel("Input efficiency")
+#     # subplot(1,2,2)
+#     # title("Maximize yield")
+#     # pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3], vmin=-4.5, vmax=-0.5)
+#     # colorbar()
+#     # ylabel("Maximum potential yield")
+#     # xlabel("Input efficiency")
+#     # tight_layout()
+#     return AVCKslopefig
+#     # savefig(joinpath(abpath(), "figs/AVCKslopefig.png"))
+# end
+# #bigger effect of ymax on slope. but effect of yo happens when ymax is small.
 
-let 
-    ymaxrange = 120.0:1.0:180.0
-    data133 = AVCKslope_revexpcon_data(1.33, 120.0:1.0:180.0)
-    data110 = AVCKslope_revexpcon_data(1.10, 120.0:1.0:180.0)
-    test = figure()
-    plot(data133[:1], data133[:2], color="blue")
-    plot(data110[:1], data110[:2], color="red")
-    return test
-end
+# #Trying out compare slopes of AVCK between max profit and max yield
+# function compare_slopes(par, maxyieldslope::Float64=0.1)
+#     maxprofitslope = AVCKslope("profit", par)
+#     maxyslope = AVCKslope("yield", par, maxyieldslope)
+#     return [maxprofitslope, maxyslope]
+# end
 
-let 
-    data_maxprofit = AVCKslopedata(0.8:0.01:2.0, 0.8:0.01:2.0, "profit", 2.2)
-    # data_maxyield = AVCKslopedata(0.8:0.01:2.0, 0.8:0.01:2.0, "yield", 2.2)
-    AVCKslopefig = figure(figsize=(8,3))
-    # subplot(1,2,1)
-    title("Maximum profit")
-    pcolor(data_maxprofit[1], data_maxprofit[2], data_maxprofit[3], vmin=-4.5, vmax=-0.5)
-    colorbar()
-    ylabel("Maximize potential yield")
-    xlabel("Input efficiency")
-    # subplot(1,2,2)
-    # title("Maximize yield")
-    # pcolor(data_maxyield[1], data_maxyield[2], data_maxyield[3], vmin=-4.5, vmax=-0.5)
-    # colorbar()
-    # ylabel("Maximum potential yield")
-    # xlabel("Input efficiency")
-    # tight_layout()
-    return AVCKslopefig
-    # savefig(joinpath(abpath(), "figs/AVCKslopefig.png"))
-end
-#bigger effect of ymax on slope. but effect of yo happens when ymax is small.
+# function compare_slopes_data(y0range, ymaxrange, p::Float64 = 2.2, maxyieldslope::Float64=0.1)
+#     Irange = 0.0:0.01:10.0
+#     y0range = y0range
+#     ymaxrange = ymaxrange
+#     data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+#     @threads for ymaxi in eachindex(ymaxrange)
+#         @inbounds for (y0i, y0num) in enumerate(y0range)
+#             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
+#             if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
+#                 data[ymaxi, y0i] = NaN
+#             else
+#                 slopes = compare_slopes(par, maxyieldslope)
+#                 data[ymaxi, y0i] = abs(slopes[1])-abs(slopes[2])
+#             end
+#         end
+#     end
+#     return [ymaxrange, y0range, data]
+# end
+# #Most of the time max yield causes higher variability (larger AVCK slope) compared to max profit. except when ymax is low and the opposite is true
 
-#Trying out compare slopes of AVCK between max profit and max yield
-function compare_slopes(par, maxyieldslope::Float64=0.1)
-    maxprofitslope = AVCKslope("profit", par)
-    maxyslope = AVCKslope("yield", par, maxyieldslope)
-    return [maxprofitslope, maxyslope]
-end
+# function compare_slopes_AVC_min(y0range, ymaxrange, p::Float64 = 2.2, maxyieldslope::Float64=0.1)
+#     Irange = 0.0:0.01:10.0
+#     y0range = y0range
+#     ymaxrange = ymaxrange
+#     data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+#     @threads for ymaxi in eachindex(ymaxrange)
+#         @inbounds for (y0i, y0num) in enumerate(y0range)
+#             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
+#             if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p
+#                 data[ymaxi, y0i] = NaN
+#             elseif minimum(filter(!isnan,[avvarcostIII(I, par) for I in Irange])) >= par.p
+#                 data[ymaxi, y0i] = 1
+#             else
+#                 data[ymaxi, y0i] = 0
+#             end
+#         end
+#     end
+#     return data
+# end
 
-function compare_slopes_data(y0range, ymaxrange, p::Float64 = 2.2, maxyieldslope::Float64=0.1)
-    Irange = 0.0:0.01:10.0
-    y0range = y0range
-    ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
-    @threads for ymaxi in eachindex(ymaxrange)
-        @inbounds for (y0i, y0num) in enumerate(y0range)
-            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p || avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
-                data[ymaxi, y0i] = NaN
-            else
-                slopes = compare_slopes(par, maxyieldslope)
-                data[ymaxi, y0i] = abs(slopes[1])-abs(slopes[2])
-            end
-        end
-    end
-    return [ymaxrange, y0range, data]
-end
-#Most of the time max yield causes higher variability (larger AVCK slope) compared to max profit. except when ymax is low and the opposite is true
+# function compare_slopes_AVC_maxyieldinput(y0range, ymaxrange, p::Float64 = 2.2, maxyieldslope::Float64=0.1)
+#     Irange = 0.0:0.01:10.0
+#     y0range = y0range
+#     ymaxrange = ymaxrange
+#     data = Array{Float64}(undef, length(ymaxrange), length(y0range))
+#     @threads for ymaxi in eachindex(ymaxrange)
+#         @inbounds for (y0i, y0num) in enumerate(y0range)
+#             par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
+#             if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p
+#                 data[ymaxi, y0i] = NaN
+#             elseif avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
+#                 data[ymaxi, y0i] = 1
+#             else
+#                 data[ymaxi, y0i] = 0
+#             end
+#         end
+#     end
+#     return data
+# end
 
-function compare_slopes_AVC_min(y0range, ymaxrange, p::Float64 = 2.2, maxyieldslope::Float64=0.1)
-    Irange = 0.0:0.01:10.0
-    y0range = y0range
-    ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
-    @threads for ymaxi in eachindex(ymaxrange)
-        @inbounds for (y0i, y0num) in enumerate(y0range)
-            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p
-                data[ymaxi, y0i] = NaN
-            elseif minimum(filter(!isnan,[avvarcostIII(I, par) for I in Irange])) >= par.p
-                data[ymaxi, y0i] = 1
-            else
-                data[ymaxi, y0i] = 0
-            end
-        end
-    end
-    return data
-end
-
-function compare_slopes_AVC_maxyieldinput(y0range, ymaxrange, p::Float64 = 2.2, maxyieldslope::Float64=0.1)
-    Irange = 0.0:0.01:10.0
-    y0range = y0range
-    ymaxrange = ymaxrange
-    data = Array{Float64}(undef, length(ymaxrange), length(y0range))
-    @threads for ymaxi in eachindex(ymaxrange)
-        @inbounds for (y0i, y0num) in enumerate(y0range)
-            par = BMPPar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-            if minimum(filter(!isnan,[margcostIII(I, par) for I in Irange])) >= par.p
-                data[ymaxi, y0i] = NaN
-            elseif avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
-                data[ymaxi, y0i] = 1
-            else
-                data[ymaxi, y0i] = 0
-            end
-        end
-    end
-    return data
-end
-
-function true_slopescompare(data1, data2)
-    data = Array{Float64}(undef, size(data1,1), size(data1,2))
-    for i in 1:size(data1,1)
-        for j in 1:size(data1,2)
-            if isnan(data1[i,j])
-                data[i,j] =  NaN
-            elseif data1[i,j] > 0.0 && data2[i,j] == 0.0
-                data[i,j] =  1.0
-            else
-                data[i,j] = 0.0
-            end
-        end
-    end
-    return data
-end
+# function true_slopescompare(data1, data2)
+#     data = Array{Float64}(undef, size(data1,1), size(data1,2))
+#     for i in 1:size(data1,1)
+#         for j in 1:size(data1,2)
+#             if isnan(data1[i,j])
+#                 data[i,j] =  NaN
+#             elseif data1[i,j] > 0.0 && data2[i,j] == 0.0
+#                 data[i,j] =  1.0
+#             else
+#                 data[i,j] = 0.0
+#             end
+#         end
+#     end
+#     return data
+# end
  
 # compare_slopes_AVC_maxyieldinput(0.8:0.1:2.0, 0.8:0.1:2.0, 1.2)
 
