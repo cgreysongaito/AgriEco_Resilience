@@ -1,16 +1,18 @@
 using SymPy
 
-@vars C
-@vars y y₀ p c
+@vars I
+@vars yₘ y₀ p c
 
 #Type III
-f(C) = y * (C^2) / (y₀ + (C^2))
-SymPy.simplify(diff(f(C),C))
+f(I) = yₘ * (I^2) / (y₀ + (I^2))
+SymPy.simplify(diff(f(I),I))
 
-g(C) = y * (C^2) / (y₀ + (C^2))
-SymPy.simplify(diff(g(C),C))
+g(I) = 2 * I * yₘ * y₀ / (( y₀ + (I^2) )^2)
+SymPy.simplify(diff(g(I),I))
 
 SymPy.solve((c/p)*((y₀+(C^2))^2)-(2*C*y*y₀), C)
+
+
 
 
 # Monod Type II version

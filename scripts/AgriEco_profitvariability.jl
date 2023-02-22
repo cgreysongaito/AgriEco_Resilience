@@ -2,40 +2,20 @@ include("packages.jl")
 include("AgriEco_commoncode.jl")
 
 #Trying out AVCK slope numerical analysis
-#NOTE this function is calculating maxprofitIIIvals twice in the same function
 function AVCKslope(profityield, par, maxyieldslope::Float64=0.1)
-    Yrange = 0.0:0.01:par.ymax
-    data = [avvarcostkickIII(Y, par, profityield, maxyieldslope) for Y in Yrange]
     if profityield == "profit"
-        Yindex = isapprox_index(Yrange, maxprofitIII_vals(par)[2])
+        inputsyield = maxprofitIII_vals(par)
     elseif profityield == "yield"
-        Yindex = isapprox_index(Yrange, maxyieldIII_vals(maxyieldslope, par)[2])
+        inputsyield = maxyieldIII_vals(maxyieldslope, par)
     else
         error("profityield variable must be either \"profit\" or \"yield\".")
     end
+    Yrange = 0.0:0.01:par.ymax
+    data = [avvarcostkickIII(inputsyield[1],Y, par) for Y in Yrange]
+    Yindex = isapprox_index(Yrange, inputsyield[2])
     slope = (data[Yindex+1] - data[Yindex]) / (Yrange[Yindex+1] - Yrange[Yindex])
     return slope
 end
-
-# function AVCKslopedata(y0range, ymaxrange, profityield, p::Float64 = 2.2, maxyieldslope::Float64 = 0.1)
-#     Irange = 0.0:0.01:10.0
-#     y0range = y0range
-#     ymaxrange = ymaxrange
-#     data = Array{Float64}(undef, length(ymaxrange), length(y0range))
-#     @threads for ymaxi in eachindex(ymaxrange)
-#         for (y0i, y0num) in enumerate(y0range)
-#             par = FarmBasePar(y0 = y0num, ymax = ymaxrange[ymaxi], c = 0.5, p = p)
-#             if minimum(filter(!isnan, [margcostIII(I, par) for I in Irange])) >= par.p || minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
-#                 data[ymaxi, y0i] = NaN
-#             elseif profityield == "yield" && avvarcostIII(maxyieldIII_vals(maxyieldslope, par)[1],par) >= par.p
-#                 data[ymaxi, y0i] = NaN
-#             else
-#                 data[ymaxi, y0i] = AVCKslope(profityield, par, maxyieldslope)
-#             end
-#         end
-#     end
-#     return [ymaxrange, y0range, data]
-# end
 
 function AVCKslope_revexpcon_data(revexpratio, ymaxrange, pval::Float64 =  6.70, cval::Float64 = 139.0)
     Irange = 0.0:0.01:40.0
@@ -52,6 +32,9 @@ function AVCKslope_revexpcon_data(revexpratio, ymaxrange, pval::Float64 =  6.70,
     end
     return data
 end
+
+
+###BUT WHAT ABOUT PROFIT VARIABILITY WITH PRICE AND COST DISTURBANCE!!****
 
 # let 
 #     data_maxprofit = AVCKslopedata(0.8:0.01:2.0, 0.8:0.01:2.0, "profit", 2.2)

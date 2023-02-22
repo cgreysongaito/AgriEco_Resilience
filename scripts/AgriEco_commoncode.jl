@@ -41,7 +41,7 @@ end
 
 @with_kw mutable struct FarmBasePar
     ymax = 174.0 # yield per acre #budget summary field crops budgets 2022 corn conventional
-    y0 = 10
+    y0 = 9.9416
     p = 6.70 # market price pert unit (not acre) #budget summary field crops budgets 2022 corn conventional
     c = 139
 end
@@ -119,7 +119,7 @@ end
 # end
 
 
-function testIzeros(testwidth, par)
+function testIzeros_profit(testwidth, par)
     testIrange = 0.0:testwidth:par.y0
     dataI = zeros(length(testIrange))
     for Ii in eachindex(testIrange)
@@ -131,7 +131,8 @@ function testIzeros(testwidth, par)
             end
         end
     end
-    intersects = unique(trunc.(filter(!isnan, dataI), digits=7))
+    
+    intersects = unique(round.(filter(!isnan, dataI), digits=7))
     if length(intersects) > 2 || length(intersects) < 1
         error("Something is wrong with finding zeros function")
     elseif length(intersects) == 2
@@ -139,7 +140,7 @@ function testIzeros(testwidth, par)
         Y = yieldIII(I, par)
         return [I, Y]
     else
-        testIzeros(testwidth*0.5, par)
+        testIzeros_profit(testwidth*0.5, par)
     end
 end
 
@@ -150,41 +151,86 @@ function maxprofitIII_vals(par)
     if minimum(MC) >= par.p
         return [0,0]
     else
-        return testIzeros(testwidth, par)
+        return testIzeros_profit(testwidth, par)
     end
 end
+
+function d2Id2I(I, par)
+    @unpack y0, ymax = par
+    return (2 * y0 * ymax * (-3 * (I^2) + y0))/(( y0 + (I^2) )^3)
+end
+
+# d2Id2I(9, FarmBasePar(ymax=174))
+
+# let 
+#     par = FarmBasePar(ymax=120)
+#     Irange = 0.0:0.1:30.0
+#     data = [d2Id2I(I, par) for I in Irange]
+#     # test = figure()
+#     # plot(Irange, data)
+#     return data
+# end
 
 function maxyieldIII_param(I, slope, par)
     @unpack y0, ymax, c, p = par
     return 2 * I * ymax * y0 / (( y0 + (I^2) )^2) - slope
 end
 
-function maxyieldIII_vals(slope, par)
-    try
-    I = find_zero(I -> maxyieldIII_param(I, slope, par), 2 * sqrt(par.y0))
-    Y = yieldIII(I, par)
-    [I, Y]
-    catch err
-        if isa(err, Roots.ConvergenceFailed)
-            smallerguess = (sqrt(par.y0) + find_zero(I -> maxyieldIII_param(I, slope, par), 0.0))/2
-            I = find_zero(I -> maxyieldIII_param(I, slope, par), smallerguess)
-            Y = yieldIII(I, par)
-            [I, Y]
+function testIzeros_yield(testwidth, slope, par)
+    testIrange = 0.0:testwidth:par.y0
+    dataI = zeros(length(testIrange))
+    for Ii in eachindex(testIrange)
+        try
+        dataI[Ii] = find_zero(I -> maxyieldIII_param(I, slope, par), testIrange[Ii])
+        catch err
+            if isa(err, Roots.ConvergenceFailed)
+                dataI[Ii]  = NaN
+            end
         end
+    end
+    
+    intersects = unique(round.(filter(!isnan, dataI), digits=7))
+    if length(intersects) > 2 || length(intersects) < 1
+        error("Something is wrong with finding zeros function")
+    elseif length(intersects) == 2
+        I = maximum(intersects)
+        Y = yieldIII(I, par)
+        return [I, Y]
+    else
+        testIzeros_yield(testwidth*0.5, slope, par)
     end
 end
 
-### Yield disturbance function
-function avvarcostkickIII(Y, par, profityield, maxyieldslope::Float64=1.0)
-    @unpack c = par
-    if profityield == "profit"
-        I = maxprofitIII_vals(par)[1]
-    elseif profityield == "yield"
-        I = maxyieldIII_vals(maxyieldslope, par)[1]
+function maxyieldIII_vals(slope, par)
+    testwidth = trunc(par.y0/4, digits=0)
+    Irange = 0.0:0.01:Int64(round(3*par.y0))
+    MC = [margcostIII(I, par) for I in Irange]
+    if minimum(MC) >= par.p
+        return [0,0]
     else
-        error("profityield variable must be either \"profit\" or \"yield\".")
+        return testIzeros_yield(testwidth, slope, par)
     end
-    return c * I / Y
+end
+
+# function maxyieldIII_vals(slope, par)
+#     try
+#     I = find_zero(I -> maxyieldIII_param(I, slope, par), 2 * sqrt(par.y0))
+#     Y = yieldIII(I, par)
+#     [I, Y]
+#     catch err
+#         if isa(err, Roots.ConvergenceFailed)
+#             smallerguess = (sqrt(par.y0) + find_zero(I -> maxyieldIII_param(I, slope, par), 0.0))/2
+#             I = find_zero(I -> maxyieldIII_param(I, slope, par), smallerguess)
+#             Y = yieldIII(I, par)
+#             [I, Y]
+#         end
+#     end
+# end
+
+### Yield disturbance function
+function avvarcostkickIII(inputs, Y, par)
+    @unpack c = par
+    return c * inputs / Y
 end 
 
 ### Noise creation function
