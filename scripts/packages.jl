@@ -12,3 +12,4 @@ using Random
 using SymPy
 using PyPlot
 using DataFrames
+using StatsBase
