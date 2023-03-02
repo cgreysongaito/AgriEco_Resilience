@@ -525,7 +525,8 @@ let
     xlabel("y0")
     ylabel("ymax")
     legend()
-    return revexpparamfigure
+    # return revexpparamfigure
+    savefig(joinpath(abpath(), "figs/revexpparamfigure.png"))
 end
 
 
