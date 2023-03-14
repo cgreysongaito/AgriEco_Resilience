@@ -46,7 +46,7 @@ function expectedprofits_yieldnoise(ymaxval, revexpratio, σ, corrrange, len, re
     y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
     newpar = FarmBasePar(ymax=ymaxval, y0=y0val)
     inputsyield = maxprofitIII_vals(newpar)
-    avexpectedprofitsdata = zeros(length(corrrange))
+    data=zeros(length(corrrange), 3)
     @threads for ri in eachindex(corrrange)
         expectedprofitsdata = zeros(reps)
         for i in 1:reps
@@ -56,19 +56,21 @@ function expectedprofits_yieldnoise(ymaxval, revexpratio, σ, corrrange, len, re
             cdata = repeat([newpar.c], len)
             expectedprofitsdata[i] = expectedprofits(profitsdata(yielddata, inputsdata, pdata, cdata), 25)
         end
-        avexpectedprofitsdata[ri] = mean(expectedprofitsdata)
+        data[ri,1] = mean(expectedprofitsdata)
+        data[ri,2] = maximum(expectedprofitsdata)
+        data[ri,3] = minimum(expectedprofitsdata)
     end
-    return avexpectedprofitsdata
+    return data
 end
 
 
-expectedprofits_yieldnoise(120, 1.33, 0.1, 0.1:0.1:0.9, 50, 10)
+expectedprofits_yieldnoise(120, 1.33, 0.3, 0.1:0.1:0.9, 50, 1000)
 
 function variability_yieldnoise(ymaxval, revexpratio, σ, corrrange, len, reps)
     y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
     newpar = FarmBasePar(ymax=ymaxval, y0=y0val)
     inputsyield = maxprofitIII_vals(newpar)
-    avvariabilitydata = zeros(length(corrrange))
+    data=zeros(length(corrrange), 3)
     @threads for ri in eachindex(corrrange)
         variabilitydata = zeros(reps)
         for i in 1:reps
@@ -81,10 +83,12 @@ function variability_yieldnoise(ymaxval, revexpratio, σ, corrrange, len, reps)
             sdprofits = std(profits)
             variabilitydata[i] = sdprofits/meanprofits
         end
-        avvariabilitydata[ri] = mean(variabilitydata)
+        data[ri,1] = mean(variabilitydata)
+        data[ri,2] = maximum(variabilitydata)
+        data[ri,3] = minimum(variabilitydata)
     end
-    return avvariabilitydata
+    return data
 end
 
 
-variability_yieldnoise(120, 1.33, 0.1, 0.1:0.1:0.9, 50, 10)
+variability_yieldnoise(120, 1.33, 0.1, 0.1:0.1:0.9, 50, 1000)
