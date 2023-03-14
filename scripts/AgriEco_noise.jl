@@ -64,3 +64,27 @@ end
 
 expectedprofits_yieldnoise(120, 1.33, 0.1, 0.1:0.1:0.9, 50, 10)
 
+function variability_yieldnoise(ymaxval, revexpratio, σ, corrrange, len, reps)
+    y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
+    newpar = FarmBasePar(ymax=ymaxval, y0=y0val)
+    inputsyield = maxprofitIII_vals(newpar)
+    avvariabilitydata = zeros(length(corrrange))
+    @threads for ri in eachindex(corrrange)
+        variabilitydata = zeros(reps)
+        for i in 1:reps
+            yielddata = noise_creation(inputsyield[2], σ, corrrange[ri], len, i)
+            inputsdata = repeat([inputsyield[1]], len)
+            pdata = repeat([newpar.p], len)
+            cdata = repeat([newpar.c], len)
+            profits = profitsdata(yielddata, inputsdata, pdata, cdata)
+            meanprofits = mean(profits)
+            sdprofits = std(profits)
+            variabilitydata[i] = sdprofits/meanprofits
+        end
+        avvariabilitydata[ri] = mean(variabilitydata)
+    end
+    return avvariabilitydata
+end
+
+
+variability_yieldnoise(120, 1.33, 0.1, 0.1:0.1:0.9, 50, 10)
