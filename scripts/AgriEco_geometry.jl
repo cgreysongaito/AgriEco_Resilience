@@ -529,6 +529,40 @@ let
     savefig(joinpath(abpath(), "figs/revexpparamfigure.png"))
 end
 
+#figure of lines where same rev-exp
+let 
+    ymaxrange = 120.0:1.0:200.0
+    y0data133rat = [calc_y0(1.33, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data140rat = [calc_y0(1.40, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data110rat = [calc_y0(1.10, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data090rat = [calc_y0(0.90, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data133 = [calc_y0_abs(400, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data140 = [calc_y0_abs(200, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data110 = [calc_y0_abs(100, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data090 = [calc_y0_abs(-50, ymax, 139, 6.70) for ymax in ymaxrange]
+    revexpparamfigure = figure()
+    plot(y0data140rat, ymaxrange, color="red", label="rev/exp = 1.40", linestyle="dashed")
+    plot(y0data133rat, ymaxrange, color="blue", label="rev/exp = 1.33", linestyle="dashed")
+    plot(y0data110rat, ymaxrange, color="orange", label="rev/exp = 1.10", linestyle="dashed")
+    plot(y0data090rat, ymaxrange, color="purple", label="rev/exp = 0.90", linestyle="dashed")
+    plot(y0data140, ymaxrange, color="red", label="rev-exp = 400")
+    plot(y0data133, ymaxrange, color="blue", label="rev-exp = 200")
+    plot(y0data110, ymaxrange, color="orange", label="rev-exp = 100")
+    plot(y0data090, ymaxrange, color="purple", label="rev-exp = -50")
+    xlabel("y0")
+    ylabel("ymax")
+    legend()
+    return revexpparamfigure
+    # savefig(joinpath(abpath(), "figs/absrevexpparamfigure.png"))
+end
+
+calc_y0_abs(400, 170, 139, 6.70)
+calc_y0_abs(400, 120, 139, 6.70)
+
+param_absolute(FarmBasePar(ymax=170,y0=7.066417369701361,p=6.70,c=139))
+param_absolute(FarmBasePar(ymax=120,y0=2.111898970032607,p=6.70,c=139))
+param_ratio(FarmBasePar(ymax=170,y0=7.066417369701361,p=6.70,c=139))
+param_ratio(FarmBasePar(ymax=120,y0=2.111898970032607,p=6.70,c=139))
 
 #Comparing the geometry when keeping revenue/expenses the same but changing ymax and y0
 calc_y0(0.90, 174, 139, 6.70)

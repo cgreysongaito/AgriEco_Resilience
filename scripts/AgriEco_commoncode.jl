@@ -31,12 +31,25 @@ function param_ratio(par)
     return (ymax * p) / (2 * sqrt(y0) * c)
 end
 
+function param_absolute(par)
+    @unpack y0, ymax, p, c = par
+    return (ymax * p) - (2 * sqrt(y0) * c)
+end
+
 function calc_c(rev_exp_ratio, ymax, y0, p)
     return (ymax * p) / (2 * sqrt(y0) * rev_exp_ratio)
 end
 
 function calc_y0(rev_exp_ratio, ymax, c, p)
     return ((ymax * p) / (2 * c * rev_exp_ratio) )^2
+end
+
+function calc_c_abs(rev_exp_val, ymax, y0, p)
+    return ( (ymax * p) - rev_exp_val ) / (2 * sqrt(y0))
+end
+
+function calc_y0_abs(rev_exp_val, ymax, c, p)
+    return (((ymax * p) - rev_exp_val ) / (2 * c))^2
 end
 
 @with_kw mutable struct FarmBasePar

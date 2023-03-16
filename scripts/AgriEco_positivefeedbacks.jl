@@ -170,10 +170,10 @@ function expectedterminalassets_yield_rednoise(ymaxval, revexpratio, interestpar
         noisepar = NoisePar(yielddisturbed_CV = yieldCV, yielddisturbed_r = corrrange[ri])
         termassetsdata = terminalassets_distribution("yield", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
         expectedprofitsdata = expectedterminalassets(termassetsdata, 25)
-        norm_termassetsdata = terminalassets_distribution("none", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        norm_expectedprofitsdata = expectedterminalassets(norm_termassetsdata, 25)
+        # norm_termassetsdata = terminalassets_distribution("none", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
+        # norm_expectedprofitsdata = expectedterminalassets(norm_termassetsdata, 25)
         data[ri,1] = corrrange[ri]
-        data[ri,2] = expectedprofitsdata - norm_expectedprofitsdata
+        data[ri,2] = expectedprofitsdata # - norm_expectedprofitsdata
     end
     return data
 end
@@ -195,7 +195,7 @@ let
     plot(highymax_133[:,1], highymax_133[:,2], color="blue", label="Rev/Exp = 1.33")
     plot(highymax_115[:,1], highymax_115[:,2], color="red", label="Rev/Exp = 1.15")
     plot(highymax_100[:,1], highymax_100[:,2], color="purple", label="Rev/Exp =1.00")
-    ylim(-90,40)
+    # ylim(-90,40)
     xlabel("Autocorrelation")
     ylabel("Expected Terminal Assets")
     title("High ymax, low input eff")
@@ -203,7 +203,7 @@ let
     plot(medymax_133[:,1], medymax_133[:,2], color="blue", label="Rev/Exp = 1.33")
     plot(medymax_115[:,1], medymax_115[:,2], color="red", label="Rev/Exp = 1.15")
     plot(medymax_100[:,1], medymax_100[:,2], color="purple", label="Rev/Exp =1.00")
-    ylim(-90,40)
+    # ylim(-90,40)
     xlabel("Autocorrelation")
     ylabel("Expected Terminal Assets")
     title("Med ymax, med input eff")
@@ -211,7 +211,7 @@ let
     plot(lowymax_133[:,1], lowymax_133[:,2], color="blue", label="Rev/Exp = 1.33")
     plot(lowymax_115[:,1], lowymax_115[:,2], color="red", label="Rev/Exp = 1.15")
     plot(lowymax_100[:,1], lowymax_100[:,2], color="purple", label="Rev/Exp =1.00")
-    ylim(-90,40)
+    # ylim(-90,40)
     xlabel("Autocorrelation")
     ylabel("Expected Terminal Assets")
     title("Low ymax, high input eff")
@@ -254,7 +254,7 @@ let
     # plot(highymax_100[:,1], highymax_100[:,2], color="purple", label="Rev/Exp =1.00", linestyle="solid")
     plot(lowymax_133[:,1], lowymax_133[:,2], color="blue", label="Rev/Exp = 1.33", linestyle="dashed")
     plot(lowymax_115[:,1], lowymax_115[:,2], color="red", label="Rev/Exp = 1.15", linestyle="dashed")
-    plot(lowymax_100[:,1], lowymax_100[:,2], color="purple", label="Rev/Exp =1.00", linestyle="dashed")
+    plot(lowymax_100[:,1], lowymax_100[:,2] , color="purple", label="Rev/Exp =1.00", linestyle="dashed")
     # ylim(-90,40)
     xlabel("Autocorrelation")
     ylabel("CV Terminal Assets")
@@ -370,3 +370,104 @@ end  #CV does not differ between high ymax and low ymax - WHY?
 #     plot(data150, ymaxrange, color = "red")
 #     return test
 # end
+
+
+## Relative version of positive feedbacks
+
+function assetsdebtupdate_rel(assetsdebt, interestpar)
+    @unpack debtinterest, savingsinterest = interestpar
+    if assetsdebt > 1.0
+        return assetsdebt * (1 + savingsinterest/100)
+    else
+        return assetsdebt * (1 - debtinterest/100)
+    end
+end
+
+function simulation_rel(basedata, interestpar)
+    maxyears = size(basedata,1)
+    assetsdebt = zeros(maxyears+1)
+    assetsdebt[1] = 1.0
+    for yr in 2:maxyears+1
+        expenses = expenses_calc(basedata[yr-1,3], basedata[yr-1,5])
+        revenue = revenue_calc(basedata[yr-1,2], basedata[yr-1,4])
+        assetsdebtafterfarming = assetsdebt[yr-1] * revenue/expenses
+        assetsdebt[yr] = assetsdebtupdate_rel(assetsdebtafterfarming, interestpar)
+    end
+    return assetsdebt
+end
+
+function terminalassets_distribution_rel(noiselocation, inputsyield, basepar, noisepar, interestpar, maxyears, reps)
+    assetsdebtdata =  zeros(reps)
+    @threads for i in 1:reps
+        basedata = noise_createdata(noiselocation, inputsyield, basepar, noisepar, maxyears, i)
+        simdata = simulation_rel(basedata, interestpar)
+        assetsdebtdata[i] = simdata[end]
+    end
+    return assetsdebtdata
+end
+
+function expectedterminalassets_yield_rednoise_rel(ymaxval, revexpratio, interestpar, yieldCV, corrrange, maxyears, reps)
+    y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
+    newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
+    inputsyield = maxprofitIII_vals(newbasepar)
+    data=zeros(length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        noisepar = NoisePar(yielddisturbed_CV = yieldCV, yielddisturbed_r = corrrange[ri])
+        termassetsdata = terminalassets_distribution_rel("yield", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
+        expectedprofitsdata = expectedterminalassets(termassetsdata, 25)
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = expectedprofitsdata
+    end
+    return data
+end
+
+expectedterminalassets_yield_rednoise_rel(170, 1.33, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+expectedterminalassets_yield_rednoise_rel(120, 1.33, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+expectedterminalassets_yield_rednoise_rel(170, 1.00, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+expectedterminalassets_yield_rednoise_rel(120, 1.00, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+
+let 
+    highymax_133 = expectedterminalassets_yield_rednoise_rel(170, 1.33, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+    highymax_115 = expectedterminalassets_yield_rednoise_rel(170, 1.15, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+    highymax_100 = expectedterminalassets_yield_rednoise_rel(170, 1.00, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+    medymax_133 = expectedterminalassets_yield_rednoise_rel(140, 1.33, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+    medymax_115 = expectedterminalassets_yield_rednoise_rel(140, 1.15, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+    medymax_100 = expectedterminalassets_yield_rednoise_rel(140, 1.00, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+    lowymax_133 = expectedterminalassets_yield_rednoise_rel(120, 1.33, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+    lowymax_115 = expectedterminalassets_yield_rednoise_rel(120, 1.15, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+    lowymax_100 = expectedterminalassets_yield_rednoise_rel(120, 1.00, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
+    rednoise_exptermassets = figure()
+    subplot(3,1,1)
+    # plot(highymax_133[:,1], highymax_133[:,2], color="blue", label="Rev/Exp = 1.33")
+    plot(highymax_115[:,1], highymax_115[:,2], color="red", label="Rev/Exp = 1.15")
+    plot(highymax_100[:,1], highymax_100[:,2], color="purple", label="Rev/Exp =1.00")
+    # ylim(-90,40)
+    xlabel("Autocorrelation")
+    ylabel("Expected Terminal Assets")
+    title("High ymax, low input eff")
+    subplot(3,1,2)
+    # plot(medymax_133[:,1], medymax_133[:,2], color="blue", label="Rev/Exp = 1.33")
+    plot(medymax_115[:,1], medymax_115[:,2], color="red", label="Rev/Exp = 1.15")
+    plot(medymax_100[:,1], medymax_100[:,2], color="purple", label="Rev/Exp =1.00")
+    # ylim(-90,40)
+    xlabel("Autocorrelation")
+    ylabel("Expected Terminal Assets")
+    title("Med ymax, med input eff")
+    subplot(3,1,3)
+    # plot(lowymax_133[:,1], lowymax_133[:,2], color="blue", label="Rev/Exp = 1.33")
+    plot(lowymax_115[:,1], lowymax_115[:,2], color="red", label="Rev/Exp = 1.15")
+    plot(lowymax_100[:,1], lowymax_100[:,2], color="purple", label="Rev/Exp =1.00")
+    # ylim(-90,40)
+    xlabel("Autocorrelation")
+    ylabel("Expected Terminal Assets")
+    title("Low ymax, high input eff")
+    tight_layout()
+    return rednoise_exptermassets
+end
+
+
+function variabilityterminalassets(distributiondata)
+    meandata = abs(mean(distributiondata))
+    sddata = std(distributiondata)
+    return sddata/meandata
+end
