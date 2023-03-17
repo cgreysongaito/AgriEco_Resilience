@@ -104,7 +104,7 @@ function operatingloan(expenses, interestpar)
     return expenses * (1 + operatinginterest/100)
 end
 
-function assetsdebtupdate(assetsdebt, interestpar)
+function assetsdebt_NLposfeed(assetsdebt, interestpar)
     @unpack debtinterest, savingsinterest = interestpar
     if assetsdebt > 0.0
         return assetsdebt * (1 + savingsinterest/100)
@@ -113,23 +113,30 @@ function assetsdebtupdate(assetsdebt, interestpar)
     end
 end
 
-function simulation(basedata, interestpar)
+
+function simulation_NLposfeed(NL, basedata, interestpar)
     maxyears = size(basedata,1)
     assetsdebt = zeros(maxyears+1)
     for yr in 2:maxyears+1
         expenses = expenses_calc(basedata[yr-1,3], basedata[yr-1,5])
         revenue = revenue_calc(basedata[yr-1,2], basedata[yr-1,4])
         assetsdebtafterfarming = assetsdebt[yr-1] + (revenue - operatingloan(expenses, interestpar))
-        assetsdebt[yr] = assetsdebtupdate(assetsdebtafterfarming, interestpar)
+        if NL == "with"
+            assetsdebt[yr] = assetsdebt_NLposfeed(assetsdebtafterfarming, interestpar)
+        elseif NL == "without"
+            assetsdebt[yr] = assetsdebtafterfarming
+        else
+            error("NL should be either with or without")
+        end
     end
     return assetsdebt
 end
 
-function terminalassets_distribution(noiselocation, inputsyield, basepar, noisepar, interestpar, maxyears, reps)
+function terminalassets_distribution(NL, noiselocation, inputsyield, basepar, noisepar, interestpar, maxyears, reps)
     assetsdebtdata =  zeros(reps)
-    @threads for i in 1:reps
+    for i in 1:reps
         basedata = noise_createdata(noiselocation, inputsyield, basepar, noisepar, maxyears, i)
-        simdata = simulation(basedata, interestpar)
+        simdata = simulation_NLposfeed(NL, basedata, interestpar)
         assetsdebtdata[i] = simdata[end]
     end
     return assetsdebtdata
@@ -155,29 +162,29 @@ function expectedterminalassets(distributiondata, numbins)
     return expectedassets
 end
 
-function variabilityterminalassets(distributiondata)
-    meandata = abs(mean(distributiondata))
-    sddata = std(distributiondata)
-    return sddata/meandata
-end
+
 
 function expectedterminalassets_yield_rednoise(ymaxval, revexpratio, interestpar, yieldCV, corrrange, maxyears, reps)
     y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
     newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
     inputsyield = maxprofitIII_vals(newbasepar)
-    data=zeros(length(corrrange), 2)
+    data=zeros(length(corrrange), 4)
     @threads for ri in eachindex(corrrange)
         noisepar = NoisePar(yielddisturbed_CV = yieldCV, yielddisturbed_r = corrrange[ri])
-        termassetsdata = terminalassets_distribution("yield", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        expectedprofitsdata = expectedterminalassets(termassetsdata, 25)
-        # norm_termassetsdata = terminalassets_distribution("none", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        # norm_expectedprofitsdata = expectedterminalassets(norm_termassetsdata, 25)
+        termassetsdata_NL = terminalassets_distribution("with", "yield", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
+        termassetsdata_woNL = terminalassets_distribution("without", "yield", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
+        expectedprofitsdata_NL = expectedterminalassets(termassetsdata_NL, 30)
+        expectedprofitsdata_woNL = expectedterminalassets(termassetsdata_woNL, 30)
         data[ri,1] = corrrange[ri]
-        data[ri,2] = expectedprofitsdata # - norm_expectedprofitsdata
+        data[ri,2] = expectedprofitsdata_NL
+        data[ri,3] = expectedprofitsdata_woNL
+        data[ri,4] = expectedprofitsdata_NL-expectedprofitsdata_woNL
     end
     return data
 end
 
+test1 = expectedterminalassets_yield_rednoise(170, 1.00, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 10)
+test2 = expectedterminalassets_yield_rednoise(120, 1.00, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 10)
 
 
 let 
@@ -222,22 +229,58 @@ end #FOR THIS METHOD OF DIFFERENTIAL - WHAT is -50  - just less than original by
 #### CAN"T COMPARE BETWEEN HIGH AND LOW YMAX BECAUSE OF RELATIVE VERSUS ABSOLUTE PROFITS
 
 
+function variabilityterminalassets(distributiondata)
+    meandata = abs(mean(distributiondata))
+    sddata = std(distributiondata)
+    return sddata/meandata
+end
+
 function variabilityterminalassets_yield_rednoise(ymaxval, revexpratio, interestpar, yieldCV, corrrange, maxyears, reps)
     y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
     newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
     inputsyield = maxprofitIII_vals(newbasepar)
-    data=zeros(length(corrrange), 2)
+    data=zeros(length(corrrange), 4)
     @threads for ri in eachindex(corrrange)
         noisepar = NoisePar(yielddisturbed_CV = yieldCV, yielddisturbed_r = corrrange[ri])
-        termassetsdata = terminalassets_distribution("yield", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        variabilityassetsdata = variabilityterminalassets(termassetsdata)
+        termassetsdata_NL = terminalassets_distribution("with", "yield", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
+        termassetsdata_woNL = terminalassets_distribution("without", "yield", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
+        variabilityassetsdata_NL = variabilityterminalassets(termassetsdata_NL)
+        variabilityassetsdata_woNL = variabilityterminalassets(termassetsdata_woNL)
         data[ri,1] = corrrange[ri]
-        data[ri,2] = variabilityassetsdata
+        data[ri,2] = variabilityassetsdata_NL
+        data[ri,3] = variabilityassetsdata_woNL
+        data[ri,4] = variabilityassetsdata_NL/variabilityassetsdata_woNL
     end
     return data
 end
+#SOMETHING IS WRONG without NL varaibility
+
+let
+    y0val = calc_y0(1.33, 170, FarmBasePar().c, FarmBasePar().p)
+    newbasepar = FarmBasePar(ymax=170, y0=y0val)
+    inputsyield = maxprofitIII_vals(newbasepar)
+    basedata = noise_createdata("yield", inputsyield, newbasepar, NoisePar(yielddisturbed_r = 0.9), 20, 18)
+    assets = simulation_NLposfeed("without", basedata, InterestPar())
+    return assets
+end
+
+2540.3884768145867
+2594.0320813135327
+2684.4343837891356
+2753.999401514481
+
+#checking that integral of red noise and white noise is always the same
+let 
+    noise = noise_creation(10, 0.1, 0.1, 50, 150)
+    println(sum(noise))
+    test = figure()
+    plot(1:1:50, noise)
+    return test
+end
 
 
+
+variabilityterminalassets_yield_rednoise(170, 1.33, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 10)
 let 
     highymax_133 = variabilityterminalassets_yield_rednoise(170, 1.33, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
     highymax_115 = variabilityterminalassets_yield_rednoise(170, 1.15, InterestPar(), 0.1, 0.1:0.1:0.9, 50, 1000)
