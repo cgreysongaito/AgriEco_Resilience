@@ -255,15 +255,9 @@ function noise_creation(μ, σ, corr, len, seed)
     for i in 2:Int64(len)
         intnoise = append!(intnoise, corr * intnoise[i-1] + white[i] )
     end
-    c = std(white)/std(intnoise)
-    meanintnoise = mean(intnoise)
-    scalednoise = zeros(Int64(len))
-    for i in 1:Int64(len)
-        scalednoise[i] = c * (intnoise[i] - meanintnoise)
-    end
     recentrednoise = zeros(Int64(len))
     for i in 1:Int64(len)
-        recentrednoise[i] = scalednoise[i]+μ
+        recentrednoise[i] = intnoise[i]+μ
     end
     return recentrednoise
 end

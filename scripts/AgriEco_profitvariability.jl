@@ -23,11 +23,12 @@ function AVCKslope_revexpcon_data(revexpratio, ymaxrange, pval::Float64 =  6.70,
     @threads for ymaxi in eachindex(ymaxrange)
         y0val = calc_y0(revexpratio, ymaxrange[ymaxi], cval, pval)
         par = FarmBasePar(ymax = ymaxrange[ymaxi], y0 = y0val, c = cval, p = pval)
+        inputsyield = maxprofitIII_vals(par)
         if minimum(filter(!isnan, [margcostIII(I, par) for I in Irange])) >= par.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
             data[ymaxi, 2] = NaN
         else
             data[ymaxi, 1] = ymaxrange[ymaxi]
-            data[ymaxi, 2] = AVCKslope("profit", par)
+            data[ymaxi, 2] = AVCKslope("profit", par)/inputsyield[2]
         end
     end
     return data
