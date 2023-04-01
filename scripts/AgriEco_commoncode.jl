@@ -246,7 +246,15 @@ function avvarcostkickIII(inputs, Y, par)
     return c * inputs / Y
 end 
 
-### Noise creation function
+### Noise creation
+@with_kw mutable struct NoisePar
+    yielddisturbed_σ = 0.2
+    p_σ = 0.2
+    c_σ = 0.2
+    yielddisturbed_r = 0.0
+    p_r = 0.0
+    c_r = 0.0
+end
 
 function noise_creation(μ, σ, corr, len, seed)
     Random.seed!(seed)
@@ -261,4 +269,72 @@ function noise_creation(μ, σ, corr, len, seed)
     end
     return recentrednoise
 end
+
+function convert_neg_zero(paramdata)
+    newparamdata = zeros(length(paramdata))
+    for i in 1:length(paramdata)
+        if paramdata[i] <= 0.0
+            newparamdata[i] = 0.0
+        else
+            newparamdata[i] = paramdata[i]
+        end
+    end
+    return newparamdata
+end
+
+function yielddisturbed(inputsyield, noisepar, maxyears, seed)
+    yieldnoise = noise_creation(inputsyield[2], noisepar.yielddisturbed_σ, noisepar.yielddisturbed_r, maxyears, seed)
+    convert_neg_zero(yieldnoise)
+    return yieldnoise
+end
+
+function yieldnoise_createdata(inputsyield, basepar, noisepar, maxyears, seed)
+    return hcat(1:1:maxyears, yielddisturbed(inputsyield, noisepar, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([basepar.p],maxyears), repeat([basepar.c],maxyears))
+end
+
+
+function revenue_calc(yield, p)
+    return yield * p
+end
+
+function expenses_calc(inputs, c)
+    return inputs * c
+end
+
+function distribution_prob_convert(histogramdata)
+    sumcounts = sum(histogramdata.weights)
+    probdata = zeros(length(histogramdata.weights))
+    for bini in eachindex(probdata)
+        probdata[bini] = histogramdata.weights[bini]/sumcounts
+    end
+    return probdata
+end
+
+function expectedterminalassets(distributiondata, numbins)
+    histogramdata = fit(Histogram, distributiondata, nbins=numbins)
+    probdata = distribution_prob_convert(histogramdata)
+    expectedassets = 0
+    for bini in eachindex(probdata)
+        midpoint = histogramdata.edges[1][bini]+step(histogramdata.edges[1])/2
+        expectedassets += midpoint*probdata[bini]
+    end
+    return expectedassets
+end
+
+function variabilityterminalassets(distributiondata) #I think you do want CV for here because NL will pull the mean quite far apart
+    meandata = abs(mean(distributiondata))
+    sddata = std(distributiondata)
+    return sddata/meandata
+end
+
+function count_shortfall(distributiondata, shortfallval)
+    number = 0
+    for i in eachindex(distributiondata)
+        if distributiondata[i] < shortfallval
+            number +=1
+        end
+    end
+    return number
+end
     
+
