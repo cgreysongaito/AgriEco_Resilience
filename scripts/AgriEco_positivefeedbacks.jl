@@ -229,7 +229,7 @@ let
     lowymax_133 = termassetsshortfall_posfeed_rednoise(120, 1.33, shortfallval, InterestPar(), sd, corrrange, 50, reps)
     lowymax_115 = termassetsshortfall_posfeed_rednoise(120, 1.15, shortfallval, InterestPar(), sd, corrrange, 50, reps)
     lowymax_100 = termassetsshortfall_posfeed_rednoise(130, 1.00, shortfallval, InterestPar(), sd, corrrange, 50, reps)
-    rednoise_var_exptermassets = figure()    
+    rednoise_shortfall_exptermassets = figure()    
     subplot(3,1,1)
     plot(highymax_133[:,1], highymax_133[:,4], color="blue", label="High ymax")
     plot(medymax_133[:,1], medymax_133[:,4], color="red", label="Med ymax")
@@ -252,5 +252,5 @@ let
     ylabel("ShortwNL/ShortwoNL")
     title("Rev/Exp = 1.10")
     tight_layout()
-    return rednoise_var_exptermassets
+    return rednoise_shortfall_exptermassets
 end 
