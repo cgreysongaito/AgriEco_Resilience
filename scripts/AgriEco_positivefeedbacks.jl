@@ -50,42 +50,43 @@ function terminalassets_distribution(NL, inputsyield, basepar, noisepar, interes
     return assetsdebtdata
 end
 
-function expectedterminalassets_posfeed_rednoise(ymaxval, revexpratio, interestpar, yielddisturbance_sd, corrrange, maxyears, reps)
+function terminalassets_posfeed_rednoise_dataset(ymaxval, revexpratio, interestpar, yielddisturbance_sd, corrrange, maxyears, reps)
     y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
     newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
-    inputsyield = maxprofitIII_vals(newbasepar)
-    data=zeros(length(corrrange), 4)
+    defaultinputsyield = maxprofitIII_vals(newbasepar)
+    data = Array{Vector{Float64}}(undef,length(corrrange), 2)
     @threads for ri in eachindex(corrrange)
         noisepar = NoisePar(yielddisturbed_σ = yielddisturbance_sd, yielddisturbed_r = corrrange[ri])
-        termassetsdata_NL = terminalassets_distribution("with", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        termassetsdata_woNL = terminalassets_distribution("without", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        expectedtermassetsdata_NL = expectedterminalassets(termassetsdata_NL, 30)
-        expectedtermassetsdata_woNL = expectedterminalassets(termassetsdata_woNL, 30)
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = expectedtermassetsdata_NL
-        data[ri,3] = expectedtermassetsdata_woNL
-        if expectedtermassetsdata_NL >= 0.0
-            data[ri,4] = abs(expectedtermassetsdata_NL)/abs(expectedtermassetsdata_woNL)
-        else
-            data[ri,4] = -abs(expectedtermassetsdata_NL)/abs(expectedtermassetsdata_woNL)
-        end
+        data[ri, 1] = terminalassets_distribution("with", defaultinputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
+        data[ri, 2] = terminalassets_distribution("without", defaultinputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
     end
-    return data
+    return hcat(corrrange, data)
 end
 
+sd = 20
+corrrange = 0.0:0.01:0.85
+maxyears = 50
+reps = 1000
+highymax_133_posfeed_data = terminalassets_posfeed_rednoise_dataset(170, 1.33, InterestPar(), sd, corrrange, maxyears, reps)
+highymax_115_posfeed_data = terminalassets_posfeed_rednoise_dataset(170, 1.15, InterestPar(), sd, corrrange, maxyears, reps)
+highymax_100_posfeed_data = terminalassets_posfeed_rednoise_dataset(170, 1.00, InterestPar(), sd, corrrange, maxyears, reps)
+medymax_133_posfeed_data = terminalassets_posfeed_rednoise_dataset(140, 1.33, InterestPar(), sd, corrrange, maxyears, reps)
+medymax_115_posfeed_data = terminalassets_posfeed_rednoise_dataset(140, 1.15, InterestPar(), sd, corrrange, maxyears, reps)
+medymax_100_posfeed_data = terminalassets_posfeed_rednoise_dataset(140, 1.00, InterestPar(), sd, corrrange, maxyears, reps)
+lowymax_133_posfeed_data = terminalassets_posfeed_rednoise_dataset(120, 1.33, InterestPar(), sd, corrrange, maxyears, reps)
+lowymax_115_posfeed_data = terminalassets_posfeed_rednoise_dataset(120, 1.15, InterestPar(), sd, corrrange, maxyears, reps)
+lowymax_100_posfeed_data = terminalassets_posfeed_rednoise_dataset(130, 1.00, InterestPar(), sd, corrrange, maxyears, reps)
+
 let
-    sd = 20
-    corrrange = 0.0:0.01:0.85
-    reps = 2000
-    highymax_133 = expectedterminalassets_posfeed_rednoise(170, 1.33, InterestPar(), sd, corrrange, 50, reps)
-    highymax_115 = expectedterminalassets_posfeed_rednoise(170, 1.15, InterestPar(), sd, corrrange, 50, reps)
-    highymax_100 = expectedterminalassets_posfeed_rednoise(170, 1.00, InterestPar(), sd, corrrange, 50, reps)
-    medymax_133 = expectedterminalassets_posfeed_rednoise(140, 1.33, InterestPar(), sd, corrrange, 50, reps)
-    medymax_115 = expectedterminalassets_posfeed_rednoise(140, 1.15, InterestPar(), sd, corrrange, 50, reps)
-    medymax_100 = expectedterminalassets_posfeed_rednoise(140, 1.00, InterestPar(), sd, corrrange, 50, reps)
-    lowymax_133 = expectedterminalassets_posfeed_rednoise(120, 1.33, InterestPar(), sd, corrrange, 50, reps)
-    lowymax_115 = expectedterminalassets_posfeed_rednoise(120, 1.15, InterestPar(), sd, corrrange, 50, reps)
-    lowymax_100 = expectedterminalassets_posfeed_rednoise(130, 1.00, InterestPar(), sd, corrrange, 50, reps)
+    highymax_133 = expectedterminalassets_rednoise(highymax_133_posfeed_data)
+    highymax_115 = expectedterminalassets_rednoise(highymax_115_posfeed_data)
+    highymax_100 = expectedterminalassets_rednoise(highymax_100_posfeed_data)
+    medymax_133 = expectedterminalassets_rednoise(medymax_133_posfeed_data)
+    medymax_115 = expectedterminalassets_rednoise(medymax_115_posfeed_data)
+    medymax_100 = expectedterminalassets_rednoise(medymax_100_posfeed_data)
+    lowymax_133 = expectedterminalassets_rednoise(lowymax_133_posfeed_data)
+    lowymax_115 = expectedterminalassets_rednoise(lowymax_115_posfeed_data)
+    lowymax_100 = expectedterminalassets_rednoise(lowymax_100_posfeed_data)
     rednoise_exptermassets = figure()
     subplot(3,1,1)
     plot(highymax_133[:,1], highymax_133[:,4], color="blue", label="High ymax")
@@ -115,56 +116,16 @@ let
     return rednoise_exptermassets
 end 
 
-
-# #test of white noise against single year profits
-# function variability_yieldnoise(ymaxval, revexpratio, σ, len)
-#     y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
-#     newpar = FarmBasePar(ymax=ymaxval, y0=y0val)
-#     inputsyield = maxprofitIII_vals(newpar)
-#     yielddata = noise_creation(inputsyield[2], σ, 0.0, len, 124)
-#     inputsdata = repeat([inputsyield[1]], len)
-#     pdata = repeat([newpar.p], len)
-#     cdata = repeat([newpar.c], len)
-#     profits = profitsdata(yielddata, inputsdata, pdata, cdata)
-#     return std(profits)/mean(profits)
-# end
-
-# variability_yieldnoise(170, 1.10, 20, 50)
-# variability_yieldnoise(120, 1.10, 20, 50)
-# #std stays the same but CV changes even though slope differs between high and low ymax
-
-function variabilityterminalassets_posfeed_rednoise(ymaxval, revexpratio, interestpar, yielddisturbance_sd, corrrange, maxyears, reps)
-    y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
-    newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
-    inputsyield = maxprofitIII_vals(newbasepar)
-    data=zeros(length(corrrange), 4)
-    @threads for ri in eachindex(corrrange)
-        noisepar = NoisePar(yielddisturbed_σ = yielddisturbance_sd, yielddisturbed_r = corrrange[ri])
-        termassetsdata_NL = terminalassets_distribution("with", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        termassetsdata_woNL = terminalassets_distribution("without", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        variabilityassetsdata_NL = variabilityterminalassets(termassetsdata_NL)
-        variabilityassetsdata_woNL = variabilityterminalassets(termassetsdata_woNL)
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = variabilityassetsdata_NL
-        data[ri,3] = variabilityassetsdata_woNL
-        data[ri,4] = variabilityassetsdata_NL/variabilityassetsdata_woNL
-    end
-    return data
-end
-
 let 
-    sd = 20
-    corrrange = 0.0:0.01:0.85
-    reps = 2000
-    highymax_133 = variabilityterminalassets_posfeed_rednoise(170, 1.33, InterestPar(), sd, corrrange, 50, reps)
-    highymax_115 = variabilityterminalassets_posfeed_rednoise(170, 1.15, InterestPar(), sd, corrrange, 50, reps)
-    highymax_100 = variabilityterminalassets_posfeed_rednoise(170, 1.00, InterestPar(), sd, corrrange, 50, reps)
-    medymax_133 = variabilityterminalassets_posfeed_rednoise(140, 1.33, InterestPar(), sd, corrrange, 50, reps)
-    medymax_115 = variabilityterminalassets_posfeed_rednoise(140, 1.15, InterestPar(), sd, corrrange, 50, reps)
-    medymax_100 = variabilityterminalassets_posfeed_rednoise(140, 1.00, InterestPar(), sd, corrrange, 50, reps)
-    lowymax_133 = variabilityterminalassets_posfeed_rednoise(120, 1.33, InterestPar(), sd, corrrange, 50, reps)
-    lowymax_115 = variabilityterminalassets_posfeed_rednoise(120, 1.15, InterestPar(), sd, corrrange, 50, reps)
-    lowymax_100 = variabilityterminalassets_posfeed_rednoise(130, 1.00, InterestPar(), sd, corrrange, 50, reps)
+    highymax_133 = variabilityterminalassets_rednoise(highymax_133_posfeed_data)
+    highymax_115 = variabilityterminalassets_rednoise(highymax_115_posfeed_data)
+    highymax_100 = variabilityterminalassets_rednoise(highymax_100_posfeed_data)
+    medymax_133 = variabilityterminalassets_rednoise(medymax_133_posfeed_data)
+    medymax_115 = variabilityterminalassets_rednoise(medymax_115_posfeed_data)
+    medymax_100 = variabilityterminalassets_rednoise(medymax_100_posfeed_data)
+    lowymax_133 = variabilityterminalassets_rednoise(lowymax_133_posfeed_data)
+    lowymax_115 = variabilityterminalassets_rednoise(lowymax_115_posfeed_data)
+    lowymax_100 = variabilityterminalassets_rednoise(lowymax_100_posfeed_data)
     rednoise_var_exptermassets = figure()    
     subplot(3,1,1)
     plot(highymax_133[:,1], highymax_133[:,4], color="blue", label="High ymax")
@@ -194,41 +155,18 @@ let
     return rednoise_var_exptermassets
 end 
 
-#TERMINAL ASSETS SHORTFALL 
-
-function termassetsshortfall_posfeed_rednoise(ymaxval, revexpratio, shortfallval, interestpar, yielddisturbance_sd, corrrange, maxyears, reps)
-    y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
-    newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
-    inputsyield = maxprofitIII_vals(newbasepar)
-    data=zeros(length(corrrange), 4)
-    @threads for ri in eachindex(corrrange)
-        noisepar = NoisePar(yielddisturbed_σ = yielddisturbance_sd, yielddisturbed_r = corrrange[ri])
-        termassetsdata_NL = terminalassets_distribution("with", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        termassetsdata_woNL = terminalassets_distribution("without", inputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-        termassetsshortfalldata_NL = count_shortfall(termassetsdata_NL, shortfallval)
-        termassetsshortfalldata_woNL = count_shortfall(termassetsdata_woNL, shortfallval)
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = termassetsshortfalldata_NL
-        data[ri,3] = termassetsshortfalldata_woNL
-        data[ri,4] = termassetsshortfalldata_NL/termassetsshortfalldata_woNL
-    end
-    return data
-end
-
+#TERMINAL ASSETS SHORTFALL
 let 
-    sd = 20
-    corrrange = 0.0:0.01:0.85
-    reps = 4000
     shortfallval = 1000
-    highymax_133 = termassetsshortfall_posfeed_rednoise(170, 1.33, shortfallval, InterestPar(), sd, corrrange, 50, reps)
-    highymax_115 = termassetsshortfall_posfeed_rednoise(170, 1.15, shortfallval, InterestPar(), sd, corrrange, 50, reps)
-    highymax_100 = termassetsshortfall_posfeed_rednoise(170, 1.00, shortfallval, InterestPar(), sd, corrrange, 50, reps)
-    medymax_133 = termassetsshortfall_posfeed_rednoise(140, 1.33, shortfallval, InterestPar(), sd, corrrange, 50, reps)
-    medymax_115 = termassetsshortfall_posfeed_rednoise(140, 1.15, shortfallval, InterestPar(), sd, corrrange, 50, reps)
-    medymax_100 = termassetsshortfall_posfeed_rednoise(140, 1.00, shortfallval, InterestPar(), sd, corrrange, 50, reps)
-    lowymax_133 = termassetsshortfall_posfeed_rednoise(120, 1.33, shortfallval, InterestPar(), sd, corrrange, 50, reps)
-    lowymax_115 = termassetsshortfall_posfeed_rednoise(120, 1.15, shortfallval, InterestPar(), sd, corrrange, 50, reps)
-    lowymax_100 = termassetsshortfall_posfeed_rednoise(130, 1.00, shortfallval, InterestPar(), sd, corrrange, 50, reps)
+    highymax_133 = termassetsshortfall_rednoise(highymax_133_posfeed_data, shortfallval)
+    highymax_115 = termassetsshortfall_rednoise(highymax_115_posfeed_data, shortfallval)
+    highymax_100 = termassetsshortfall_rednoise(highymax_100_posfeed_data, shortfallval)
+    medymax_133 = termassetsshortfall_rednoise(medymax_133_posfeed_data, shortfallval)
+    medymax_115 = termassetsshortfall_rednoise(medymax_115_posfeed_data, shortfallval)
+    medymax_100 = termassetsshortfall_rednoise(medymax_100_posfeed_data, shortfallval)
+    lowymax_133 = termassetsshortfall_rednoise(lowymax_133_posfeed_data, shortfallval)
+    lowymax_115 = termassetsshortfall_rednoise(lowymax_115_posfeed_data, shortfallval)
+    lowymax_100 = termassetsshortfall_rednoise(lowymax_100_posfeed_data, shortfallval)
     rednoise_shortfall_exptermassets = figure()    
     subplot(3,1,1)
     plot(highymax_133[:,1], highymax_133[:,4], color="blue", label="High ymax")

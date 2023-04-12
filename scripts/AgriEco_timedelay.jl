@@ -35,7 +35,6 @@ function simulation_NLtimedelay(basedata, basepar)
     return assetsdebt
 end
 
-
 function terminalassets_distribution_NLtimedelay(NL, defaultinputsyield, basepar, noisepar, minfraction, maxyears, reps)
     assetsdebtdata =  zeros(reps)
     if NL == "with"
@@ -84,24 +83,6 @@ lowymax_133_timedelay_data = terminalassets_timedelay_rednoise_dataset(120, 1.33
 lowymax_115_timedelay_data = terminalassets_timedelay_rednoise_dataset(120, 1.15, sd, corrrange, minfraction, maxyears, reps)
 lowymax_100_timedelay_data = terminalassets_timedelay_rednoise_dataset(130, 1.00, sd, corrrange, minfraction, maxyears, reps)
 
-function expectedterminalassets_timedelay_rednoise(dataset)
-    corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 4)
-    @threads for ri in eachindex(corrrange)
-        expectedtermassetsdata_NL = expectedterminalassets(dataset[ri,2], 30)
-        expectedtermassetsdata_woNL = expectedterminalassets(dataset[ri,3], 30)
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = expectedtermassetsdata_NL
-        data[ri,3] = expectedtermassetsdata_woNL
-        if expectedtermassetsdata_NL >= 0.0
-            data[ri,4] = abs(expectedtermassetsdata_NL)/abs(expectedtermassetsdata_woNL)
-        else
-            data[ri,4] = -abs(expectedtermassetsdata_NL)/abs(expectedtermassetsdata_woNL)
-        end
-    end
-    return data
-end
-
 let
     highymax_133 = expectedterminalassets_timedelay_rednoise(highymax_133_timedelay_data)
     highymax_115 = expectedterminalassets_timedelay_rednoise(highymax_115_timedelay_data)
@@ -141,30 +122,16 @@ let
     return rednoise_exptermassets
 end  #something going wrong at 0.4 for rev/exp = 1.10
 
-function variabilityterminalassets_timedelay_rednoise(dataset)
-    corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 4)
-    @threads for ri in eachindex(corrrange)
-        variabilityassetsdata_NL = variabilityterminalassets(dataset[ri,2])
-        variabilityassetsdata_woNL = variabilityterminalassets(dataset[ri,3])
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = variabilityassetsdata_NL
-        data[ri,3] = variabilityassetsdata_woNL
-        data[ri,4] = variabilityassetsdata_NL/variabilityassetsdata_woNL
-    end
-    return data
-end
-
 let 
-    highymax_133 = variabilityterminalassets_timedelay_rednoise(highymax_133_timedelay_data)
-    highymax_115 = variabilityterminalassets_timedelay_rednoise(highymax_115_timedelay_data)
-    highymax_100 = variabilityterminalassets_timedelay_rednoise(highymax_100_timedelay_data)
-    medymax_133 = variabilityterminalassets_timedelay_rednoise(medymax_133_timedelay_data)
-    medymax_115 = variabilityterminalassets_timedelay_rednoise(medymax_115_timedelay_data)
-    medymax_100 = variabilityterminalassets_timedelay_rednoise(medymax_100_timedelay_data)
-    lowymax_133 = variabilityterminalassets_timedelay_rednoise(lowymax_133_timedelay_data)
-    lowymax_115 = variabilityterminalassets_timedelay_rednoise(lowymax_115_timedelay_data)
-    lowymax_100 = variabilityterminalassets_timedelay_rednoise(lowymax_100_timedelay_data)
+    highymax_133 = variabilityterminalassets_rednoise(highymax_133_timedelay_data)
+    highymax_115 = variabilityterminalassets_rednoise(highymax_115_timedelay_data)
+    highymax_100 = variabilityterminalassets_rednoise(highymax_100_timedelay_data)
+    medymax_133 = variabilityterminalassets_rednoise(medymax_133_timedelay_data)
+    medymax_115 = variabilityterminalassets_rednoise(medymax_115_timedelay_data)
+    medymax_100 = variabilityterminalassets_rednoise(medymax_100_timedelay_data)
+    lowymax_133 = variabilityterminalassets_rednoise(lowymax_133_timedelay_data)
+    lowymax_115 = variabilityterminalassets_rednoise(lowymax_115_timedelay_data)
+    lowymax_100 = variabilityterminalassets_rednoise(lowymax_100_timedelay_data)
     rednoise_var_exptermassets = figure()    
     subplot(3,1,1)
     plot(highymax_133[:,1], highymax_133[:,4], color="blue", label="High ymax")
@@ -198,20 +165,6 @@ let
 end #something is going wrong with 0.8
 
 #TERMINAL ASSETS SHORTFALL 
-
-function termassetsshortfall_timedelay_rednoise(dataset, shortfallval)
-    corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 4)
-    @threads for ri in eachindex(corrrange)
-        termassetsshortfalldata_NL = count_shortfall(dataset[ri,2], shortfallval)
-        termassetsshortfalldata_woNL = count_shortfall(dataset[ri,3], shortfallval)
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = termassetsshortfalldata_NL
-        data[ri,3] = termassetsshortfalldata_woNL
-        data[ri,4] = termassetsshortfalldata_NL/termassetsshortfalldata_woNL
-    end
-    return data
-end
 
 let 
     shortfallval = 1000
