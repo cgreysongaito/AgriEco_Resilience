@@ -1,5 +1,5 @@
 include("packages.jl")
-include("AgriEco_commoncode.jl") 
+include("AgriEco_commoncode.jl")
 include("AgriEco_positivefeedbacks.jl")
 include("AgriEco_timedelay.jl")
 
@@ -163,8 +163,8 @@ let
     ylabel("ETAwNL/ETAwoNL")
     title("Rev/Exp = 1.10")
     tight_layout()
-    # return rednoise_exptermassets
-    savefig(joinpath(abpath(), "figs/timedelay_expectedterminalassets.pdf")) 
+    return rednoise_exptermassets
+    # savefig(joinpath(abpath(), "figs/timedelay_expectedterminalassets.pdf")) 
 end  #something going wrong at 0.4 for rev/exp = 1.10
 
 #Variability Terminal Assets

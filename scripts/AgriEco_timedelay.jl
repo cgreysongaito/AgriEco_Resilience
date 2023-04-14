@@ -10,18 +10,21 @@ function delayedinputs(defaultinputs, minfraction, lastyrsactualyield, lastyrspr
     end
 end
 
-function NLtimedelay_data(defaultinputsyield, basepar, noisepar, minfraction, maxyears, seed)
-    basenoise = noise_creation(0.0, noisepar.yielddisturbed_σ, noisepar.yielddisturbed_r, maxyears, seed)
-    inputsdata = zeros(maxyears)
-    inputsdata[1] = defaultinputsyield[1]
-    yielddata = zeros(maxyears)
-    yielddata[1] = defaultinputsyield[2] + basenoise[1]
-    for i in 2:maxyears
-        lastyrsprojectedyield = yieldIII(inputsdata[i-1], basepar)
-        inputsdata[i] = delayedinputs(defaultinputsyield[1], minfraction, yielddata[i-1], lastyrsprojectedyield)
+function NLtimedelay_data(defaultinputsyield, yearsdelay, basepar, noisepar, minfraction, maxyears, seed)
+    basenoise = noise_creation(0.0, noisepar.yielddisturbed_σ, noisepar.yielddisturbed_r, maxyears+yearsdelay, seed)
+    inputsdata = zeros(maxyears+yearsdelay)
+    yielddata = zeros(maxyears+yearsdelay)
+    for i in 1:yearsdelay
+        inputsdata[i] = defaultinputsyield[1]
+        yielddata[i] = defaultinputsyield[2] + basenoise[i]
+    end
+    for i in yearsdelay+1:maxyears+yearsdelay
+        previousyrsactualyield = mean(yielddata[i-yearsdelay:i-1])
+        previousyrsprojectedyield = mean([yieldIII(inputs, basepar) for inputs in inputsdata[i-yearsdelay:i-1]])
+        inputsdata[i] = delayedinputs(defaultinputsyield[1], minfraction, previousyrsactualyield, previousyrsprojectedyield)
         yielddata[i] = yieldIII(inputsdata[i], basepar) + basenoise[i]
     end
-    return hcat(inputsdata, convert_neg_zero(yielddata))
+    return hcat(inputsdata[yearsdelay+1:maxyears+yearsdelay], convert_neg_zero(yielddata[yearsdelay+1:maxyears+yearsdelay]))
 end
 
 function simulation_NLtimedelay(basedata, basepar)
@@ -35,11 +38,11 @@ function simulation_NLtimedelay(basedata, basepar)
     return assetsdebt
 end
 
-function terminalassets_distribution_NLtimedelay(NL, defaultinputsyield, basepar, noisepar, minfraction, maxyears, reps)
+function terminalassets_distribution_NLtimedelay(NL, defaultinputsyield, yearsdelay, basepar, noisepar, minfraction, maxyears, reps)
     assetsdebtdata =  zeros(reps)
     if NL == "with"
         for i in 1:reps
-            basedataNL = NLtimedelay_data(defaultinputsyield, basepar, noisepar, minfraction, maxyears, i)
+            basedataNL = NLtimedelay_data(defaultinputsyield, yearsdelay, basepar, noisepar, minfraction, maxyears, i)
             simdata = simulation_NLtimedelay(basedataNL, basepar)
             assetsdebtdata[i] = simdata[end]
         end
@@ -55,30 +58,31 @@ function terminalassets_distribution_NLtimedelay(NL, defaultinputsyield, basepar
     return assetsdebtdata
 end
 
-function terminalassets_timedelay_rednoise_dataset(ymaxval, revexpratio, yielddisturbance_sd, corrrange, minfraction, maxyears, reps)
+function terminalassets_timedelay_rednoise_dataset(ymaxval, revexpratio, yielddisturbance_sd, corrrange, yearsdelay, minfraction, maxyears, reps)
     y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
     newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
     defaultinputsyield = maxprofitIII_vals(newbasepar)
     data = Array{Vector{Float64}}(undef,length(corrrange), 2)
     @threads for ri in eachindex(corrrange)
         noisepar = NoisePar(yielddisturbed_σ = yielddisturbance_sd, yielddisturbed_r = corrrange[ri])
-        data[ri, 1] = terminalassets_distribution_NLtimedelay("with", defaultinputsyield, newbasepar, noisepar, minfraction, maxyears, reps)
-        data[ri, 2] = terminalassets_distribution_NLtimedelay("without", defaultinputsyield, newbasepar, noisepar, minfraction, maxyears, reps)
+        data[ri, 1] = terminalassets_distribution_NLtimedelay("with", defaultinputsyield, yearsdelay, newbasepar, noisepar, minfraction, maxyears, reps)
+        data[ri, 2] = terminalassets_distribution_NLtimedelay("without", defaultinputsyield, yearsdelay, newbasepar, noisepar, minfraction, maxyears, reps)
     end
     return hcat(corrrange, data)
 end
 
 sd_timedelay = 20
 corrrange_timedelay = 0.0:0.01:0.85
+yearsdelay = 3
 minfraction_timedelay = 0.2
 maxyears_timedelay = 50
 reps_timedelay = 1000
-highymax_133_timedelay_data = terminalassets_timedelay_rednoise_dataset(170, 1.33, sd_timedelay, corrrange_timedelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
-highymax_115_timedelay_data = terminalassets_timedelay_rednoise_dataset(170, 1.15, sd_timedelay, corrrange_timedelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
-highymax_100_timedelay_data = terminalassets_timedelay_rednoise_dataset(170, 1.00, sd_timedelay, corrrange_timedelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
-medymax_133_timedelay_data = terminalassets_timedelay_rednoise_dataset(140, 1.33, sd_timedelay, corrrange_timedelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
-medymax_115_timedelay_data = terminalassets_timedelay_rednoise_dataset(140, 1.15, sd_timedelay, corrrange_timedelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
-medymax_100_timedelay_data = terminalassets_timedelay_rednoise_dataset(140, 1.00, sd_timedelay, corrrange_timedelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
-lowymax_133_timedelay_data = terminalassets_timedelay_rednoise_dataset(120, 1.33, sd_timedelay, corrrange_timedelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
-lowymax_115_timedelay_data = terminalassets_timedelay_rednoise_dataset(120, 1.15, sd_timedelay, corrrange_timedelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
-lowymax_100_timedelay_data = terminalassets_timedelay_rednoise_dataset(130, 1.00, sd_timedelay, corrrange_timedelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
+highymax_133_timedelay_data = terminalassets_timedelay_rednoise_dataset(170, 1.33, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
+highymax_115_timedelay_data = terminalassets_timedelay_rednoise_dataset(170, 1.15, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
+highymax_100_timedelay_data = terminalassets_timedelay_rednoise_dataset(170, 1.00, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
+medymax_133_timedelay_data = terminalassets_timedelay_rednoise_dataset(140, 1.33, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
+medymax_115_timedelay_data = terminalassets_timedelay_rednoise_dataset(140, 1.15, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
+medymax_100_timedelay_data = terminalassets_timedelay_rednoise_dataset(140, 1.00, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
+lowymax_133_timedelay_data = terminalassets_timedelay_rednoise_dataset(120, 1.33, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
+lowymax_115_timedelay_data = terminalassets_timedelay_rednoise_dataset(120, 1.15, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
+lowymax_100_timedelay_data = terminalassets_timedelay_rednoise_dataset(130, 1.00, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
