@@ -252,6 +252,8 @@ let
 end 
 
 
+### Supporting Information
+include("AgriEco_supportinginformation.jl")
 
 #figure for weersink lab presentation (showing geometric approach) 
 let 
@@ -371,104 +373,73 @@ let
     # savefig(joinpath(abpath(), "figs/resyield.png")) 
 end  
 
-#Figure resistance to price and cost disturbance #no change***
-respricecost133 = MR_AVC_distance_revexpcon_data(1.33, 120.0:1.0:180.0)
-respricecost110 = MR_AVC_distance_revexpcon_data(1.10, 120.0:1.0:180.0)
-respricecost100 = MR_AVC_distance_revexpcon_data(1.00, 120.0:1.0:180.0)
-respricecost095 = MR_AVC_distance_revexpcon_data(0.95, 120.0:1.0:180.0)
+# Showing that changing y0 and c keeps geometry the same (as long as rev/exp is constrained)
+#setting y0 and c arbitrarily but still ratio is 1.33
 
+calc_c(1.33, 174, 10, 6.70)
+parratio2 = FarmBasePar(y0 = 10, ymax = 174, p = 6.70, c = 138.59335)
+
+param_ratio(FarmBasePar(y0 = 10, ymax = 120, p = 6.70, c = 138.59335))
+param_ratio(FarmBasePar(y0 = 5, ymax = 120, p = 6.70, c = 138.59335))
+param_ratio(parratio2)
 let 
-    ymaxrange = 120.0:1.0:180.0
-    respricecostfigure = figure()
-    plot(respricecost133[:,1], respricecost133[:,2], color="blue", label="Rev/Exp = 1.33")
-    plot(respricecost110[:,1], respricecost110[:,2], color="red", label="Rev/Exp = 1.10")
-    plot(respricecost100[:,1], respricecost100[:,2], color="purple", label="Rev/Exp =1.00")
-    plot(respricecost095[:,1], respricecost095[:,2], color="orange", label="Rev/Exp = 0.95")
-    xlabel("Ymax")
-    ylabel("Resistance to price and cost (Distance between MR and AVC)")
+    par1 = FarmBasePar(y0 = 10, ymax = 174, p = 6.70, c = 138.59335)
+    par2 = FarmBasePar(y0 = 10, ymax = 120, p = 6.70, c = 138.59335)
+    par3 = FarmBasePar(y0 = 5, ymax = 174, p = 6.70, c = 138.59335)
+    par4 = FarmBasePar(y0 = 5, ymax = 120, p = 6.70, c = 138.59335)
+    Irange = 0.0:0.01:10.0
+    Yield1 = [yieldIII(I, par1) for I in Irange]
+    MC1 = [margcostIII(I, par1) for I in Irange]
+    AVC1 = [avvarcostIII(I,par1) for I in Irange]
+    Yield2 = [yieldIII(I, par2) for I in Irange]
+    MC2 = [margcostIII(I, par2) for I in Irange]
+    AVC2 = [avvarcostIII(I,par2) for I in Irange]
+    Yield3 = [yieldIII(I, par3) for I in Irange]
+    MC3 = [margcostIII(I, par3) for I in Irange]
+    AVC3 = [avvarcostIII(I,par3) for I in Irange]
+    Yield4 = [yieldIII(I, par4) for I in Irange]
+    MC4 = [margcostIII(I, par4) for I in Irange]
+    AVC4 = [avvarcostIII(I,par4) for I in Irange]
+    costcurves = figure()
+    subplot(2,2,1)
+    plot(Yield1, MC1, color="blue", label="MC")
+    plot(Yield1, AVC1, color="orange", label="AVC")
+    hlines(par1.p, 0.0, 174, colors="black", label = "MR")
     legend()
-    return respricecostfigure
-    # savefig(joinpath(abpath(), "figs/respricecostfigure.png")) 
-end 
-
-
-#Figure resistance to yield, price, and cost disturbance #simular to resistance to price and cost disturbance NO CHANGE
-#++
-resyieldpricecostpp133 = AVCK_MC_multi_distance_revexpcon_data(1.33, 120.0:1.0:180.0, 0.1, "++")
-resyieldpricecostpp110 = AVCK_MC_multi_distance_revexpcon_data(1.10, 120.0:1.0:180.0, 0.1, "++")
-resyieldpricecostpp100 = AVCK_MC_multi_distance_revexpcon_data(1.00, 120.0:1.0:180.0, 0.1, "++")
-resyieldpricecostpp095 = AVCK_MC_multi_distance_revexpcon_data(0.95, 120.0:1.0:180.0, 0.1, "++")
-
-let 
-    ymaxrange = 120.0:1.0:180.0
-    resyieldpricecostpp = figure()
-    plot(resyieldpricecostpp133[:,1], resyieldpricecostpp133[:,4], color="blue", label="Rev/Exp = 1.33")
-    plot(resyieldpricecostpp110[:,1], resyieldpricecostpp110[:,4], color="red", label="Rev/Exp = 1.10")
-    # plot(resyieldpricecostpp100[:,1], resyieldpricecostpp100[:,4], color="purple", label="Rev/Exp =1.00")
-    plot(resyieldpricecostpp095[:,1], resyieldpricecostpp095[:,4], color="orange", label="Rev/Exp = 0.95")
-    xlabel("Ymax")
-    ylabel("Resistance to yield, price and cost disturbance")
+    ylim(0.0, 50.0)
+    # xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,2,2)
+    plot(Yield2, MC2, color="blue", label="MC")
+    plot(Yield2, AVC2, color="orange", label="AVC")
+    hlines(par2.p, 0.0, 174, colors="black", label = "MR")
     legend()
-    return resyieldpricecostpp
-    # savefig(joinpath(abpath(), "figs/resyieldpricecostpp.png")) 
-end
-
-#+-
-resyieldpricecostpn133 = AVCK_MC_multi_distance_revexpcon_data(1.33, 120.0:1.0:180.0, 0.1, "+-")
-resyieldpricecostpn110 = AVCK_MC_multi_distance_revexpcon_data(1.10, 120.0:1.0:180.0, 0.1, "+-")
-resyieldpricecostpn100 = AVCK_MC_multi_distance_revexpcon_data(1.00, 120.0:1.0:180.0, 0.1, "+-")
-resyieldpricecostpn095 = AVCK_MC_multi_distance_revexpcon_data(0.95, 120.0:1.0:180.0, 0.1, "+-")
-
-let 
-    ymaxrange = 120.0:1.0:180.0
-    resyieldpricecostpn = figure()
-    plot(resyieldpricecostpn133[:,1], resyieldpricecostpn133[:,4], color="blue", label="Rev/Exp = 1.33")
-    plot(resyieldpricecostpn110[:,1], resyieldpricecostpn110[:,4], color="red", label="Rev/Exp = 1.10")
-    # plot(resyieldpricecostpn100[:,1], resyieldpricecostpn100[:,4], color="purple", label="Rev/Exp =1.00")
-    plot(resyieldpricecostpn095[:,1], resyieldpricecostpn095[:,4], color="orange", label="Rev/Exp = 0.95")
-    xlabel("Ymax")
-    ylabel("Resistance to yield, price and cost disturbance")
+    ylim(0.0, 50.0)
+    # xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,2,3)
+    plot(Yield3, MC3, color="blue", label="MC")
+    plot(Yield3, AVC3, color="orange", label="AVC")
+    hlines(par3.p, 0.0, 174, colors="black", label = "MR")
     legend()
-    return resyieldpricecostpn
-    # savefig(joinpath(abpath(), "figs/resyieldpricecostpn.png")) 
-end
-
-#-+
-resyieldpricecostnp133 = AVCK_MC_multi_distance_revexpcon_data(1.33, 120.0:1.0:180.0, 0.1, "-+")
-resyieldpricecostnp110 = AVCK_MC_multi_distance_revexpcon_data(1.10, 120.0:1.0:180.0, 0.1, "-+")
-resyieldpricecostnp100 = AVCK_MC_multi_distance_revexpcon_data(1.00, 120.0:1.0:180.0, 0.1, "-+")
-resyieldpricecostnp095 = AVCK_MC_multi_distance_revexpcon_data(0.95, 120.0:1.0:180.0, 0.1, "-+")
-
-let 
-    ymaxrange = 120.0:1.0:180.0
-    resyieldpricecostnp = figure()
-    plot(resyieldpricecostnp133[:,1], resyieldpricecostnp133[:,4], color="blue", label="Rev/Exp = 1.33")
-    plot(resyieldpricecostnp110[:,1], resyieldpricecostnp110[:,4], color="red", label="Rev/Exp = 1.10")
-    # plot(resyieldpricecostpn100[:,1], resyieldpricecostpn100[:,4], color="purple", label="Rev/Exp =1.00")
-    plot(resyieldpricecostnp095[:,1], resyieldpricecostnp095[:,4], color="orange", label="Rev/Exp = 0.95")
-    xlabel("Ymax")
-    ylabel("Resistance to yield, price and cost disturbance")
+    ylim(0.0, 50.0)
+    # xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,2,4)
+    plot(Yield4, MC4, color="blue", label="MC")
+    plot(Yield4, AVC4, color="orange", label="AVC")
+    hlines(par4.p, 0.0, 174, colors="black", label = "MR")
     legend()
-    return resyieldpricecostnp
-    # savefig(joinpath(abpath(), "figs/resyieldpricecostnp.png")) 
-end
+    ylim(0.0, 50.0)
+    # xlim(0.0, 1.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    tight_layout()
+    return costcurves
+    # savefig(joinpath(abpath(), "figs/costcurves.png"))
+end  
 
-#--
-resyieldpricecostnn133 = AVCK_MC_multi_distance_revexpcon_data(1.33, 120.0:1.0:180.0, 0.1, "--")
-resyieldpricecostnn110 = AVCK_MC_multi_distance_revexpcon_data(1.10, 120.0:1.0:180.0, 0.1, "--")
-resyieldpricecostnn100 = AVCK_MC_multi_distance_revexpcon_data(1.00, 120.0:1.0:180.0, 0.1, "--")
-resyieldpricecostnn095 = AVCK_MC_multi_distance_revexpcon_data(0.95, 120.0:1.0:180.0, 0.1, "--")
 
-let 
-    ymaxrange = 120.0:1.0:180.0
-    resyieldpricecostnn = figure()
-    plot(resyieldpricecostnn133[:,1], resyieldpricecostnn133[:,4], color="blue", label="Rev/Exp = 1.33")
-    plot(resyieldpricecostnn110[:,1], resyieldpricecostnn110[:,4], color="red", label="Rev/Exp = 1.10")
-    # plot(resyieldpricecostpn100[:,1], resyieldpricecostpn100[:,4], color="purple", label="Rev/Exp =1.00")
-    plot(resyieldpricecostnn095[:,1], resyieldpricecostnn095[:,4], color="orange", label="Rev/Exp = 0.95")
-    xlabel("Ymax")
-    ylabel("Resistance to yield, price and cost disturbance")
-    legend()
-    return resyieldpricecostnn
-    # savefig(joinpath(abpath(), "figs/resyieldpricecostnn.png")) 
-end
