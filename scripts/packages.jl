@@ -13,3 +13,5 @@ using SymPy
 using PyPlot
 using DataFrames
 using StatsBase
+using CSV
+using Tables
