@@ -66,41 +66,32 @@ end
 sd_posfeed = 20
 corrrange_posfeed = 0.0:0.01:0.85
 maxyears_posfeed = 50
-reps_posfeed = 1000
+reps_posfeed = 20000
 
-begin
-    highymax_133_posfeed_data = terminalassets_posfeed_rednoise_dataset(170, 1.33, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
-    CSV.write(joinpath(abpath(), "data/highymax_133_posfeed_data.csv"), Tables.table(highymax_133_posfeed_data), writeheader=false)
-end
-
-begin
-    highymax_133_posfeed_data = terminalassets_posfeed_rednoise_dataset(170, 1.33, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
-    Arrow.write(joinpath(abpath(), "data/highymax_133_posfeed_data.arrow"), Tables.table(highymax_133_posfeed_data))
-end
-
-
-begin
-    medymax_133_posfeed_data = terminalassets_posfeed_rednoise_dataset(140, 1.33, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
+let
+    highymax_133_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(170, 1.33, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/highymax_133_posfeed_data.csv"), highymax_133_posfeed_data)
+    medymax_133_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(140, 1.33, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/medymax_133_posfeed_data.csv"), medymax_133_posfeed_data)
-    lowymax_133_posfeed_data = terminalassets_posfeed_rednoise_dataset(120, 1.33, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
+    lowymax_133_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(120, 1.33, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/lowymax_133_posfeed_data.csv"), lowymax_133_posfeed_data)
 end
 
-begin
-    highymax_115_posfeed_data = terminalassets_posfeed_rednoise_dataset(170, 1.15, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
+let
+    highymax_115_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(170, 1.15, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/highymax_115_posfeed_data.csv"), highymax_115_posfeed_data)
-    medymax_115_posfeed_data = terminalassets_posfeed_rednoise_dataset(140, 1.15, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
+    medymax_115_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(140, 1.15, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/medymax_115_posfeed_data.csv"), medymax_115_posfeed_data)
-    lowymax_115_posfeed_data = terminalassets_posfeed_rednoise_dataset(120, 1.15, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
+    lowymax_115_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(120, 1.15, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/lowymax_115_posfeed_data.csv"), lowymax_115_posfeed_data)
 end
 
-begin
-    highymax_103_posfeed_data = terminalassets_posfeed_rednoise_dataset(170, 1.03, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
+let
+    highymax_103_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(170, 1.03, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/highymax_103_posfeed_data.csv"), highymax_103_posfeed_data)
-    medymax_103_posfeed_data = terminalassets_posfeed_rednoise_dataset(140, 1.03, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
+    medymax_103_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(140, 1.03, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/medymax_103_posfeed_data.csv"), medymax_103_posfeed_data)
-    lowymax_103_posfeed_data = terminalassets_posfeed_rednoise_dataset(130, 1.03, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed)
+    lowymax_103_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(130, 1.03, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/lowymax_103_posfeed_data.csv"), lowymax_103_posfeed_data)
 end
 

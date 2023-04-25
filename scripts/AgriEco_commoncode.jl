@@ -23,6 +23,24 @@ function cv_calc(data)
     return stddev/mn
 end
 
+function prepDataFrame(array)
+    return DataFrame(corrrange = array[:,1], wNL = array[:,2], woNL = array[:,3])
+end
+
+function CSVstringtoArrayVector(CSVstring)
+    parsedCSVstring = map(split.(strip.(CSVstring, Ref(['[', ']'])), ',')) do nums
+    parse.(Float64, nums)
+    end
+    return parsedCSVstring
+end
+
+function CSVtoArrayVector(CSVfile)
+    corrangecol = CSVfile.corrrange
+    wNLcol = CSVstringtoArrayVector(CSVfile.wNL)
+    woNLcol = CSVstringtoArrayVector(CSVfile.woNL)
+    return hcat(corrangecol, wNLcol, woNLcol )
+end
+
 ### Parameters
 
 #Useful functions for setting up parameters

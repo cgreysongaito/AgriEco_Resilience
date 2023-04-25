@@ -1,12 +1,21 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
 
-highymax_133_posfeed_data = CSV.read(joinpath(abpath(),"data/highymax_133_posfeed_data.csv"), Tables, header=false)
-
-test = Arrow.table(joinpath(abpath(),"data/highymax_133_posfeed_data.arrow"))
-# https://discourse.julialang.org/t/dataframes-csv-how-to-read-vectors-from-csv/57883
-
 ## Positive feedbacks ##
+#Read in data
+#Rev/Exp = 1.33
+highymax_133_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_133_posfeed_data.csv"), DataFrame))
+medymax_133_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_133_posfeed_data.csv"), DataFrame))
+lowymax_133_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_133_posfeed_data.csv"), DataFrame))
+#Rev/Exp = 1.15
+highymax_115_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_115_posfeed_data.csv"), DataFrame))
+medymax_115_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_115_posfeed_data.csv"), DataFrame))
+lowymax_115_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_115_posfeed_data.csv"), DataFrame))
+#Rev/Exp = 1.03
+highymax_103_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_103_posfeed_data.csv"), DataFrame))
+medymax_103_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_103_posfeed_data.csv"), DataFrame))
+lowymax_103_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_103_posfeed_data.csv"), DataFrame))
+
 #Expected Terminal Assets
 let
     highymax_133 = expectedterminalassets_rednoise(highymax_133_posfeed_data)
@@ -130,6 +139,20 @@ end
 
 
 ## Time Delay ##
+#Read in data
+#Rev/Exp = 1.33
+highymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_133_timedelay_data.csv"), DataFrame))
+medymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_133_timedelay_data.csv"), DataFrame))
+lowymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_133_timedelay_data.csv"), DataFrame))
+#Rev/Exp = 1.15
+highymax_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_115_timedelay_data.csv"), DataFrame))
+medymax_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_115_timedelay_data.csv"), DataFrame))
+lowymax_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_115_timedelay_data.csv"), DataFrame))
+#Rev/Exp = 1.03
+highymax_103_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_103_timedelay_data.csv"), DataFrame))
+medymax_103_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_103_timedelay_data.csv"), DataFrame))
+lowymax_103_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_103_timedelay_data.csv"), DataFrame))
+
 #Expected Terminal Assets
 let
     highymax_133 = expectedterminalassets_rednoise(highymax_133_timedelay_data)
@@ -169,7 +192,7 @@ let
     tight_layout()
     return rednoise_exptermassets
     # savefig(joinpath(abpath(), "figs/timedelay_expectedterminalassets.pdf")) 
-end  #something going wrong at 0.4 for rev/exp = 1.00
+end
 
 #Variability Terminal Assets
 let 
