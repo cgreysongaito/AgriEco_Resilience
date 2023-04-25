@@ -98,6 +98,8 @@ let
     # savefig(joinpath(abpath(), "figs/posfeed_variabilityterminalassets.pdf")) 
 end 
 
+#getting huge instabilities again now that operating expenses has been removed from positive feedbacks
+
 #TERMINAL ASSETS SHORTFALL
 let 
     shortfallval = 0
