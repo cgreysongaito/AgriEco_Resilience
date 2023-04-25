@@ -98,7 +98,7 @@ let
     CSV.write(joinpath(abpath(), "data/lowymax_115_timedelay_data.csv"), lowymax_115_timedelay_data)
 end
 
-#Rev/Exp = 1.03
+#Rev/Exp = 1.08
 let
     highymax_108_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset(170, 1.08, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
     CSV.write(joinpath(abpath(), "data/highymax_108_timedelay_data.csv"), highymax_108_timedelay_data)

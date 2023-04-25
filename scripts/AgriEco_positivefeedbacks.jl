@@ -15,7 +15,6 @@ function assetsdebt_NLposfeed(assetsdebt, interestpar)
     end
 end
 
-
 function simulation_NLposfeed(NL, basedata, interestpar)
     maxyears = size(basedata,1)
     assetsdebt = zeros(maxyears+1)
