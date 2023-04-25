@@ -100,12 +100,12 @@ end
 
 #Rev/Exp = 1.03
 let
-    highymax_103_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset(170, 1.03, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/highymax_103_timedelay_data.csv"), highymax_103_timedelay_data)
-    medymax_103_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset(140, 1.03, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/medymax_103_timedelay_data.csv"), medymax_103_timedelay_data)
-    lowymax_103_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset(130, 1.03, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/lowymax_103_timedelay_data.csv"), lowymax_103_timedelay_data)
+    highymax_108_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset(170, 1.08, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/highymax_108_timedelay_data.csv"), highymax_108_timedelay_data)
+    medymax_108_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset(140, 1.08, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/medymax_108_timedelay_data.csv"), medymax_108_timedelay_data)
+    lowymax_108_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset(130, 1.08, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/lowymax_108_timedelay_data.csv"), lowymax_108_timedelay_data)
 end
 
 # #Testing of rev/exp 1.00 problem

@@ -2,15 +2,9 @@ include("packages.jl")
 include("AgriEco_commoncode.jl")
 
 @with_kw mutable struct InterestPar
-    # operatinginterest = 4
     debtinterest = 4
     savingsinterest = 2
 end
-
-# function operatingloan(expenses, interestpar)
-#     @unpack operatinginterest = interestpar
-#     return expenses * (1 + operatinginterest/100)
-# end
 
 function assetsdebt_NLposfeed(assetsdebt, interestpar)
     @unpack debtinterest, savingsinterest = interestpar
@@ -87,11 +81,11 @@ let
 end
 
 let
-    highymax_103_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(170, 1.06, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/highymax_103_posfeed_data.csv"), highymax_103_posfeed_data)
-    medymax_103_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(140, 1.06, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/medymax_103_posfeed_data.csv"), medymax_103_posfeed_data)
-    lowymax_103_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(130, 1.06, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/lowymax_103_posfeed_data.csv"), lowymax_103_posfeed_data)
+    highymax_108_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(170, 1.08, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/highymax_108_posfeed_data.csv"), highymax_108_posfeed_data)
+    medymax_108_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(140, 1.08, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/medymax_108_posfeed_data.csv"), medymax_108_posfeed_data)
+    lowymax_108_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(130, 1.08, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/lowymax_108_posfeed_data.csv"), lowymax_108_posfeed_data)
 end
 
