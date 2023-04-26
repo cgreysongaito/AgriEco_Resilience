@@ -88,3 +88,9 @@ let
     CSV.write(joinpath(abpath(), "data/lowymax_108_posfeed_data.csv"), lowymax_108_posfeed_data)
 end
 
+let
+    medymax_105_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(140, 1.05, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/medymax_105_posfeed_data.csv"), medymax_105_posfeed_data)
+end
+
+

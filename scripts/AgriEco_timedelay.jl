@@ -108,6 +108,11 @@ let
     CSV.write(joinpath(abpath(), "data/lowymax_108_timedelay_data.csv"), lowymax_108_timedelay_data)
 end
 
+let
+    medymax_105_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset(140, 1.05, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/medymax_105_timedelay_data.csv"), medymax_105_timedelay_data)
+end
+
 # #Testing of rev/exp 1.00 problem
 # lowymax_100_timedelay_data = terminalassets_timedelay_rednoise_dataset(130, 1.00, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay)
 # lowymax_100 = expectedterminalassets_rednoise(lowymax_100_timedelay_data)
