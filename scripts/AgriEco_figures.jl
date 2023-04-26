@@ -6,8 +6,8 @@ let
     Irange = 0.0:0.01:20.0
     datahymaxhyo = [yieldIII(I, FarmBasePar(ymax = 174.0, y0 = 10, p = 6.70, c = 139)) for I in Irange]
     ymaxrange = 120.0:1.0:200.0
-    y0data133 = [calc_y0(1.33, ymax, 139, 6.70) for ymax in ymaxrange]
-    y0data108 = [calc_y0(1.08, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data133rel = [calc_y0(1.33, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data108rel = [calc_y0(1.08, ymax, 139, 6.70) for ymax in ymaxrange]
     figure2schematicprep = figure(figsize = (5,6.5))
     subplot(2,1,1)
     plot(Irange, datahymaxhyo, color = "black", linewidth = 3)
@@ -17,15 +17,15 @@ let
     yticks([])
     ylim(0.0, 180.0)
     subplot(2,1,2)
-    plot(1 ./ y0data133, ymaxrange, linestyle="dashed", color="black", label="rev/exp = 1.33")
-    plot(1 ./ y0data108, ymaxrange, linestyle="dotted", color="black", label="rev/exp = 1.08")
+    plot(1 ./ y0data133rel, ymaxrange, linestyle="dashed", color="black", label="rev/exp = 1.33")
+    plot(1 ./ y0data108rel, ymaxrange, linestyle="dotted", color="black", label="rev/exp = 1.08")
     xlabel("1/y0", fontsize = 20)
     ylabel("ymax", fontsize = 20)
     xticks([])
     yticks([])
     tight_layout()
-    # return figure2schematicprep
-    savefig(joinpath(abpath(), "figs/figure2schematicprep.pdf"))
+    return figure2schematicprep
+    # savefig(joinpath(abpath(), "figs/figure2schematicprep.pdf"))
 end
 
 ## Positive feedbacks ##

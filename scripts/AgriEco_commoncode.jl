@@ -432,15 +432,3 @@ function termassetsshortfall_absolute_detrend(dataset, shortfallval)
     detrendeddata = detrend(data[:,2])
     return hcat(data, detrendeddata)
 end
-
-function termassetsshortfall_detrend(dataset, shortfallval)
-    corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 2)
-    @threads for ri in eachindex(corrrange)
-        termassetsshortfalldata = detrend(count_shortfall(dataset[ri,2], shortfallval))
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = termassetsshortfalldata
-    end
-    return data
-end
-
