@@ -65,6 +65,64 @@ let
     ylabel("ETAwNL/ETAwoNL")
     title("Rev/Exp = 1.08")
     tight_layout()
+    # return rednoise_exptermassets
+    savefig(joinpath(abpath(), "figs/posfeed_expectedterminalassets.pdf")) 
+end
+
+let
+    highymax_133 = expectedterminalassets_absolute_detrend(highymax_133_posfeed_data)
+    highymax_108 = expectedterminalassets_absolute_detrend(highymax_108_posfeed_data)
+    medymax_133 = expectedterminalassets_absolute_detrend(medymax_133_posfeed_data)
+    medymax_108 = expectedterminalassets_absolute_detrend(medymax_108_posfeed_data)
+    lowymax_133 = expectedterminalassets_absolute_detrend(lowymax_133_posfeed_data)
+    lowymax_108 = expectedterminalassets_absolute_detrend(lowymax_108_posfeed_data)
+    rednoise_exptermassets = figure(figsize=(4,6))
+    subplot(2,1,1)
+    plot(highymax_133[:,1], highymax_133[:,2], color="blue", label="High ymax")
+    plot(medymax_133[:,1], medymax_133[:,2], color="red", label="Med ymax")
+    plot(lowymax_133[:,1], lowymax_133[:,2], color="purple", label="Low ymax")
+    # ylim(-90,40)
+    xlabel("Autocorrelation")
+    ylabel("ETA")
+    title("Rev/Exp = 1.33")
+    subplot(2,1,2)
+    plot(highymax_108[:,1], highymax_108[:,2], color="blue", label="High ymax")
+    plot(medymax_108[:,1], medymax_108[:,2], color="red", label="Med ymax")
+    plot(lowymax_108[:,1], lowymax_108[:,2], color="purple", label="Low ymax")
+    # ylim(-90,40)
+    xlabel("Autocorrelation")
+    ylabel("ETA")
+    title("Rev/Exp = 1.08")
+    tight_layout()
+    return rednoise_exptermassets
+    # savefig(joinpath(abpath(), "figs/posfeed_expectedterminalassets.pdf")) 
+end
+
+let
+    highymax_133 = expectedterminalassets_absolute_detrend(highymax_133_posfeed_data)
+    highymax_108 = expectedterminalassets_absolute_detrend(highymax_108_posfeed_data)
+    medymax_133 = expectedterminalassets_absolute_detrend(medymax_133_posfeed_data)
+    medymax_108 = expectedterminalassets_absolute_detrend(medymax_108_posfeed_data)
+    lowymax_133 = expectedterminalassets_absolute_detrend(lowymax_133_posfeed_data)
+    lowymax_108 = expectedterminalassets_absolute_detrend(lowymax_108_posfeed_data)
+    rednoise_exptermassets = figure(figsize=(4,6))
+    subplot(2,1,1)
+    plot(highymax_133[:,1], highymax_133[:,3], color="blue", label="High ymax")
+    plot(medymax_133[:,1], medymax_133[:,3], color="red", label="Med ymax")
+    plot(lowymax_133[:,1], lowymax_133[:,3], color="purple", label="Low ymax")
+    # ylim(-90,40)
+    xlabel("Autocorrelation")
+    ylabel("Detrended ETA")
+    title("Rev/Exp = 1.33")
+    subplot(2,1,2)
+    plot(highymax_108[:,1], highymax_108[:,3], color="blue", label="High ymax")
+    plot(medymax_108[:,1], medymax_108[:,3], color="red", label="Med ymax")
+    plot(lowymax_108[:,1], lowymax_108[:,3], color="purple", label="Low ymax")
+    # ylim(-90,40)
+    xlabel("Autocorrelation")
+    ylabel("Detrended ETA")
+    title("Rev/Exp = 1.08")
+    tight_layout()
     return rednoise_exptermassets
     # savefig(joinpath(abpath(), "figs/posfeed_expectedterminalassets.pdf")) 
 end
@@ -95,11 +153,11 @@ let
     ylabel("VarwNL/VarwoNL")
     title("Rev/Exp = 1.08")
     tight_layout()
-    return rednoise_var_exptermassets
-    # savefig(joinpath(abpath(), "figs/posfeed_variabilityterminalassets.pdf")) 
+    # return rednoise_var_exptermassets
+    savefig(joinpath(abpath(), "figs/posfeed_variabilityterminalassets.pdf")) 
 end 
 
-#TERMINAL ASSETS SHORTFALL
+#Terminal Assets Shortfall
 let 
     shortfallval = 0
     highymax_133 = termassetsshortfall_rednoise(highymax_133_posfeed_data, shortfallval)
@@ -124,9 +182,65 @@ let
     ylabel("ShortwNL/ShortwoNL")
     title("Rev/Exp = 1.08")
     tight_layout()
+    # return rednoise_shortfall_exptermassets
+    savefig(joinpath(abpath(), "figs/posfeed_terminalassetsshortfall.pdf")) 
+end 
+
+let 
+    shortfallval = 0
+    highymax_133 = termassetsshortfall_absolute_detrend(highymax_133_posfeed_data, shortfallval)
+    highymax_108 = termassetsshortfall_absolute_detrend(highymax_108_posfeed_data, shortfallval)
+    medymax_133 = termassetsshortfall_absolute_detrend(medymax_133_posfeed_data, shortfallval)
+    medymax_108 = termassetsshortfall_absolute_detrend(medymax_108_posfeed_data, shortfallval)
+    lowymax_133 = termassetsshortfall_absolute_detrend(lowymax_133_posfeed_data, shortfallval)
+    lowymax_108 = termassetsshortfall_absolute_detrend(lowymax_108_posfeed_data, shortfallval)
+    rednoise_shortfall_exptermassets = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(highymax_133[:,1], highymax_133[:,2], color="blue", label="High ymax")
+    plot(medymax_133[:,1], medymax_133[:,2], color="red", label="Med ymax")
+    plot(lowymax_133[:,1], lowymax_133[:,2], color="purple", label="Low ymax")
+    xlabel("Autocorrelation")
+    ylabel("Shortfall")
+    title("Rev/Exp = 1.33")
+    subplot(2,1,2)
+    plot(highymax_108[:,1], highymax_108[:,2], color="blue", label="High ymax")
+    plot(medymax_108[:,1], medymax_108[:,2], color="red", label="Med ymax")
+    plot(lowymax_108[:,1], lowymax_108[:,2], color="purple", label="Low ymax")
+    xlabel("Autocorrelation")
+    ylabel("Shortfall")
+    title("Rev/Exp = 1.08")
+    tight_layout()
     return rednoise_shortfall_exptermassets
     # savefig(joinpath(abpath(), "figs/posfeed_terminalassetsshortfall.pdf")) 
-end 
+end
+
+let 
+    shortfallval = 0
+    highymax_133 = termassetsshortfall_absolute_detrend(highymax_133_posfeed_data, shortfallval)
+    highymax_108 = termassetsshortfall_absolute_detrend(highymax_108_posfeed_data, shortfallval)
+    medymax_133 = termassetsshortfall_absolute_detrend(medymax_133_posfeed_data, shortfallval)
+    medymax_108 = termassetsshortfall_absolute_detrend(medymax_108_posfeed_data, shortfallval)
+    lowymax_133 = termassetsshortfall_absolute_detrend(lowymax_133_posfeed_data, shortfallval)
+    lowymax_108 = termassetsshortfall_absolute_detrend(lowymax_108_posfeed_data, shortfallval)
+    rednoise_shortfall_exptermassets = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(highymax_133[:,1], highymax_133[:,3], color="blue", label="High ymax")
+    plot(medymax_133[:,1], medymax_133[:,3], color="red", label="Med ymax")
+    plot(lowymax_133[:,1], lowymax_133[:,3], color="purple", label="Low ymax")
+    xlabel("Autocorrelation")
+    ylabel("Detrended Shortfall")
+    title("Rev/Exp = 1.33")
+    subplot(2,1,2)
+    plot(highymax_108[:,1], highymax_108[:,3], color="blue", label="High ymax")
+    plot(medymax_108[:,1], medymax_108[:,3], color="red", label="Med ymax")
+    plot(lowymax_108[:,1], lowymax_108[:,3], color="purple", label="Low ymax")
+    xlabel("Autocorrelation")
+    ylabel("Detrended Shortfall")
+    title("Rev/Exp = 1.08")
+    tight_layout()
+    return rednoise_shortfall_exptermassets
+    # savefig(joinpath(abpath(), "figs/posfeed_terminalassetsshortfall.pdf")) 
+end
 
 
 ## Time Delay ##
@@ -166,6 +280,35 @@ let
     ylabel("ETAwNL/ETAwoNL")
     title("Rev/Exp = 1.08")
     tight_layout()
+    # return rednoise_exptermassets
+    savefig(joinpath(abpath(), "figs/timedelay_expectedterminalassets.pdf")) 
+end
+
+let
+    highymax_133 = expectedterminalassets_absolute(highymax_133_timedelay_data)
+    highymax_108 = expectedterminalassets_absolute(highymax_108_timedelay_data)
+    medymax_133 = expectedterminalassets_absolute(medymax_133_timedelay_data)
+    medymax_108 = expectedterminalassets_absolute(medymax_108_timedelay_data)
+    lowymax_133 = expectedterminalassets_absolute(lowymax_133_timedelay_data)
+    lowymax_108 = expectedterminalassets_absolute(lowymax_108_timedelay_data)
+    rednoise_exptermassets = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(highymax_133[:,1], highymax_133[:,2], color="blue", label="High ymax")
+    plot(medymax_133[:,1], medymax_133[:,2], color="red", label="Med ymax")
+    plot(lowymax_133[:,1], lowymax_133[:,2], color="purple", label="Low ymax")
+    # ylim(-90,40)
+    xlabel("Autocorrelation")
+    ylabel("ETA")
+    title("Rev/Exp = 1.33")
+    subplot(2,1,2)
+    plot(highymax_108[:,1], highymax_108[:,2], color="blue", label="High ymax")
+    plot(medymax_108[:,1], medymax_108[:,2], color="red", label="Med ymax")
+    plot(lowymax_108[:,1], lowymax_108[:,2], color="purple", label="Low ymax")
+    # ylim(-90,40)
+    xlabel("Autocorrelation")
+    ylabel("ETA")
+    title("Rev/Exp = 1.08")
+    tight_layout()
     return rednoise_exptermassets
     # savefig(joinpath(abpath(), "figs/timedelay_expectedterminalassets.pdf")) 
 end
@@ -198,11 +341,11 @@ let
     # xlim(0.0,0.8)
     title("Rev/Exp = 1.08")
     tight_layout()
-    return rednoise_var_exptermassets
-    # savefig(joinpath(abpath(), "figs/timedelay_variabilityterminalassets.pdf")) 
+    # return rednoise_var_exptermassets
+    savefig(joinpath(abpath(), "figs/timedelay_variabilityterminalassets.pdf")) 
 end
 
-#TERMINAL ASSETS SHORTFALL 
+#Terminal Assets Shortfall
 let 
     shortfallval = 0
     highymax_133 = termassetsshortfall_rednoise(highymax_133_timedelay_data, shortfallval)
@@ -225,6 +368,34 @@ let
     plot(lowymax_108[:,1], lowymax_108[:,4], color="purple", label="Low ymax")
     xlabel("Autocorrelation")
     ylabel("ShortwNL/ShortwoNL")
+    title("Rev/Exp = 1.08")
+    tight_layout()
+    # return rednoise_shortfall_exptermassets
+    savefig(joinpath(abpath(), "figs/timedelay_terminalassetsshortfall.pdf")) 
+end 
+
+let 
+    shortfallval = 0
+    highymax_133 = termassetsshortfall_absolute(highymax_133_timedelay_data, shortfallval)
+    highymax_108 = termassetsshortfall_absolute(highymax_108_timedelay_data, shortfallval)
+    medymax_133 = termassetsshortfall_absolute(medymax_133_timedelay_data, shortfallval)
+    medymax_108 = termassetsshortfall_absolute(medymax_108_timedelay_data, shortfallval)
+    lowymax_133 = termassetsshortfall_absolute(lowymax_133_timedelay_data, shortfallval)
+    lowymax_108 = termassetsshortfall_absolute(lowymax_108_timedelay_data, shortfallval)
+    rednoise_shortfall_exptermassets = figure(figsize=(4,6))       
+    subplot(2,1,1)
+    plot(highymax_133[:,1], highymax_133[:,2], color="blue", label="High ymax")
+    plot(medymax_133[:,1], medymax_133[:,2], color="red", label="Med ymax")
+    plot(lowymax_133[:,1], lowymax_133[:,2], color="purple", label="Low ymax")
+    xlabel("Autocorrelation")
+    ylabel("Shortfall")
+    title("Rev/Exp = 1.33")
+    subplot(2,1,2)
+    plot(highymax_108[:,1], highymax_108[:,2], color="blue", label="High ymax")
+    plot(medymax_108[:,1], medymax_108[:,2], color="red", label="Med ymax")
+    plot(lowymax_108[:,1], lowymax_108[:,2], color="purple", label="Low ymax")
+    xlabel("Autocorrelation")
+    ylabel("Shortfall")
     title("Rev/Exp = 1.08")
     tight_layout()
     return rednoise_shortfall_exptermassets

@@ -319,6 +319,14 @@ function expenses_calc(inputs, c)
     return inputs * c
 end
 
+function detrend(data)
+    detrendeddata = zeros(length(data))
+    for i in 1:length(data)
+        detrendeddata[i] = data[i] - data[1]
+    end
+    return detrendeddata
+end
+
 function distribution_prob_convert(histogramdata)
     sumcounts = sum(histogramdata.weights)
     probdata = zeros(length(histogramdata.weights))
@@ -355,6 +363,18 @@ function expectedterminalassets_rednoise(dataset)
         end
     end
     return data
+end
+
+function expectedterminalassets_absolute_detrend(dataset)
+    corrrange = dataset[:,1]
+    data=zeros(length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        expectedtermassetsdata = expectedterminalassets(dataset[ri,2], 30)
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = expectedtermassetsdata
+    end
+    detrendeddata = detrend(data[:,2])
+    return hcat(data, detrendeddata)
 end
 
 function variabilityterminalassets(distributiondata) #I think you do want CV for here because NL will pull the mean quite far apart
@@ -401,4 +421,26 @@ function termassetsshortfall_rednoise(dataset, shortfallval)
     return data
 end
     
+function termassetsshortfall_absolute_detrend(dataset, shortfallval)
+    corrrange = dataset[:,1]
+    data=zeros(length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        termassetsshortfalldata = count_shortfall(dataset[ri,2], shortfallval)
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = termassetsshortfalldata
+    end
+    detrendeddata = detrend(data[:,2])
+    return hcat(data, detrendeddata)
+end
+
+function termassetsshortfall_detrend(dataset, shortfallval)
+    corrrange = dataset[:,1]
+    data=zeros(length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        termassetsshortfalldata = detrend(count_shortfall(dataset[ri,2], shortfallval))
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = termassetsshortfalldata
+    end
+    return data
+end
 
