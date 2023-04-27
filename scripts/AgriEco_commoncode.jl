@@ -310,21 +310,12 @@ function yieldnoise_createdata(inputsyield, basepar, noisepar, maxyears, seed)
     return hcat(1:1:maxyears, yielddisturbed(inputsyield, noisepar, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([basepar.p],maxyears), repeat([basepar.c],maxyears))
 end
 
-
 function revenue_calc(yield, p)
     return yield * p
 end
 
 function expenses_calc(inputs, c)
     return inputs * c
-end
-
-function detrend(data)
-    detrendeddata = zeros(length(data))
-    for i in 1:length(data)
-        detrendeddata[i] = data[i] - data[1]
-    end
-    return detrendeddata
 end
 
 function distribution_prob_convert(histogramdata)
@@ -334,47 +325,6 @@ function distribution_prob_convert(histogramdata)
         probdata[bini] = histogramdata.weights[bini]/sumcounts
     end
     return probdata
-end
-
-function expectedterminalassets(distributiondata, numbins)
-    histogramdata = fit(Histogram, distributiondata, nbins=numbins)
-    probdata = distribution_prob_convert(histogramdata)
-    expectedassets = 0
-    for bini in eachindex(probdata)
-        midpoint = histogramdata.edges[1][bini]+step(histogramdata.edges[1])/2
-        expectedassets += midpoint*probdata[bini]
-    end
-    return expectedassets
-end
-
-function expectedterminalassets_rednoise(dataset)
-    corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 4)
-    @threads for ri in eachindex(corrrange)
-        expectedtermassetsdata_NL = expectedterminalassets(dataset[ri,2], 30)
-        expectedtermassetsdata_woNL = expectedterminalassets(dataset[ri,3], 30)
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = expectedtermassetsdata_NL
-        data[ri,3] = expectedtermassetsdata_woNL
-        if expectedtermassetsdata_NL >= 0.0
-            data[ri,4] = abs(expectedtermassetsdata_NL)/abs(expectedtermassetsdata_woNL)
-        else
-            data[ri,4] = -abs(expectedtermassetsdata_NL)/abs(expectedtermassetsdata_woNL)
-        end
-    end
-    return data
-end
-
-function expectedterminalassets_absolute_detrend(dataset)
-    corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 2)
-    @threads for ri in eachindex(corrrange)
-        expectedtermassetsdata = expectedterminalassets(dataset[ri,2], 30)
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = expectedtermassetsdata
-    end
-    detrendeddata = detrend(data[:,2])
-    return hcat(data, detrendeddata)
 end
 
 function variabilityterminalassets(distributiondata) #I think you do want CV for here because NL will pull the mean quite far apart
@@ -395,40 +345,4 @@ function variabilityterminalassets_rednoise(dataset)
         data[ri,4] = variabilityassetsdata_NL/variabilityassetsdata_woNL
     end
     return data
-end
-
-function count_shortfall(distributiondata, shortfallval)
-    number = 0
-    for i in eachindex(distributiondata)
-        if distributiondata[i] < shortfallval
-            number +=1
-        end
-    end
-    return number
-end
-
-function termassetsshortfall_rednoise(dataset, shortfallval)
-    corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 4)
-    @threads for ri in eachindex(corrrange)
-        termassetsshortfalldata_NL = count_shortfall(dataset[ri,2], shortfallval)
-        termassetsshortfalldata_woNL = count_shortfall(dataset[ri,3], shortfallval)
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = termassetsshortfalldata_NL
-        data[ri,3] = termassetsshortfalldata_woNL
-        data[ri,4] = termassetsshortfalldata_NL/termassetsshortfalldata_woNL
-    end
-    return data
-end
-    
-function termassetsshortfall_absolute_detrend(dataset, shortfallval)
-    corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 2)
-    @threads for ri in eachindex(corrrange)
-        termassetsshortfalldata = count_shortfall(dataset[ri,2], shortfallval)
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = termassetsshortfalldata
-    end
-    detrendeddata = detrend(data[:,2])
-    return hcat(data, detrendeddata)
 end
