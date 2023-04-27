@@ -88,9 +88,96 @@ let
     CSV.write(joinpath(abpath(), "data/lowymax_108_posfeed_data.csv"), lowymax_108_posfeed_data)
 end
 
+#CV
+function terminalassets_distribution_CV(NL, inputsyield, basepar, noiseparCV, interestpar, maxyears, reps)
+    assetsdebtdata =  zeros(reps)
+    for i in 1:reps
+        basedata = yieldnoise_createdata_CV(inputsyield, basepar, noiseparCV, maxyears, i)
+        simdata = simulation_NLposfeed(NL, basedata, interestpar)
+        assetsdebtdata[i] = simdata[end]
+    end
+    return assetsdebtdata
+end
+
+function terminalassets_posfeed_rednoise_dataset_CV(ymaxval, revexpratio, interestpar, yielddisturbance_CV, corrrange, maxyears, reps)
+    y0val = calc_y0(revexpratio, ymaxval, FarmBasePar().c, FarmBasePar().p)
+    newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
+    defaultinputsyield = maxprofitIII_vals(newbasepar)
+    data = Array{Vector{Float64}}(undef,length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        noiseparCV = NoiseParCV(yielddisturbed_CV = yielddisturbance_CV, yielddisturbed_r = corrrange[ri])
+        data[ri, 1] = terminalassets_distribution_CV("with", defaultinputsyield, newbasepar, noiseparCV, interestpar, maxyears, reps)
+        data[ri, 2] = terminalassets_distribution_CV("without", defaultinputsyield, newbasepar, noiseparCV, interestpar, maxyears, reps)
+    end
+    return hcat(corrrange, data)
+end
+
+CV_posfeed = 0.117
+corrrange_posfeed = 0.0:0.01:0.85
+maxyears_posfeed = 50
+reps_posfeed = 1000
+
 let
-    medymax_105_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset(140, 1.05, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/medymax_105_posfeed_data.csv"), medymax_105_posfeed_data)
+    highymax_133_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(170, 1.33, InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/highymax_133_posfeed_data_CV.csv"), highymax_133_posfeed_data_CV)
+    medymax_133_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(140, 1.33, InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/medymax_133_posfeed_data_CV.csv"), medymax_133_posfeed_data_CV)
+    lowymax_133_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(120, 1.33, InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/lowymax_133_posfeed_data_CV.csv"), lowymax_133_posfeed_data_CV)
+end
+
+let
+    highymax_115_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(170, 1.15, InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/highymax_115_posfeed_data_CV.csv"), highymax_115_posfeed_data_CV)
+    medymax_115_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(140, 1.15, InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/medymax_115_posfeed_data_CV.csv"), medymax_115_posfeed_data_CV)
+    lowymax_115_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(120, 1.15, InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/lowymax_115_posfeed_data_CV.csv"), lowymax_115_posfeed_data_CV)
+end
+
+let
+    highymax_108_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(170, 1.08, InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/highymax_108_posfeed_data_CV.csv"), highymax_108_posfeed_data_CV)
+    medymax_108_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(140, 1.08, InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/medymax_108_posfeed_data_CV.csv"), medymax_108_posfeed_data_CV)
+    lowymax_108_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(130, 1.08, InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/lowymax_108_posfeed_data_CV.csv"), lowymax_108_posfeed_data_CV)
 end
 
 
+#Rev-exp (absolute)
+function terminalassets_posfeed_rednoise_dataset_abs(ymaxval, revexpabs, interestpar, yielddisturbance_sd, corrrange, maxyears, reps)
+    y0val = calc_y0_abs(revexpabs, ymaxval, FarmBasePar().c, FarmBasePar().p)
+    newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
+    defaultinputsyield = maxprofitIII_vals(newbasepar)
+    data = Array{Vector{Float64}}(undef,length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        noisepar = NoisePar(yielddisturbed_σ = yielddisturbance_sd, yielddisturbed_r = corrrange[ri])
+        data[ri, 1] = terminalassets_distribution("with", defaultinputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
+        data[ri, 2] = terminalassets_distribution("without", defaultinputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
+    end
+    return hcat(corrrange, data)
+end
+
+sd_posfeed = 20
+corrrange_posfeed = 0.0:0.01:0.85
+maxyears_posfeed = 50
+reps_posfeed = 1000
+
+let
+    highymax_200_posfeed_data_abs = prepDataFrame(terminalassets_posfeed_rednoise_dataset_abs(170, 200, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/highymax_200_posfeed_data_abs.csv"), highymax_200_posfeed_data_abs)
+    medymax_200_posfeed_data_abs = prepDataFrame(terminalassets_posfeed_rednoise_dataset_abs(140, 200, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/medymax_200_posfeed_data_abs.csv"), medymax_200_posfeed_data_abs)
+    lowymax_200_posfeed_data_abs = prepDataFrame(terminalassets_posfeed_rednoise_dataset_abs(120, 200, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/lowymax_200_posfeed_data_abs.csv"), lowymax_200_posfeed_data_abs)
+end
+
+let
+    highymax_100_posfeed_data_abs = prepDataFrame(terminalassets_posfeed_rednoise_dataset_abs(170, 100, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/highymax_100_posfeed_data_abs.csv"), highymax_100_posfeed_data_abs)
+    medymax_100_posfeed_data_abs = prepDataFrame(terminalassets_posfeed_rednoise_dataset_abs(140, 100, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/medymax_100_posfeed_data_abs.csv"), medymax_100_posfeed_data_abs)
+    lowymax_100_posfeed_data_abs = prepDataFrame(terminalassets_posfeed_rednoise_dataset_abs(130, 100, InterestPar(), sd_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/lowymax_100_posfeed_data_abs.csv"), lowymax_100_posfeed_data_abs)
+end

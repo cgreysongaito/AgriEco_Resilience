@@ -266,12 +266,13 @@ end
 
 ### Noise creation
 @with_kw mutable struct NoisePar
-    yielddisturbed_σ = 0.2
-    p_σ = 0.2
-    c_σ = 0.2
+    yielddisturbed_σ = 20
     yielddisturbed_r = 0.0
-    p_r = 0.0
-    c_r = 0.0
+end
+
+@with_kw mutable struct NoiseParCV
+    yielddisturbed_CV = 0.117
+    yielddisturbed_r = 0.0
 end
 
 function noise_creation(μ, σ, corr, len, seed)
@@ -306,8 +307,19 @@ function yielddisturbed(inputsyield, noisepar, maxyears, seed)
     return yieldnoise
 end
 
+function yielddisturbed_CV(inputsyield, noiseparCV, maxyears, seed)
+    sd = noiseparCV.yielddisturbed_CV * inputsyield[2]
+    yieldnoise = noise_creation(inputsyield[2], sd, noiseparCV.yielddisturbed_r, maxyears, seed)
+    convert_neg_zero(yieldnoise)
+    return yieldnoise
+end
+
 function yieldnoise_createdata(inputsyield, basepar, noisepar, maxyears, seed)
     return hcat(1:1:maxyears, yielddisturbed(inputsyield, noisepar, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([basepar.p],maxyears), repeat([basepar.c],maxyears))
+end
+
+function yieldnoise_createdata_CV(inputsyield, basepar, noiseparCV, maxyears, seed)
+    return hcat(1:1:maxyears, yielddisturbed_CV(inputsyield, noiseparCV, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([basepar.p],maxyears), repeat([basepar.c],maxyears))
 end
 
 function revenue_calc(yield, p)
