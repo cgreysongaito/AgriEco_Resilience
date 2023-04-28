@@ -62,6 +62,10 @@ function calc_y0(rev_exp_ratio, ymax, c, p)
     return ((ymax * p) / (2 * c * rev_exp_ratio) )^2
 end
 
+function calc_ymax(rev_exp_ratio, y0, c, p)
+    return (rev_exp_ratio * 2 * sqrt(y0) * c) / p
+end
+
 function calc_c_abs(rev_exp_val, ymax, y0, p)
     return ( (ymax * p) - rev_exp_val ) / (2 * sqrt(y0))
 end

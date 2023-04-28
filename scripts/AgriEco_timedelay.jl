@@ -224,22 +224,22 @@ minfraction_timedelay = 0.2
 maxyears_timedelay = 50
 reps_timedelay = 1000
 
-#Rev-Exp = 200
+#Rev-Exp = 225
 let
-    highymax_200_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(170, 200, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/highymax_200_timedelay_data_abs.csv"), highymax_200_timedelay_data_abs)
-    medymax_200_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(140, 200, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/medymax_200_timedelay_data_abs.csv"), medymax_200_timedelay_data_abs)
-    lowymax_200_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(120, 200, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/lowymax_200_timedelay_data_abs.csv"), lowymax_200_timedelay_data_abs)
+    highymax_225_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(170, 225, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/highymax_225_timedelay_data_abs.csv"), highymax_225_timedelay_data_abs)
+    medymax_225_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(140, 225, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/medymax_225_timedelay_data_abs.csv"), medymax_225_timedelay_data_abs)
+    lowymax_225_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(120, 225, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/lowymax_225_timedelay_data_abs.csv"), lowymax_225_timedelay_data_abs)
 end
 
-#Rev-Exp = 100
+#Rev-Exp = 75
 let
-    highymax_100_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(170, 100, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/highymax_100_timedelay_data_abs.csv"), highymax_100_timedelay_data_abs)
-    medymax_100_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(140, 100, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/medymax_100_timedelay_data_abs.csv"), medymax_100_timedelay_data_abs)
-    lowymax_100_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(130, 100, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/lowymax_100_timedelay_data_abs.csv"), lowymax_100_timedelay_data_abs)
+    highymax_75_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(170, 75, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/highymax_75_timedelay_data_abs.csv"), highymax_75_timedelay_data_abs)
+    medymax_75_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(140, 75, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/medymax_75_timedelay_data_abs.csv"), medymax_75_timedelay_data_abs)
+    lowymax_75_timedelay_data_abs = prepDataFrame(terminalassets_timedelay_rednoise_dataset_abs(130, 75, sd_timedelay, corrrange_timedelay, yearsdelay, minfraction_timedelay, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/lowymax_75_timedelay_data_abs.csv"), lowymax_75_timedelay_data_abs)
 end

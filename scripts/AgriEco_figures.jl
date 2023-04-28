@@ -28,6 +28,19 @@ let
     # savefig(joinpath(abpath(), "figs/figure2schematicprep.pdf"))
 end
 
+let 
+    ymaxrange = 120.0:1.0:200.0
+    y0data225abs = [calc_y0_abs(225, ymax, 139, 6.70) for ymax in ymaxrange]
+    y0data75abs = [calc_y0_abs(75, ymax, 139, 6.70) for ymax in ymaxrange]
+    abs = figure()
+    plot(1 ./ y0data225abs, ymaxrange, linestyle="dashed", color="black", label="rev-exp = 225")
+    plot(1 ./ y0data75abs, ymaxrange, linestyle="dotted", color="black", label="rev-exp = 75")
+    xlabel("1/y0", fontsize = 20)
+    ylabel("ymax", fontsize = 20)
+    # return abs
+    savefig(joinpath(abpath(), "figs/abs_constrainedgraph.pdf"))
+end
+
 ## Positive feedbacks ##
 #Read in data
 #Standard Deviation
@@ -39,31 +52,17 @@ lowymax_133_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/low
 highymax_108_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_108_posfeed_data.csv"), DataFrame))
 medymax_108_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_108_posfeed_data.csv"), DataFrame))
 lowymax_108_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_108_posfeed_data.csv"), DataFrame))
-
 medymax_115_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_115_posfeed_data.csv"), DataFrame))
 
-#Coefficient of variation
-highymax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_133_posfeed_data_CV.csv"), DataFrame))
-medymax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_133_posfeed_data_CV.csv"), DataFrame))
-lowymax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_133_posfeed_data_CV.csv"), DataFrame))
-#Rev/Exp = 1.08
-highymax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_108_posfeed_data_CV.csv"), DataFrame))
-medymax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_108_posfeed_data_CV.csv"), DataFrame))
-lowymax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_108_posfeed_data_CV.csv"), DataFrame))
+medy0_133_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_133_posfeed_data.csv"), DataFrame))
+medy0_115_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_115_posfeed_data.csv"), DataFrame))
+medy0_108_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_108_posfeed_data.csv"), DataFrame))
 
-#Rev-exp
-highymax_200_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_200_posfeed_data_abs.csv"), DataFrame))
-medymax_200_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_200_posfeed_data_abs.csv"), DataFrame))
-lowymax_200_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_200_posfeed_data_abs.csv"), DataFrame))
-#Rev/Exp = 1.08
-highymax_100_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_100_posfeed_data_abs.csv"), DataFrame))
-medymax_100_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_100_posfeed_data_abs.csv"), DataFrame))
-lowymax_100_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_100_posfeed_data_abs.csv"), DataFrame))
 
 
 #Variability Terminal Assets
 
-# Changing Rev/Exp ratio
+# Changing Rev/Exp ratio constrain ymax
 let 
     medymax_133 = variabilityterminalassets_rednoise(medymax_133_posfeed_data)
     medymax_115 = variabilityterminalassets_rednoise(medymax_115_posfeed_data)
@@ -79,6 +78,101 @@ let
     savefig(joinpath(abpath(), "figs/var_changingrevexp_posfeedbacks.pdf")) 
 end 
 
+# Changing Rev/Exp ratio constrain y0
+let 
+    medy0_133 = variabilityterminalassets_rednoise(medy0_133_posfeed_data)
+    medy0_115 = variabilityterminalassets_rednoise(medy0_115_posfeed_data)
+    medy0_108 = variabilityterminalassets_rednoise(medy0_108_posfeed_data)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(medy0_133[:,1], medy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(medy0_115[:,1], medy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(medy0_108[:,1], medy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_posfeedbacks.pdf")) 
+end 
+
+ 
+
+## Time Delay ##
+#Read in data
+#SD
+#Rev/Exp = 1.33
+highymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_133_timedelay_data.csv"), DataFrame))
+medymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_133_timedelay_data.csv"), DataFrame))
+lowymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_133_timedelay_data.csv"), DataFrame))
+#Rev/Exp = 1.08
+highymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_108_timedelay_data.csv"), DataFrame))
+medymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_108_timedelay_data.csv"), DataFrame))
+lowymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_108_timedelay_data.csv"), DataFrame))
+
+medymax_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_115_timedelay_data.csv"), DataFrame))
+
+
+medy0_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_133_timedelay_data.csv"), DataFrame))
+medy0_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_115_timedelay_data.csv"), DataFrame))
+medy0_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_108_timedelay_data.csv"), DataFrame))
+
+
+
+# Changing Rev/Exp ratio - constrain ymax
+let 
+    medymax_133 = variabilityterminalassets_rednoise(medymax_133_timedelay_data)
+    medymax_115 = variabilityterminalassets_rednoise(medymax_115_timedelay_data)
+    medymax_108 = variabilityterminalassets_rednoise(medymax_108_timedelay_data)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(medymax_133[:,1], medymax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(medymax_115[:,1], medymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(medymax_108[:,1], medymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    # return var_changingrevexp
+    savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelay.pdf")) 
+end 
+
+# Changing Rev/Exp ratio - constrain y0
+let 
+    medy0_133 = variabilityterminalassets_rednoise(medy0_133_timedelay_data)
+    medy0_115 = variabilityterminalassets_rednoise(medy0_115_timedelay_data)
+    medy0_108 = variabilityterminalassets_rednoise(medy0_108_timedelay_data)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(medy0_133[:,1], medy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(medy0_115[:,1], medy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(medy0_108[:,1], medy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelay.pdf")) 
+end 
+
+### Supporting Information
+include("AgriEco_supportinginformation.jl")
+
+## comparing when rev/exp constrained
+#Coefficient of variation
+highymax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_133_posfeed_data_CV.csv"), DataFrame))
+medymax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_133_posfeed_data_CV.csv"), DataFrame))
+lowymax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_133_posfeed_data_CV.csv"), DataFrame))
+#Rev/Exp = 1.08
+highymax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_108_posfeed_data_CV.csv"), DataFrame))
+medymax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_108_posfeed_data_CV.csv"), DataFrame))
+lowymax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_108_posfeed_data_CV.csv"), DataFrame))
+
+#Rev-exp=225
+highymax_225_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_225_posfeed_data_abs.csv"), DataFrame))
+medymax_225_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_225_posfeed_data_abs.csv"), DataFrame))
+lowymax_225_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_225_posfeed_data_abs.csv"), DataFrame))
+#Rev-Exp = 75
+highymax_75_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_75_posfeed_data_abs.csv"), DataFrame))
+medymax_75_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_75_posfeed_data_abs.csv"), DataFrame))
+lowymax_75_posfeed_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_75_posfeed_data_abs.csv"), DataFrame))
+
+
+# Positive feedbacks
 # Examining sustainability and incremental productivity #SD
 let 
     highymax_133 = variabilityterminalassets_rednoise(highymax_133_posfeed_data)
@@ -135,53 +229,40 @@ let
     ylabel("VarwNL/VarwoNL")
     title("Rev/Exp = 1.08")
     tight_layout()
-    return rednoise_var_exptermassets
-    # savefig(joinpath(abpath(), "figs/posfeed_variabilityterminalassets_CV.pdf")) 
+    # return rednoise_var_exptermassets
+    savefig(joinpath(abpath(), "figs/posfeed_variabilityterminalassets_CV.pdf")) 
 end 
 
 #Rev-exp
 let 
-    highymax_200 = variabilityterminalassets_rednoise(highymax_200_posfeed_data_abs)
-    highymax_100 = variabilityterminalassets_rednoise(highymax_100_posfeed_data_abs)
-    medymax_200 = variabilityterminalassets_rednoise(medymax_200_posfeed_data_abs)
-    medymax_100 = variabilityterminalassets_rednoise(medymax_100_posfeed_data_abs)
-    lowymax_200 = variabilityterminalassets_rednoise(lowymax_200_posfeed_data_abs)
-    lowymax_100 = variabilityterminalassets_rednoise(lowymax_100_posfeed_data_abs)
+    highymax_225 = variabilityterminalassets_rednoise(highymax_225_posfeed_data_abs)
+    highymax_75 = variabilityterminalassets_rednoise(highymax_75_posfeed_data_abs)
+    medymax_225 = variabilityterminalassets_rednoise(medymax_225_posfeed_data_abs)
+    medymax_75 = variabilityterminalassets_rednoise(medymax_75_posfeed_data_abs)
+    lowymax_225 = variabilityterminalassets_rednoise(lowymax_225_posfeed_data_abs)
+    lowymax_75 = variabilityterminalassets_rednoise(lowymax_75_posfeed_data_abs)
     rednoise_var_exptermassets = figure(figsize=(4,6))    
     subplot(2,1,1)
-    plot(highymax_200[:,1], highymax_200[:,4], color="blue", label="High ymax")
-    plot(medymax_200[:,1], medymax_200[:,4], color="red", label="Med ymax")
-    plot(lowymax_200[:,1], lowymax_200[:,4], color="purple", label="Low ymax")
+    plot(highymax_225[:,1], highymax_225[:,4], color="blue", label="High ymax")
+    plot(medymax_225[:,1], medymax_225[:,4], color="red", label="Med ymax")
+    plot(lowymax_225[:,1], lowymax_225[:,4], color="purple", label="Low ymax")
     # ylim(-90,40)
     xlabel("Autocorrelation")
     ylabel("VarwNL/VarwoNL")
-    title("Rev-Exp = 200")
+    title("Rev-Exp = 225")
     subplot(2,1,2)
-    plot(highymax_100[:,1], highymax_100[:,4], color="blue", label="High ymax")
-    plot(medymax_100[:,1], medymax_100[:,4], color="red", label="Med ymax")
-    plot(lowymax_100[:,1], lowymax_100[:,4], color="purple", label="Low ymax")
+    plot(highymax_75[:,1], highymax_75[:,4], color="blue", label="High ymax")
+    plot(medymax_75[:,1], medymax_75[:,4], color="red", label="Med ymax")
+    plot(lowymax_75[:,1], lowymax_75[:,4], color="purple", label="Low ymax")
     # ylim(-90,40)
     xlabel("Autocorrelation")
     ylabel("VarwNL/VarwoNL")
-    title("Rev-Exp = 100")
+    title("Rev-Exp = 75")
     tight_layout()
-    return rednoise_var_exptermassets
-    # savefig(joinpath(abpath(), "figs/posfeed_variabilityterminalassets_CV.pdf")) 
-end 
+    # return rednoise_var_exptermassets
+    savefig(joinpath(abpath(), "figs/posfeed_variabilityterminalassets_abs.pdf")) 
+end
 
-## Time Delay ##
-#Read in data
-#SD
-#Rev/Exp = 1.33
-highymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_133_timedelay_data.csv"), DataFrame))
-medymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_133_timedelay_data.csv"), DataFrame))
-lowymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_133_timedelay_data.csv"), DataFrame))
-#Rev/Exp = 1.08
-highymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_108_timedelay_data.csv"), DataFrame))
-medymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_108_timedelay_data.csv"), DataFrame))
-lowymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_108_timedelay_data.csv"), DataFrame))
-
-medymax_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_115_timedelay_data.csv"), DataFrame))
 
 #CV
 highymax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_133_timedelay_data_CV.csv"), DataFrame))
@@ -192,32 +273,17 @@ highymax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"da
 medymax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_108_timedelay_data_CV.csv"), DataFrame))
 lowymax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_108_timedelay_data_CV.csv"), DataFrame))
 
-#Rev-exp=200
-highymax_200_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_200_timedelay_data_abs.csv"), DataFrame))
-medymax_200_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_200_timedelay_data_abs.csv"), DataFrame))
-lowymax_200_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_200_timedelay_data_abs.csv"), DataFrame))
-#Rev-Exp = 100
-highymax_100_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_100_timedelay_data_abs.csv"), DataFrame))
-medymax_100_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_100_timedelay_data_abs.csv"), DataFrame))
-lowymax_100_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_100_timedelay_data_abs.csv"), DataFrame))
+#Rev-exp=225
+highymax_225_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_225_timedelay_data_abs.csv"), DataFrame))
+medymax_225_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_225_timedelay_data_abs.csv"), DataFrame))
+lowymax_225_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_225_timedelay_data_abs.csv"), DataFrame))
+#Rev-Exp = 75
+highymax_75_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_75_timedelay_data_abs.csv"), DataFrame))
+medymax_75_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_75_timedelay_data_abs.csv"), DataFrame))
+lowymax_75_timedelay_data_abs = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_75_timedelay_data_abs.csv"), DataFrame))
 
 
-# Changing Rev/Exp ratio
-let 
-    medymax_133 = variabilityterminalassets_rednoise(medymax_133_timedelay_data)
-    medymax_115 = variabilityterminalassets_rednoise(medymax_115_timedelay_data)
-    medymax_108 = variabilityterminalassets_rednoise(medymax_108_timedelay_data)
-    var_changingrevexp = figure(figsize=(5,4))    
-    plot(medymax_133[:,1], medymax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(medymax_115[:,1], medymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(medymax_108[:,1], medymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    xlabel("Autocorrelation")
-    ylabel("VarwNL/VarwoNL")
-    legend()
-    # return var_changingrevexp
-    savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelay.pdf")) 
-end 
-
+# Time delay
 #Variability Terminal Assets #SD
 let 
     highymax_133 = variabilityterminalassets_rednoise(highymax_133_timedelay_data)
@@ -278,43 +344,39 @@ let
     # xlim(0.0,0.8)
     title("Rev/Exp = 1.08")
     tight_layout()
-    return rednoise_var_exptermassets
-    # savefig(joinpath(abpath(), "figs/timedelay_variabilityterminalassets_CV.pdf")) 
+    # return rednoise_var_exptermassets
+    savefig(joinpath(abpath(), "figs/timedelay_variabilityterminalassets_CV.pdf")) 
 end
 
 #Rev-exp
 let 
-    highymax_200 = variabilityterminalassets_rednoise(highymax_200_timedelay_data_abs)
-    highymax_100 = variabilityterminalassets_rednoise(highymax_100_timedelay_data_abs)
-    medymax_200 = variabilityterminalassets_rednoise(medymax_200_timedelay_data_abs)
-    medymax_100 = variabilityterminalassets_rednoise(medymax_100_timedelay_data_abs)
-    lowymax_200 = variabilityterminalassets_rednoise(lowymax_200_timedelay_data_abs)
-    lowymax_100 = variabilityterminalassets_rednoise(lowymax_100_timedelay_data_abs)
+    highymax_225 = variabilityterminalassets_rednoise(highymax_225_timedelay_data_abs)
+    highymax_75 = variabilityterminalassets_rednoise(highymax_75_timedelay_data_abs)
+    medymax_225 = variabilityterminalassets_rednoise(medymax_225_timedelay_data_abs)
+    medymax_75 = variabilityterminalassets_rednoise(medymax_75_timedelay_data_abs)
+    lowymax_225 = variabilityterminalassets_rednoise(lowymax_225_timedelay_data_abs)
+    lowymax_75 = variabilityterminalassets_rednoise(lowymax_75_timedelay_data_abs)
     rednoise_var_exptermassets = figure(figsize=(4,6))    
     subplot(2,1,1)
-    plot(highymax_200[:,1], highymax_200[:,4], color="blue", label="High ymax")
-    plot(medymax_200[:,1], medymax_200[:,4], color="red", label="Med ymax")
-    plot(lowymax_200[:,1], lowymax_200[:,4], color="purple", label="Low ymax")
+    plot(highymax_225[:,1], highymax_225[:,4], color="blue", label="High ymax")
+    plot(medymax_225[:,1], medymax_225[:,4], color="red", label="Med ymax")
+    plot(lowymax_225[:,1], lowymax_225[:,4], color="purple", label="Low ymax")
     # ylim(-90,40)
     xlabel("Autocorrelation")
     ylabel("VarwNL/VarwoNL")
-    title("Rev-Exp = 200")
+    title("Rev-Exp = 225")
     subplot(2,1,2)
-    plot(highymax_100[:,1], highymax_100[:,4], color="blue", label="High ymax")
-    plot(medymax_100[:,1], medymax_100[:,4], color="red", label="Med ymax")
-    plot(lowymax_100[:,1], lowymax_100[:,4], color="purple", label="Low ymax")
+    plot(highymax_75[:,1], highymax_75[:,4], color="blue", label="High ymax")
+    plot(medymax_75[:,1], medymax_75[:,4], color="red", label="Med ymax")
+    plot(lowymax_75[:,1], lowymax_75[:,4], color="purple", label="Low ymax")
     # ylim(-90,40)
     xlabel("Autocorrelation")
     ylabel("VarwNL/VarwoNL")
-    title("Rev-Exp = 100")
+    title("Rev-Exp = 75")
     tight_layout()
-    return rednoise_var_exptermassets
-    # savefig(joinpath(abpath(), "figs/_timedelay_variabilityterminalassets_CV.pdf")) 
+    # return rednoise_var_exptermassets
+    savefig(joinpath(abpath(), "figs/timedelay_variabilityterminalassets_abs.pdf")) 
 end 
-
-
-### Supporting Information
-include("AgriEco_supportinginformation.jl")
 
 
 ## Positive feedbacks
