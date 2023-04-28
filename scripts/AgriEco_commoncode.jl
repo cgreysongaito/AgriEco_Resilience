@@ -362,3 +362,59 @@ function variabilityterminalassets_rednoise(dataset)
     end
     return data
 end
+
+function find_yintercept(slope, ymaxval, recipy0val)
+    return ymaxval - slope * recipy0val
+end
+
+function guess_revexpintercept(revexpval, basepar, linslope, linint)
+    ymaxrange = 120.0:2.0:170.0
+    liney0 = [(ymax - linint)/linslope for ymax in ymaxrange]
+    curvey0 = 1 ./ [calc_y0(revexpval, ymax, basepar.c, basepar.p) for ymax in ymaxrange]
+    for i in eachindex(liney0)
+        for j in eachindex(curvey0)
+            if isapprox(liney0[i], curvey0[j], atol=0.05) == true
+                return curvey0[j]
+            end
+        end
+    end
+end
+
+function find_revexpintercept(revexpval, basepar, linslope, linint, guess)
+    return find_zero(y0 -> linslope * (1/y0) + linint - (revexpval * 2 * basepar.c * y0^(1/2))/basepar.p, 1/guess)
+end
+
+function calc_revexpintercept(origymaxval, origrecipy0val, rise, run, revexpval, basepar)
+    linslope = rise/run
+    linint = find_yintercept(linslope, origymaxval, origrecipy0val)
+    guess = guess_revexpintercept(revexpval, basepar, linslope, linint)
+    recipy0intercept = 1/find_revexpintercept(revexpval, basepar, linslope, linint, guess)
+    return recipy0intercept
+end
+
+function calcymaxy0vals(constrain, origymaxval, revexpratios, rise, run, basepar)
+    origy0val = calc_y0(minimum(revexpratios), origymaxval, basepar.c, basepar.p)
+    vals = zeros(length(revexpratios), 2)
+    if constrain == "ymax"
+        for i in eachindex(revexpratios)
+            vals[i, 1] = origymaxval
+            vals[i, 2] = 1/calc_y0(revexpratios[i], origymaxval, basepar.c, basepar.p)
+        end
+    elseif constrain =="y0"
+        for i in eachindex(revexpratios)
+            vals[i, 1] = calc_ymax(revexpratios[i], origy0val, basepar.c, basepar.p)
+            vals[i, 2] = 1/origy0val
+        end
+    elseif constrain == "neither"
+        vals[1,1] = origymaxval
+        vals[1,2] = 1/origy0val
+        for i in 2:length(revexpratios)
+            newrecipy0val = calc_revexpintercept(origymaxval, 1/origy0val, rise, run, revexpratios[i], basepar)
+            vals[i,1] = calc_ymax(revexpratios[i], 1/newrecipy0val, basepar.c, basepar.p)
+            vals[i,2] = newrecipy0val
+        end
+    else
+        error("constrain should be either ymax, y0, or neither")
+    end
+    return vals
+end
