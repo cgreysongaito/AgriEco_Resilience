@@ -85,8 +85,6 @@ end
 constrainymax_133_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_posfeed_data.csv"), DataFrame))
 constrainymax_115_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_115_posfeed_data.csv"), DataFrame))
 constrainymax_108_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_posfeed_data.csv"), DataFrame))
-
-
 let 
     constrainymax_133 = variabilityterminalassets_rednoise(constrainymax_133_posfeed_data)
     constrainymax_115 = variabilityterminalassets_rednoise(constrainymax_115_posfeed_data)
@@ -103,14 +101,17 @@ let
 end 
 
 # Changing Rev/Exp ratio constrain y0
+constrainy0_133_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_133_posfeed_data.csv"), DataFrame))
+constrainy0_115_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_115_posfeed_data.csv"), DataFrame))
+constrainy0_108_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_108_posfeed_data.csv"), DataFrame))
 let 
-    medy0_133 = variabilityterminalassets_rednoise(medy0_133_posfeed_data)
-    medy0_115 = variabilityterminalassets_rednoise(medy0_115_posfeed_data)
-    medy0_108 = variabilityterminalassets_rednoise(medy0_108_posfeed_data)
+    constrainy0_133 = variabilityterminalassets_rednoise(constrainy0_133_posfeed_data)
+    constrainy0_115 = variabilityterminalassets_rednoise(constrainy0_115_posfeed_data)
+    constrainy0_108 = variabilityterminalassets_rednoise(constrainy0_108_posfeed_data)
     var_changingrevexp = figure(figsize=(5,4))    
-    plot(medy0_133[:,1], medy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(medy0_115[:,1], medy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(medy0_108[:,1], medy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(constrainy0_133[:,1], constrainy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainy0_115[:,1], constrainy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainy0_108[:,1], constrainy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation")
     ylabel("VarwNL/VarwoNL")
     legend()
@@ -118,59 +119,201 @@ let
     # savefig(joinpath(abpath(), "figs/var_changingrevexp_posfeedbacks.pdf")) 
 end 
 
+#CV
+#Changing both ymax and y0
+changeboth_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/changeboth_133_posfeed_data_CV.csv"), DataFrame))
+changeboth_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/changeboth_115_posfeed_data_CV.csv"), DataFrame))
+changeboth_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/changeboth_108_posfeed_data_CV.csv"), DataFrame))
+
+let 
+    changeboth_133 = variabilityterminalassets_rednoise(changeboth_133_posfeed_data_CV)
+    changeboth_115 = variabilityterminalassets_rednoise(changeboth_115_posfeed_data_CV)
+    changeboth_108 = variabilityterminalassets_rednoise(changeboth_108_posfeed_data_CV)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(changeboth_133[:,1], changeboth_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(changeboth_115[:,1], changeboth_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(changeboth_108[:,1], changeboth_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_posfeedbacks.pdf")) 
+end 
+
+# Changing Rev/Exp ratio constrain ymax
+constrainymax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_posfeed_data_CV.csv"), DataFrame))
+constrainymax_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_115_posfeed_data_CV.csv"), DataFrame))
+constrainymax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_posfeed_data_CV.csv"), DataFrame))
+let 
+    constrainymax_133 = variabilityterminalassets_rednoise(constrainymax_133_posfeed_data_CV)
+    constrainymax_115 = variabilityterminalassets_rednoise(constrainymax_115_posfeed_data_CV)
+    constrainymax_108 = variabilityterminalassets_rednoise(constrainymax_108_posfeed_data_CV)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(constrainymax_133[:,1], constrainymax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainymax_115[:,1], constrainymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainymax_108[:,1], constrainymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_posfeedbacks.pdf")) 
+end 
+
+# Changing Rev/Exp ratio constrain y0
+constrainy0_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_133_posfeed_data_CV.csv"), DataFrame))
+constrainy0_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_115_posfeed_data_CV.csv"), DataFrame))
+constrainy0_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_108_posfeed_data_CV.csv"), DataFrame))
+let 
+    constrainy0_133 = variabilityterminalassets_rednoise(constrainy0_133_posfeed_data_CV)
+    constrainy0_115 = variabilityterminalassets_rednoise(constrainy0_115_posfeed_data_CV)
+    constrainy0_108 = variabilityterminalassets_rednoise(constrainy0_108_posfeed_data_CV)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(constrainy0_133[:,1], constrainy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainy0_115[:,1], constrainy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainy0_108[:,1], constrainy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_posfeedbacks.pdf")) 
+end 
  
 
 ## Time Delay ##
 #Read in data
 #SD
 #Rev/Exp = 1.33
-highymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_133_timedelay_data.csv"), DataFrame))
-medymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_133_timedelay_data.csv"), DataFrame))
-lowymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_133_timedelay_data.csv"), DataFrame))
-#Rev/Exp = 1.08
-highymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_108_timedelay_data.csv"), DataFrame))
-medymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_108_timedelay_data.csv"), DataFrame))
-lowymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_108_timedelay_data.csv"), DataFrame))
+# highymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_133_timedelay_data.csv"), DataFrame))
+# medymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_133_timedelay_data.csv"), DataFrame))
+# lowymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_133_timedelay_data.csv"), DataFrame))
+# #Rev/Exp = 1.08
+# highymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/highymax_108_timedelay_data.csv"), DataFrame))
+# medymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_108_timedelay_data.csv"), DataFrame))
+# lowymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/lowymax_108_timedelay_data.csv"), DataFrame))
 
-medymax_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_115_timedelay_data.csv"), DataFrame))
-
-
-medy0_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_133_timedelay_data.csv"), DataFrame))
-medy0_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_115_timedelay_data.csv"), DataFrame))
-medy0_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_108_timedelay_data.csv"), DataFrame))
+# medymax_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medymax_115_timedelay_data.csv"), DataFrame))
 
 
+# medy0_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_133_timedelay_data.csv"), DataFrame))
+# medy0_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_115_timedelay_data.csv"), DataFrame))
+# medy0_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/medy0_108_timedelay_data.csv"), DataFrame))
 
-# Changing Rev/Exp ratio - constrain ymax
+#Variability Terminal Assets
+#Changing both ymax and y0
+changeboth_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/changeboth_133_timedelay_data.csv"), DataFrame))
+changeboth_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/changeboth_115_timedelay_data.csv"), DataFrame))
+changeboth_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/changeboth_108_timedelay_data.csv"), DataFrame))
+
 let 
-    medymax_133 = variabilityterminalassets_rednoise(medymax_133_timedelay_data)
-    medymax_115 = variabilityterminalassets_rednoise(medymax_115_timedelay_data)
-    medymax_108 = variabilityterminalassets_rednoise(medymax_108_timedelay_data)
+    changeboth_133 = variabilityterminalassets_rednoise(changeboth_133_timedelay_data)
+    changeboth_115 = variabilityterminalassets_rednoise(changeboth_115_timedelay_data)
+    changeboth_108 = variabilityterminalassets_rednoise(changeboth_108_timedelay_data)
     var_changingrevexp = figure(figsize=(5,4))    
-    plot(medymax_133[:,1], medymax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(medymax_115[:,1], medymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(medymax_108[:,1], medymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    xlabel("Autocorrelation")
-    ylabel("VarwNL/VarwoNL")
-    legend()
-    # return var_changingrevexp
-    savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelay.pdf")) 
-end 
-
-# Changing Rev/Exp ratio - constrain y0
-let 
-    medy0_133 = variabilityterminalassets_rednoise(medy0_133_timedelay_data)
-    medy0_115 = variabilityterminalassets_rednoise(medy0_115_timedelay_data)
-    medy0_108 = variabilityterminalassets_rednoise(medy0_108_timedelay_data)
-    var_changingrevexp = figure(figsize=(5,4))    
-    plot(medy0_133[:,1], medy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(medy0_115[:,1], medy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(medy0_108[:,1], medy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(changeboth_133[:,1], changeboth_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(changeboth_115[:,1], changeboth_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(changeboth_108[:,1], changeboth_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation")
     ylabel("VarwNL/VarwoNL")
     legend()
     return var_changingrevexp
-    # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelay.pdf")) 
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelaybacks.pdf")) 
+end 
+
+# Changing Rev/Exp ratio constrain ymax
+constrainymax_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_timedelay_data.csv"), DataFrame))
+constrainymax_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_115_timedelay_data.csv"), DataFrame))
+constrainymax_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_timedelay_data.csv"), DataFrame))
+let 
+    constrainymax_133 = variabilityterminalassets_rednoise(constrainymax_133_timedelay_data)
+    constrainymax_115 = variabilityterminalassets_rednoise(constrainymax_115_timedelay_data)
+    constrainymax_108 = variabilityterminalassets_rednoise(constrainymax_108_timedelay_data)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(constrainymax_133[:,1], constrainymax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainymax_115[:,1], constrainymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainymax_108[:,1], constrainymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelaybacks.pdf")) 
+end 
+
+# Changing Rev/Exp ratio constrain y0
+constrainy0_133_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_133_timedelay_data.csv"), DataFrame))
+constrainy0_115_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_115_timedelay_data.csv"), DataFrame))
+constrainy0_108_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_108_timedelay_data.csv"), DataFrame))
+let 
+    constrainy0_133 = variabilityterminalassets_rednoise(constrainy0_133_timedelay_data)
+    constrainy0_115 = variabilityterminalassets_rednoise(constrainy0_115_timedelay_data)
+    constrainy0_108 = variabilityterminalassets_rednoise(constrainy0_108_timedelay_data)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(constrainy0_133[:,1], constrainy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainy0_115[:,1], constrainy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainy0_108[:,1], constrainy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelaybacks.pdf")) 
+end 
+
+#Variability Terminal Assets - #CV IS DOING CRAZY STUFF - DON"T KNOW WHY!
+#Changing both ymax and y0 - CV
+changeboth_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/changeboth_133_timedelay_data_CV.csv"), DataFrame))
+changeboth_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/changeboth_115_timedelay_data_CV.csv"), DataFrame))
+changeboth_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/changeboth_108_timedelay_data_CV.csv"), DataFrame))
+
+let 
+    changeboth_133 = variabilityterminalassets_rednoise(changeboth_133_timedelay_data_CV)
+    changeboth_115 = variabilityterminalassets_rednoise(changeboth_115_timedelay_data_CV)
+    # changeboth_108 = variabilityterminalassets_rednoise(changeboth_108_timedelay_data_CV)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(changeboth_133[:,1], changeboth_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(changeboth_115[:,1], changeboth_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    # plot(changeboth_108[:,1], changeboth_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelaybacks.pdf")) 
+end 
+
+# Changing Rev/Exp ratio constrain ymax - CV
+constrainymax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_timedelay_data_CV.csv"), DataFrame))
+constrainymax_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_115_timedelay_data_CV.csv"), DataFrame))
+constrainymax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_timedelay_data_CV.csv"), DataFrame))
+let 
+    constrainymax_133 = variabilityterminalassets_rednoise(constrainymax_133_timedelay_data_CV)
+    constrainymax_115 = variabilityterminalassets_rednoise(constrainymax_115_timedelay_data_CV)
+    constrainymax_108 = variabilityterminalassets_rednoise(constrainymax_108_timedelay_data_CV)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(constrainymax_133[:,1], constrainymax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainymax_115[:,1], constrainymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainymax_108[:,1], constrainymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelaybacks.pdf")) 
+end 
+
+# Changing Rev/Exp ratio constrain y0 -CV
+constrainy0_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_133_timedelay_data_CV.csv"), DataFrame))
+constrainy0_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_115_timedelay_data_CV.csv"), DataFrame))
+constrainy0_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_108_timedelay_data_CV.csv"), DataFrame))
+let 
+    constrainy0_133 = variabilityterminalassets_rednoise(constrainy0_133_timedelay_data_CV)
+    constrainy0_115 = variabilityterminalassets_rednoise(constrainy0_115_timedelay_data_CV)
+    constrainy0_108 = variabilityterminalassets_rednoise(constrainy0_108_timedelay_data_CV)
+    var_changingrevexp = figure(figsize=(5,4))    
+    plot(constrainy0_133[:,1], constrainy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainy0_115[:,1], constrainy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainy0_108[:,1], constrainy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("Autocorrelation")
+    ylabel("VarwNL/VarwoNL")
+    legend()
+    return var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelaybacks.pdf")) 
 end 
 
 ### Supporting Information

@@ -1,92 +1,46 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
 
-
-#Yield curves - type III
-let 
-    Irange = 0.0:0.01:20.0
-    datahymaxhyo = [yieldIII(I, FarmBasePar(ymax = 174.0, y0 = 10, p = 6.70, c = 139)) for I in Irange]
-    datalymaxhyo = [yieldIII(I, FarmBasePar(ymax = 124.0, y0 = 10, p = 6.70, c = 139)) for I in Irange]
-    datahymaxlyo = [yieldIII(I, FarmBasePar(ymax = 174.0, y0 = 2, p = 6.70, c = 139)) for I in Irange]
-    datalymaxlyo = [yieldIII(I, FarmBasePar(ymax = 124.0, y0 = 2, p = 6.70, c = 139)) for I in Irange]
-    typeIIIparamfigure = figure()
-    subplot(2,2,1)
-    plot(Irange, datahymaxhyo)
-    xlabel("Inputs")
-    ylabel("Yield")
-    ylim(0.0, 180.0)
-    subplot(2,2,2)
-    plot(Irange, datalymaxhyo)
-    xlabel("Inputs")
-    ylabel("Yield")
-    ylim(0.0, 180.0)
-    subplot(2,2,3)
-    plot(Irange, datahymaxlyo)
-    xlabel("Inputs")
-    ylabel("Yield")
-    ylim(0.0, 180.0)
-    subplot(2,2,4)
-    plot(Irange, datalymaxlyo)
-    xlabel("Inputs")
-    ylabel("Yield")
-    ylim(0.0, 180.0)
-    tight_layout()
-    return typeIIIparamfigure
-    # savefig(joinpath(abpath(), "figs/typeIIIparamfigure.png"))
-end
-
-#https://www.economics.utoronto.ca/osborne/2x3/tutorial/MPFRM.HTM
+#Distance to MR AVC intersection
 #Marginal revenue versus marginal cost figures
 let 
-    par1 = FarmBasePar(ymax = 174.0, y0 = 10, p = 6.70, c = 139)
-    par2 = FarmBasePar(ymax = 124.0, y0 = 10, p = 6.70, c = 139)
-    par3 = FarmBasePar(ymax = 174.0, y0 = 2, p = 6.70, c = 139)
-    par4 = FarmBasePar(ymax = 124.0, y0 = 2, p = 6.70, c = 139)
+    lowymaxvalue = 140
+    rise= 10
+    run = 0.02
+    ymaxy0vals = calcymaxy0vals("ymax", lowymaxvalue, [1.08,1.15,1.33], rise, run, EconomicPar())
     Irange = 0.0:0.01:20.0
-    Yield1 = [yieldIII(I, par1) for I in Irange]
-    MC1 = [margcostIII(I, par1) for I in Irange]
-    AVC1 = [avvarcostIII(I,par1) for I in Irange]
-    Yield2 = [yieldIII(I, par2) for I in Irange]
-    MC2 = [margcostIII(I, par2) for I in Irange]
-    AVC2 = [avvarcostIII(I,par2) for I in Irange]
-    Yield3 = [yieldIII(I, par3) for I in Irange]
-    MC3 = [margcostIII(I, par3) for I in Irange]
-    AVC3 = [avvarcostIII(I,par3) for I in Irange]
-    Yield4 = [yieldIII(I, par4) for I in Irange]
-    MC4 = [margcostIII(I, par4) for I in Irange]
-    AVC4 = [avvarcostIII(I,par4) for I in Irange]
+    Yield1 = [yieldIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    AVC1 = [avvarcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    Yield2 = [yieldIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    AVC2 = [avvarcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    Yield3 = [yieldIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2]) for I in Irange]
+    MC3 = [margcostIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2], EconomicPar()) for I in Irange]
+    AVC3 = [avvarcostIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2], EconomicPar()) for I in Irange]
     costcurves = figure()
-    subplot(2,2,1)
+    subplot(3,1,1)
     plot(Yield1, MC1, color="blue", label="MC")
     plot(Yield1, AVC1, color="orange", label="AVC")
-    hlines(par1.p, 0.0, 180.0, colors="black", label = "MR")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
     legend()
     ylim(0.0, 10.0)
     xlim(0.0, 180.0)
     xlabel("Yield (Q)")
     ylabel("Revenue & Cost")
-    subplot(2,2,2)
+    subplot(3,1,2)
     plot(Yield2, MC2, color="blue", label="MC")
     plot(Yield2, AVC2, color="orange", label="AVC")
-    hlines(par2.p, 0.0, 180.0, colors="black", label = "MR")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
     legend()
     ylim(0.0, 10.0)
     xlim(0.0, 180.0)
     xlabel("Yield (Q)")
     ylabel("Revenue & Cost")
-    subplot(2,2,3)
+    subplot(3,1,3)
     plot(Yield3, MC3, color="blue", label="MC")
     plot(Yield3, AVC3, color="orange", label="AVC")
-    hlines(par3.p, 0.0, 180.0, colors="black", label = "MR")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    subplot(2,2,4)
-    plot(Yield4, MC4, color="blue", label="MC")
-    plot(Yield4, AVC4, color="orange", label="AVC")
-    hlines(par4.p, 0.0, 180.0, colors="black", label = "MR")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
     legend()
     ylim(0.0, 10.0)
     xlim(0.0, 180.0)
@@ -95,304 +49,192 @@ let
     tight_layout()
     return costcurves
     # savefig(joinpath(abpath(), "figs/costcurves.png"))
-end            
+end   
 
 let 
-    par1 = FarmBasePar(ymax = 174.0, y0 = 10, p = 6.70, c = 139)
-    par2 = FarmBasePar(ymax = 124.0, y0 = 10, p = 6.70, c = 139)
-    par3 = FarmBasePar(ymax = 174.0, y0 = 2, p = 6.70, c = 139)
-    par4 = FarmBasePar(ymax = 124.0, y0 = 2, p = 6.70, c = 139)
+    lowymaxvalue = 140
+    rise= 10
+    run = 0.02
+    ymaxy0vals = calcymaxy0vals("y0", lowymaxvalue, [1.08,1.15,1.33], rise, run, EconomicPar())
     Irange = 0.0:0.01:20.0
-    Yrange = 0.0:0.01:180.0
-    Yield1 = [yieldIII(I, par1) for I in Irange]
-    MC1 = [margcostIII(I, par1) for I in Irange]
-    AVC1 = [avvarcostIII(I,par1) for I in Irange]
-    AVCK1 = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
-    Yield2 = [yieldIII(I, par2) for I in Irange]
-    MC2 = [margcostIII(I, par2) for I in Irange]
-    AVC2 = [avvarcostIII(I,par2) for I in Irange]
-    AVCK2 = [avvarcostkickIII(Y, par2, "profit") for Y in Yrange]
-    Yield3 = [yieldIII(I, par3) for I in Irange]
-    MC3 = [margcostIII(I, par3) for I in Irange]
-    AVC3 = [avvarcostIII(I,par3) for I in Irange]
-    AVCK3 = [avvarcostkickIII(Y, par3, "profit") for Y in Yrange]
-    Yield4 = [yieldIII(I, par4) for I in Irange]
-    MC4 = [margcostIII(I, par4) for I in Irange]
-    AVC4 = [avvarcostIII(I,par4) for I in Irange]
-    AVCK4 = [avvarcostkickIII(Y, par4, "profit") for Y in Yrange]
-    costcurveskick = figure()
-    subplot(2,2,1)
-    # plot(Yield1, MC1, color="blue", label="MC")
-    # plot(Yield1, AVC1, color="orange", label="AVC")
-    plot(Yrange, AVCK1, color="green", label="AVCK")
-    hlines(par1.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxprofitIII_vals(par1)[2], 0.0, 10.0, colors="red", label="Input Decision")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    subplot(2,2,2)
-    # plot(Yield2, MC2, color="blue", label="MC")
-    # plot(Yield2, AVC2, color="orange", label="AVC")
-    plot(Yrange, AVCK2, color="green", label="AVCK")
-    hlines(par2.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxprofitIII_vals(par2)[2], 0.0, 10.0, colors="red", label="Input Decision")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    subplot(2,2,3)
-    # plot(Yield3, MC3, color="blue", label="MC")
-    # plot(Yield3, AVC3, color="orange", label="AVC")
-    plot(Yrange, AVCK3, color="green", label="AVCK")
-    hlines(par3.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxprofitIII_vals(par3)[2], 0.0, 10.0, colors="red", label="Input Decision")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    subplot(2,2,4)
-    # plot(Yield4, MC4, color="blue", label="MC")
-    # plot(Yield4, AVC4, color="orange", label="AVC")
-    plot(Yrange, AVCK4, color="green", label="AVCK")
-    hlines(par4.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxprofitIII_vals(par4)[2], 0.0, 10.0, colors="red", label="Input Decision")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    tight_layout()
-    return costcurveskick
-    # savefig(joinpath(abpath(), "figs/costcurveskick.png"))
-end 
-
-let #MIGHT NEED TO WORK ON CHANGING RATIO OF y0/c OR changing slope for maxyield
-    par1 = FarmBasePar(ymax = 174.0, y0 = 10, p = 6.70, c = 139)
-    maxyieldslope = 1.0
-    Irange = 0.0:0.01:50.0
-    Yrange = 0.0:0.01:180.0
-    Yield1 = [yieldIII(I, par1) for I in Irange]
-    MC1 = [margcostIII(I, par1) for I in Irange]
-    AVC1 = [avvarcostIII(I,par1) for I in Irange]
-    AVCK_profit = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
-    AVCK_yield = [avvarcostkickIII(Y, par1, "yield", maxyieldslope) for Y in Yrange]
-    costcurves = figure(figsize=(8,3.8))
-    subplot(1,2,1)
+    Yield1 = [yieldIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    AVC1 = [avvarcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    Yield2 = [yieldIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    AVC2 = [avvarcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    Yield3 = [yieldIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2]) for I in Irange]
+    MC3 = [margcostIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2], EconomicPar()) for I in Irange]
+    AVC3 = [avvarcostIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2], EconomicPar()) for I in Irange]
+    costcurves = figure()
+    subplot(3,1,1)
     plot(Yield1, MC1, color="blue", label="MC")
     plot(Yield1, AVC1, color="orange", label="AVC")
-    hlines(par1.p, 0.0, 180.0, colors="black", label = "MR")
-    plot(Yrange, AVCK_profit, color="green", label="DAVC")
-    vlines(maxprofitIII_vals(par1)[2], 0.0, 30.0, colors="red", label="Max Profit\nInput Decision")
-    ylim(0.0, 30.0)
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 10.0)
     xlim(0.0, 180.0)
     xlabel("Yield (Q)")
     ylabel("Revenue & Cost")
+    subplot(3,1,2)
+    plot(Yield2, MC2, color="blue", label="MC")
+    plot(Yield2, AVC2, color="orange", label="AVC")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
     legend()
-    subplot(1,2,2)
-    plot(Yield1, MC1, color="blue", label="MC")
-    plot(Yield1, AVC1, color="orange", label="AVC")
-    hlines(par1.p, 0.0, 180.0, colors="black", label = "MR")
-    plot(Yrange, AVCK_yield, color="green", label="DAVC")
-    vlines(maxyieldIII_vals(maxyieldslope, par1)[2], 0.0, 30.0, colors="red", label="Max Yield\nInput Decision")
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(3,1,3)
+    plot(Yield3, MC3, color="blue", label="MC")
+    plot(Yield3, AVC3, color="orange", label="AVC")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
     legend()
-    ylim(0.0, 30.0)
+    ylim(0.0, 10.0)
     xlim(0.0, 180.0)
     xlabel("Yield (Q)")
     ylabel("Revenue & Cost")
     tight_layout()
     return costcurves
-    # savefig(joinpath(abpath(), "figs/costcurves_schematic.png"))
+    # savefig(joinpath(abpath(), "figs/costcurves.png"))
+end  
+
+#Absorbing of errors (DAVC)
+function IYset(ymaxy0vals, economicpar)
+    IYdata = zeros(size(ymaxy0vals,1), 2)
+    for i in 1:size(ymaxy0vals,1)
+        IY = maxprofitIII_vals(ymaxy0vals[i,1],ymaxy0vals[i,2], economicpar)
+        IYdata[i,1] = IY[1]
+        IYdata[i,2] = IY[2]
+    end
+    return IYdata
 end
+
+
+lowymaxvalue = 140
+rise= 10
+run = 0.02
+Yrange = 0.0:0.1:180.0
+ymaxy0vals = calcymaxy0vals("ymax", lowymaxvalue, [1.08,1.15,1.33], rise, run, EconomicPar())
+IYvals = IYset(ymaxy0vals, EconomicPar())
+DAVC1a = [avvarcostkickIII(IYvals[1,1]-1, Y, EconomicPar()) for Y in Yrange]
+DAVC1b = [avvarcostkickIII(IYvals[1,1]+1, Y, EconomicPar()) for Y in Yrange]
+DAVC3a = [avvarcostkickIII(IYvals[3,1]-1, Y, EconomicPar()) for Y in Yrange]
+DAVC3b = [avvarcostkickIII(IYvals[3,1]+1, Y, EconomicPar()) for Y in Yrange]
+
+ymaxy0vals2 = calcymaxy0vals("y0", lowymaxvalue, [1.08,1.15,1.33], rise, run, EconomicPar())
+IYvals2 = IYset(ymaxy0vals2, EconomicPar())
+
 
 let 
-    par1 = FarmBasePar(ymax = 174.0, y0 = 10, p = 6.70, c = 139)
-    par3 = FarmBasePar(ymax = 174.0, y0 = 2, p = 6.70, c = 139)
+    lowymaxvalue = 140
+    rise= 10
+    run = 0.02
+    ymaxy0vals = calcymaxy0vals("ymax", lowymaxvalue, [1.08,1.15,1.33], rise, run, EconomicPar())
+    IYvals = IYset(ymaxy0vals, EconomicPar())
     Irange = 0.0:0.01:20.0
-    Yrange = 0.0:0.01:180.0
-    Yield1 = [yieldIII(I, par1) for I in Irange]
-    MC1 = [margcostIII(I, par1) for I in Irange]
-    AVC1 = [avvarcostIII(I,par1) for I in Irange]
-    AVCK1 = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
-    Yield3 = [yieldIII(I, par3) for I in Irange]
-    MC3 = [margcostIII(I, par3) for I in Irange]
-    AVC3 = [avvarcostIII(I,par3) for I in Irange]
-    AVCK3 = [avvarcostkickIII(Y, par3, "profit") for Y in Yrange]
-    costcurveskick = figure(figsize=(3.5,5))
-    subplot(2,1,1)
-    # plot(Yield1, MC1, color="blue", label="MC")
-    # plot(Yield1, AVC1, color="orange", label="AVC")
-    plot(Yrange, AVCK1, color="green", label="AVCK")
-    hlines(par1.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxprofitIII_vals(par1)[2], 0.0, 10.0, colors="red", label="Input Decision")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    subplot(2,1,2)
-    # plot(Yield3, MC3, color="blue", label="MC")
-    # plot(Yield3, AVC3, color="orange", label="AVC")
-    plot(Yrange, AVCK3, color="green", label="AVCK")
-    hlines(par3.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxprofitIII_vals(par3)[2], 0.0, 10.0, colors="red", label="Input Decision")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    tight_layout()
-    return costcurveskick
-    # savefig(joinpath(abpath(), "figs/costcurveskick_small.png"))
-end
-
-let 
-    par1 = FarmBasePar(ymax = 174.0, y0 = 10, p = 6.70, c = 139)
-    par3 = FarmBasePar(ymax = 174.0, y0 = 2, p = 6.70, c = 139)
-    Irange = 0.0:0.01:20.0
-    Yrange = 0.0:0.01:180.0
-    Yield1 = [yieldIII(I, par1) for I in Irange]
-    MC1 = [margcostIII(I, par1) for I in Irange]
-    AVC1 = [avvarcostIII(I,par1) for I in Irange]
-    AVCK1 = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
-    Yield3 = [yieldIII(I, par3) for I in Irange]
-    MC3 = [margcostIII(I, par3) for I in Irange]
-    AVC3 = [avvarcostIII(I,par3) for I in Irange]
-    AVCK3 = [avvarcostkickIII(Y, par3, "profit") for Y in Yrange]
-    costcurveskick = figure(figsize=(3.5,5))
-    subplot(2,1,1)
-    # plot(Yield1, MC1, color="blue", label="MC")
-    plot(Yield1, AVC1, color="orange", label="AVC")
-    # plot(Yrange, AVCK1, color="green", label="AVCK")
-    hlines(par1.p, 0.0, 180.0, colors="black", label = "MR")
-    hlines(par1.p+0.8, 0.0, 180.0, colors="black", linestyles="dashed")
-    hlines(par1.p-0.8, 0.0, 180.0, colors="black", linestyles="dashed")
-    vlines(maxprofitIII_vals(par1)[2], 0.0, 10.0, colors="red", label="Input Decision")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    subplot(2,1,2)
-    # plot(Yield3, MC3, color="blue", label="MC")
-    plot(Yield3, AVC3, color="orange", label="AVC")
-    # plot(Yrange, AVCK3, color="green", label="AVCK")
-    hlines(par3.p, 0.0, 180.0, colors="black", label = "MR")
-    hlines(par3.p+0.8, 0.0, 180.0, colors="black", linestyles="dashed")
-    hlines(par3.p-0.8, 0.0, 180.0, colors="black", linestyles="dashed")
-    vlines(maxprofitIII_vals(par3)[2], 0.0, 10.0, colors="red", label="Input Decision")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    tight_layout()
-    return costcurveskick
-    # savefig(joinpath(abpath(), "figs/costcurveskick_pricevariability.png"))
-end
-
-let #MIGHT NEED TO WORK ON CHANGING RATIO OF y0/c OR changing slope for maxyield
-    par1 = FarmBasePar(ymax = 174.0, y0 = 10, p = 6.70, c = 139)
-    Irange = 0.0:0.01:30.0
-    Yrange = 0.0:0.01:180.0
-    Yield1 = [yieldIII(I, par1) for I in Irange]
-    MC1 = [margcostIII(I, par1) for I in Irange]
-    AVC1 = [avvarcostIII(I,par1) for I in Irange]
-    AVCK1 = [avvarcostkickIII(Y, par1, "profit") for Y in Yrange]
-    costcurveskick = figure(figsize=(3.5,2.5))
-    # plot(Yield1, MC1, color="blue", label="MC")
-    plot(Yield1, AVC1, color="orange", label="AVC")
-    # plot(Yrange, AVCK1, color="green", label="AVCK")
-    hlines(par1.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxprofitIII_vals(par1)[2], 0.0, 10.0, colors="red", label="Max profit")
-    vlines(maxyieldIII_vals(1.0, par1)[2], 0.0, 10.0, colors="red", linestyles="dashed", label="Max yield")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    return costcurveskick
-    # savefig(joinpath(abpath(), "figs/costcurvesmaxprofitvsmaxyield.png"))
-end
-
-
-# Trying out visulisation of max yield curves
-let #MIGHT NEED TO WORK ON CHANGING RATIO OF y0/c OR changing slope for maxyield
-    par1 = FarmBasePar(ymax = 174.0, y0 = 10, p = 6.70, c = 139)
-    par2 = FarmBasePar(ymax = 124.0, y0 = 10, p = 6.70, c = 139)
-    par3 = FarmBasePar(ymax = 174.0, y0 = 2, p = 6.70, c = 139)
-    par4 = FarmBasePar(ymax = 124.0, y0 = 2, p = 6.70, c = 139)
-    maxyieldslope = 1.0
-    Irange = 0.0:0.01:30.0
-    Yrange = 0.0:0.01:1.0
-    Yield1 = [yieldIII(I, par1) for I in Irange]
-    MC1 = [margcostIII(I, par1) for I in Irange]
-    AVC1 = [avvarcostIII(I,par1) for I in Irange]
-    AVCK1 = [avvarcostkickIII(Y, par1, "yield", maxyieldslope) for Y in Yrange]
-    Yield2 = [yieldIII(I, par2) for I in Irange]
-    MC2 = [margcostIII(I, par2) for I in Irange]
-    AVC2 = [avvarcostIII(I,par2) for I in Irange]
-    AVCK2 = [avvarcostkickIII(Y, par2, "yield", maxyieldslope) for Y in Yrange]
-    Yield3 = [yieldIII(I, par3) for I in Irange]
-    MC3 = [margcostIII(I, par3) for I in Irange]
-    AVC3 = [avvarcostIII(I,par3) for I in Irange]
-    AVCK3 = [avvarcostkickIII(Y, par3, "yield", maxyieldslope) for Y in Yrange]
-    Yield4 = [yieldIII(I, par4) for I in Irange]
-    MC4 = [margcostIII(I, par4) for I in Irange]
-    AVC4 = [avvarcostIII(I,par4) for I in Irange]
-    AVCK4 = [avvarcostkickIII(Y, par4, "yield", maxyieldslope) for Y in Yrange]
-    costcurveskick = figure()
-    subplot(2,2,1)
+    Yrange = 0.0:0.1:180.0
+    Yield1 = [yieldIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    AVC1 = [avvarcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    DAVC1a = [avvarcostkickIII(IYvals[1,1]-1, Y, EconomicPar()) for Y in Yrange]
+    DAVC1b = [avvarcostkickIII(IYvals[1,1]+1, Y, EconomicPar()) for Y in Yrange]
+    Yield2 = [yieldIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    AVC2 = [avvarcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    DAVC2a = [avvarcostkickIII(IYvals[2,1]-1, Y, EconomicPar()) for Y in Yrange]
+    DAVC2b = [avvarcostkickIII(IYvals[2,1]+1, Y, EconomicPar()) for Y in Yrange]
+    Yield3 = [yieldIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2]) for I in Irange]
+    MC3 = [margcostIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2], EconomicPar()) for I in Irange]
+    AVC3 = [avvarcostIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2], EconomicPar()) for I in Irange]
+    DAVC3a = [avvarcostkickIII(IYvals[3,1]-1, Y, EconomicPar()) for Y in Yrange]
+    DAVC3b = [avvarcostkickIII(IYvals[3,1]+1, Y, EconomicPar()) for Y in Yrange]
+    costcurves = figure(figsize=(7,9))
+    subplot(3,1,1)
     plot(Yield1, MC1, color="blue", label="MC")
     plot(Yield1, AVC1, color="orange", label="AVC")
-    plot(Yrange, AVCK1, color="green", label="AVCK")
-    hlines(par1.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxyieldIII_vals(maxyieldslope, par1)[2], 0.0, 10.0, label = "MxY")
+    plot(Yrange, DAVC1a, color="black", linestyle="dashed")
+    plot(Yrange, DAVC1b, color="black")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
     legend()
     ylim(0.0, 10.0)
     xlim(0.0, 180.0)
     xlabel("Yield (Q)")
     ylabel("Revenue & Cost")
-    subplot(2,2,2)
+    subplot(3,1,2)
     plot(Yield2, MC2, color="blue", label="MC")
     plot(Yield2, AVC2, color="orange", label="AVC")
-    plot(Yrange, AVCK2, color="green", label="AVCK")
-    hlines(par2.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxyieldIII_vals(maxyieldslope, par2)[2], 0.0, 10.0, label = "MxY")
+    plot(Yrange, DAVC2a, color="black", linestyle="dashed")
+    plot(Yrange, DAVC2b, color="black")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
     legend()
     ylim(0.0, 10.0)
     xlim(0.0, 180.0)
     xlabel("Yield (Q)")
     ylabel("Revenue & Cost")
-    subplot(2,2,3)
+    subplot(3,1,3)
     plot(Yield3, MC3, color="blue", label="MC")
     plot(Yield3, AVC3, color="orange", label="AVC")
-    plot(Yrange, AVCK3, color="green", label="AVCK")
-    hlines(par3.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxyieldIII_vals(maxyieldslope, par3)[2], 0.0, 10.0, label = "MxY")
-    legend()
-    ylim(0.0, 10.0)
-    xlim(0.0, 180.0)
-    xlabel("Yield (Q)")
-    ylabel("Revenue & Cost")
-    subplot(2,2,4)
-    plot(Yield4, MC4, color="blue", label="MC")
-    plot(Yield4, AVC4, color="orange", label="AVC")
-    plot(Yrange, AVCK4, color="green", label="AVCK")
-    hlines(par4.p, 0.0, 180.0, colors="black", label = "MR")
-    vlines(maxyieldIII_vals(maxyieldslope, par4)[2], 0.0, 10.0, label = "MxY")
+    plot(Yrange, DAVC3a, color="black", linestyle="dashed")
+    plot(Yrange, DAVC3b, color="black")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
     legend()
     ylim(0.0, 10.0)
     xlim(0.0, 180.0)
     xlabel("Yield (Q)")
     ylabel("Revenue & Cost")
     tight_layout()
-    return costcurveskick
-    # savefig(joinpath(abpath(), "figs/costcurveskick.png"))
-end 
+    return costcurves
+    # savefig(joinpath(abpath(), "figs/costcurves.png"))
+end   
+
+let 
+    lowymaxvalue = 140
+    rise= 10
+    run = 0.02
+    ymaxy0vals = calcymaxy0vals("y0", lowymaxvalue, [1.08,1.15,1.33], rise, run, EconomicPar())
+    Irange = 0.0:0.01:20.0
+    Yield1 = [yieldIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    AVC1 = [avvarcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    Yield2 = [yieldIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    AVC2 = [avvarcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    Yield3 = [yieldIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2]) for I in Irange]
+    MC3 = [margcostIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2], EconomicPar()) for I in Irange]
+    AVC3 = [avvarcostIII(I, ymaxy0vals[3,1],ymaxy0vals[3,2], EconomicPar()) for I in Irange]
+    costcurves = figure()
+    subplot(3,1,1)
+    plot(Yield1, MC1, color="blue", label="MC")
+    plot(Yield1, AVC1, color="orange", label="AVC")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(3,1,2)
+    plot(Yield2, MC2, color="blue", label="MC")
+    plot(Yield2, AVC2, color="orange", label="AVC")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(3,1,3)
+    plot(Yield3, MC3, color="blue", label="MC")
+    plot(Yield3, AVC3, color="orange", label="AVC")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    tight_layout()
+    return costcurves
+    # savefig(joinpath(abpath(), "figs/costcurves.png"))
+end  
 
 
 #Comparing the geometry when keeping revenue/expenses the same but changing y0 and c

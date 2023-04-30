@@ -44,122 +44,74 @@ end
 ### Parameters
 
 #Useful functions for setting up parameters
-function param_ratio(par)
-    @unpack y0, ymax, p, c = par
-    return (ymax * p) / (2 * sqrt(y0) * c)
+function param_ratio(ymax, y0, economicpar)
+    return (ymax * economicpar.p) / (2 * sqrt(y0) * economicpar.c)
 end
 
-function param_absolute(par)
-    @unpack y0, ymax, p, c = par
-    return (ymax * p) - (2 * sqrt(y0) * c)
+function param_absolute(ymax, y0, economicpar)
+    return (ymax * economicpar.p) - (2 * sqrt(y0) * economicpar.c)
 end
 
-function calc_c(rev_exp_ratio, ymax, y0, p)
-    return (ymax * p) / (2 * sqrt(y0) * rev_exp_ratio)
+function calc_c(rev_exp_ratio, ymax, y0, economicpar)
+    return (ymax * economicpar.p) / (2 * sqrt(y0) * rev_exp_ratio)
 end
 
-function calc_y0(rev_exp_ratio, ymax, c, p)
-    return ((ymax * p) / (2 * c * rev_exp_ratio) )^2
+function calc_y0(rev_exp_ratio, ymax, economicpar)
+    return ((ymax * economicpar.p) / (2 * economicpar.c * rev_exp_ratio) )^2
 end
 
-function calc_ymax(rev_exp_ratio, y0, c, p)
-    return (rev_exp_ratio * 2 * sqrt(y0) * c) / p
+function calc_ymax(rev_exp_ratio, y0, economicpar)
+    return (rev_exp_ratio * 2 * sqrt(y0) * economicpar.c) / economicpar.p
 end
 
-function calc_c_abs(rev_exp_val, ymax, y0, p)
-    return ( (ymax * p) - rev_exp_val ) / (2 * sqrt(y0))
+function calc_c_abs(rev_exp_val, ymax, y0, economicpar)
+    return ( (ymax * economicpar.p) - rev_exp_val ) / (2 * sqrt(y0))
 end
 
-function calc_y0_abs(rev_exp_val, ymax, c, p)
-    return (((ymax * p) - rev_exp_val ) / (2 * c))^2
+function calc_y0_abs(rev_exp_val, ymax, economicpar)
+    return (((ymax * economicpar.p) - rev_exp_val ) / (2 * economicpar.c))^2
 end
 
-@with_kw mutable struct FarmBasePar
-    ymax = 174.0 # yield per acre #budget summary field crops budgets 2022 corn conventional
-    y0 = 9.9416
+
+# ymax = 174.0 # yield per acre #budget summary field crops budgets 2022 corn conventional
+# y0 = 9.9416
+
+@with_kw mutable struct EconomicPar
     p = 6.70 # market price pert unit (not acre) #budget summary field crops budgets 2022 corn conventional
     c = 139
 end
 
 ### production and marginal functions
 
-function yieldIII(I, par)
-    @unpack ymax, y0 = par
+function yieldIII(I, ymax, y0)
     return ymax * (I^2) / (y0 + (I^2))
 end
 
-function margprodIII(I, par)
-    @unpack ymax, y0 = par
+function margprodIII(I, ymax, y0)
     return 2 * I * ymax * y0 / (( y0 + (I^2) )^2)
 end
 
-function margcostIII(I, par)
-    @unpack c = par
-    return c / margprodIII(I, par)
+function margcostIII(I, ymax, y0, economicpar)
+    return economicpar.c / margprodIII(I, ymax, y0)
 end
 
-function avvarcostIII(I,par)
-    @unpack c = par
-    Y = yieldIII(I, par)
-    return c * I / Y
+function avvarcostIII(I, ymax, y0, economicpar)
+    Y = yieldIII(I, ymax, y0)
+    return economicpar.c * I / Y
 end
-
-# function yieldII(I, par)
-#     @unpack ymax, y0 = par
-#     return ymax * I / (y0 + I)
-# end
-
-# function margprodII(I, par)
-#     @unpack ymax, y0 = par
-#     return ymax * y0 / (( y0 + I )^2)
-# end
-
-# function margcostII(I, par)
-#     @unpack c = par
-#     return c / margprodII(I, par)
-# end
-
-# function avvarcostII(I,par)
-#     @unpack c = par
-#     Y = yieldII(I, par)
-#     return c * I / Y
-# end
 
 ### Input decision functions
 
-function maxprofitIII_param(I, par)
-    @unpack y0, ymax, c, p = par
-    return 2 * I * ymax * y0 / (( y0 + (I^2) )^2) - c/p
+function maxprofitIII_param(I, ymax, y0, economicpar)
+    return 2 * I * ymax * y0 / (( y0 + (I^2) )^2) - economicpar.c/economicpar.p
 end
 
-# function maxprofitIII_vals_original(par)
-#     Irange = 0.0:0.01:Int64(round(3*par.y0))
-#     MC = [margcostIII(I, par) for I in Irange]
-#     if minimum(MC) >= par.p
-#         return [0,0]
-#     else
-#         try
-#         I = find_zero(I -> maxprofitIII_param(I, par), 2 * sqrt(par.y0))
-#         Y = yieldIII(I, par)
-#         [I, Y]
-#         catch err
-#             if isa(err, Roots.ConvergenceFailed)
-#                 smallerguess = (sqrt(par.y0) + find_zero(I -> maxprofitIII_param(I, par), 0.0))/2
-#                 I = find_zero(I -> maxprofitIII_param(I, par), smallerguess)
-#                 Y = yieldIII(I, par)
-#                 [I, Y]
-#             end
-#         end
-#     end
-# end
-
-
-function testIzeros_profit(testwidth, par)
-    testIrange = 0.0:testwidth:par.y0
+function testIzeros_profit(testwidth, ymax, y0, economicpar)
+    testIrange = 0.0:testwidth:y0
     dataI = zeros(length(testIrange))
     for Ii in eachindex(testIrange)
         try
-        dataI[Ii] = find_zero(I -> maxprofitIII_param(I, par), testIrange[Ii])
+        dataI[Ii] = find_zero(I -> maxprofitIII_param(I, ymax, y0, economicpar), testIrange[Ii])
         catch err
             if isa(err, Roots.ConvergenceFailed)
                 dataI[Ii]  = NaN
@@ -172,100 +124,31 @@ function testIzeros_profit(testwidth, par)
         error("Something is wrong with finding zeros function")
     elseif length(intersects) == 2
         I = maximum(intersects)
-        Y = yieldIII(I, par)
+        Y = yieldIII(I, ymax, y0)
         return [I, Y]
     else
-        testIzeros_profit(testwidth*0.5, par)
+        testIzeros_profit(testwidth*0.5, ymax, y0, economicpar)
     end
 end
 
-function maxprofitIII_vals(par)
-    testwidth = trunc(par.y0/4, digits=0)
-    Irange = 0.0:0.01:Int64(round(3*par.y0))
-    MC = [margcostIII(I, par) for I in Irange]
-    if minimum(MC) >= par.p
+function maxprofitIII_vals(ymax, y0, economicpar)
+    testwidth = trunc(y0/4, digits=0)
+    Irange = 0.0:0.01:Int64(round(3*y0))
+    MC = [margcostIII(I, ymax, y0, economicpar) for I in Irange]
+    if minimum(MC) >= economicpar.p
         return [0,0]
     else
-        return testIzeros_profit(testwidth, par)
+        return testIzeros_profit(testwidth, ymax, y0, economicpar)
     end
 end
 
-function d2Id2I(I, par)
-    @unpack y0, ymax = par
+function d2Id2I(I, ymax, y0)
     return (2 * y0 * ymax * (-3 * (I^2) + y0))/(( y0 + (I^2) )^3)
 end
 
-# d2Id2I(9, FarmBasePar(ymax=174))
-
-# let 
-#     par = FarmBasePar(ymax=120)
-#     Irange = 0.0:0.1:30.0
-#     data = [d2Id2I(I, par) for I in Irange]
-#     # test = figure()
-#     # plot(Irange, data)
-#     return data
-# end
-
-function maxyieldIII_param(I, slope, par)
-    @unpack y0, ymax, c, p = par
-    return 2 * I * ymax * y0 / (( y0 + (I^2) )^2) - slope
-end
-
-function testIzeros_yield(testwidth, slope, par)
-    testIrange = 0.0:testwidth:par.y0
-    dataI = zeros(length(testIrange))
-    for Ii in eachindex(testIrange)
-        try
-        dataI[Ii] = find_zero(I -> maxyieldIII_param(I, slope, par), testIrange[Ii])
-        catch err
-            if isa(err, Roots.ConvergenceFailed)
-                dataI[Ii]  = NaN
-            end
-        end
-    end
-    
-    intersects = unique(round.(filter(!isnan, dataI), digits=7))
-    if length(intersects) > 2 || length(intersects) < 1
-        error("Something is wrong with finding zeros function")
-    elseif length(intersects) == 2
-        I = maximum(intersects)
-        Y = yieldIII(I, par)
-        return [I, Y]
-    else
-        testIzeros_yield(testwidth*0.5, slope, par)
-    end
-end
-
-function maxyieldIII_vals(slope, par)
-    testwidth = trunc(par.y0/4, digits=0)
-    Irange = 0.0:0.01:Int64(round(3*par.y0))
-    MC = [margcostIII(I, par) for I in Irange]
-    if minimum(MC) >= par.p
-        return [0,0]
-    else
-        return testIzeros_yield(testwidth, slope, par)
-    end
-end
-
-# function maxyieldIII_vals(slope, par)
-#     try
-#     I = find_zero(I -> maxyieldIII_param(I, slope, par), 2 * sqrt(par.y0))
-#     Y = yieldIII(I, par)
-#     [I, Y]
-#     catch err
-#         if isa(err, Roots.ConvergenceFailed)
-#             smallerguess = (sqrt(par.y0) + find_zero(I -> maxyieldIII_param(I, slope, par), 0.0))/2
-#             I = find_zero(I -> maxyieldIII_param(I, slope, par), smallerguess)
-#             Y = yieldIII(I, par)
-#             [I, Y]
-#         end
-#     end
-# end
-
 ### Yield disturbance function
-function avvarcostkickIII(inputs, Y, par)
-    @unpack c = par
-    return c * inputs / Y
+function avvarcostkickIII(inputs, Y, economicpar)
+    return economicpar.c * inputs / Y
 end 
 
 ### Noise creation
@@ -318,12 +201,12 @@ function yielddisturbed_CV(inputsyield, noiseparCV, maxyears, seed)
     return yieldnoise
 end
 
-function yieldnoise_createdata(inputsyield, basepar, noisepar, maxyears, seed)
-    return hcat(1:1:maxyears, yielddisturbed(inputsyield, noisepar, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([basepar.p],maxyears), repeat([basepar.c],maxyears))
+function yieldnoise_createdata(inputsyield, economicpar, noisepar, maxyears, seed)
+    return hcat(1:1:maxyears, yielddisturbed(inputsyield, noisepar, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([economicpar.p],maxyears), repeat([economicpar.c],maxyears))
 end
 
-function yieldnoise_createdata_CV(inputsyield, basepar, noiseparCV, maxyears, seed)
-    return hcat(1:1:maxyears, yielddisturbed_CV(inputsyield, noiseparCV, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([basepar.p],maxyears), repeat([basepar.c],maxyears))
+function yieldnoise_createdata_CV(inputsyield, economicpar, noiseparCV, maxyears, seed)
+    return hcat(1:1:maxyears, yielddisturbed_CV(inputsyield, noiseparCV, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([economicpar.p],maxyears), repeat([economicpar.c],maxyears))
 end
 
 function revenue_calc(yield, p)
@@ -363,55 +246,55 @@ function variabilityterminalassets_rednoise(dataset)
     return data
 end
 
-function find_yintercept(slope, ymaxval, recipy0val)
-    return ymaxval - slope * recipy0val
+function find_yintercept(slope, ymax, y0)#takes y0 not reciprocal of y0 - but sets up yintercept for reciprocal
+    return ymax - slope * 1/y0
 end
 
-function guess_revexpintercept(revexpval, basepar, linslope, linint)
+function guess_revexpintercept(revexpval, economicpar, linslope, linint)#Returns y0 (not the reciprocal)
     ymaxrange = 120.0:2.0:170.0
-    liney0 = [(ymax - linint)/linslope for ymax in ymaxrange]
-    curvey0 = 1 ./ [calc_y0(revexpval, ymax, basepar.c, basepar.p) for ymax in ymaxrange]
-    for i in eachindex(liney0)
-        for j in eachindex(curvey0)
-            if isapprox(liney0[i], curvey0[j], atol=0.05) == true
-                return curvey0[j]
+    linerecipy0 = [(ymax - linint)/linslope for ymax in ymaxrange]
+    curverecipy0 = 1 ./ [calc_y0(revexpval, ymax, economicpar) for ymax in ymaxrange]
+    for i in eachindex(linerecipy0)
+        for j in eachindex(curverecipy0)
+            if isapprox(linerecipy0[i], curverecipy0[j], atol=0.05) == true
+                return 1/curverecipy0[j]
             end
         end
     end
 end
 
-function find_revexpintercept(revexpval, basepar, linslope, linint, guess)
-    return find_zero(y0 -> linslope * (1/y0) + linint - (revexpval * 2 * basepar.c * y0^(1/2))/basepar.p, 1/guess)
+function find_revexpintercept(revexpval, economicpar, linslope, linint, guess) #Returns y0 (not the reciprocal)
+    return find_zero(y0 -> linslope * (1/y0) + linint - (revexpval * 2 * economicpar.c * y0^(1/2))/economicpar.p, guess)
 end
 
-function calc_revexpintercept(origymaxval, origrecipy0val, rise, run, revexpval, basepar)
+function calc_revexpintercept(origymax, origy0, rise, run, revexpval, economicpar) #Returns y0 (not the reciprocal)
     linslope = rise/run
-    linint = find_yintercept(linslope, origymaxval, origrecipy0val)
-    guess = guess_revexpintercept(revexpval, basepar, linslope, linint)
-    recipy0intercept = 1/find_revexpintercept(revexpval, basepar, linslope, linint, guess)
-    return recipy0intercept
+    linint = find_yintercept(linslope, origymax, origy0)
+    guess = guess_revexpintercept(revexpval, economicpar, linslope, linint)
+    y0intercept = find_revexpintercept(revexpval, economicpar, linslope, linint, guess)
+    return y0intercept
 end
 
-function calcymaxy0vals(constrain, origymaxval, revexpratios, rise, run, basepar)
-    origy0val = calc_y0(minimum(revexpratios), origymaxval, basepar.c, basepar.p)
+function calcymaxy0vals(constrain, origymax, revexpratios, rise, run, economicpar) #Returns y0 values (not the reciprocal)
+    origy0 = calc_y0(minimum(revexpratios), origymax, economicpar)
     vals = zeros(length(revexpratios), 2)
     if constrain == "ymax"
         for i in eachindex(revexpratios)
-            vals[i, 1] = origymaxval
-            vals[i, 2] = 1/calc_y0(revexpratios[i], origymaxval, basepar.c, basepar.p)
+            vals[i, 1] = origymax
+            vals[i, 2] = calc_y0(revexpratios[i], origymax, economicpar)
         end
     elseif constrain =="y0"
         for i in eachindex(revexpratios)
-            vals[i, 1] = calc_ymax(revexpratios[i], origy0val, basepar.c, basepar.p)
-            vals[i, 2] = 1/origy0val
+            vals[i, 1] = calc_ymax(revexpratios[i], origy0, economicpar)
+            vals[i, 2] = origy0
         end
     elseif constrain == "neither"
-        vals[1,1] = origymaxval
-        vals[1,2] = 1/origy0val
+        vals[1,1] = origymax
+        vals[1,2] = origy0
         for i in 2:length(revexpratios)
-            newrecipy0val = calc_revexpintercept(origymaxval, 1/origy0val, rise, run, revexpratios[i], basepar)
-            vals[i,1] = calc_ymax(revexpratios[i], 1/newrecipy0val, basepar.c, basepar.p)
-            vals[i,2] = newrecipy0val
+            newy0 = calc_revexpintercept(origymax, origy0, rise, run, revexpratios[i], economicpar)
+            vals[i,1] = calc_ymax(revexpratios[i], newy0, economicpar)
+            vals[i,2] = newy0
         end
     else
         error("constrain should be either ymax, y0, or neither")
