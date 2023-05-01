@@ -54,29 +54,3 @@ function AVCKslope_revexpcon_data(revexpratio, ymaxrange, pval::Float64 =  6.70,
     end
     return data
 end
-
-
-## Resistance to yield disturbance
-function AVCK_MR(inputs, par, maxyieldslope::Float64=0.1)
-    Yrange = 0.0:0.01:par.ymax
-    data = [avvarcostkickIII(inputs, Y, par) for Y in Yrange]
-    Yindex = isapprox_index(data, par.p)
-    return Yrange[Yindex]
-end
-
-function AVCK_MC_distance_revexpcon_data(revexpratio, ymaxrange, pval::Float64 =  6.70, cval::Float64 = 139.0)
-    Irange = 0.0:0.01:40.0
-    data=zeros(length(ymaxrange), 2)
-    @threads for ymaxi in eachindex(ymaxrange)
-        y0val = calc_y0(revexpratio, ymaxrange[ymaxi], cval, pval)
-        par = FarmBasePar(ymax = ymaxrange[ymaxi], y0 = y0val, c = cval, p = pval)
-        inputsyield = maxprofitIII_vals(par)
-        if minimum(filter(!isnan, [margcostIII(I, par) for I in Irange])) >= par.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
-            data[ymaxi, 2] = NaN
-        else
-            data[ymaxi, 1] = ymaxrange[ymaxi]
-            data[ymaxi, 2] = inputsyield[2] - AVCK_MR(inputsyield[1], par)
-        end
-    end
-    return data
-end

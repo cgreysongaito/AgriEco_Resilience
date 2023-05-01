@@ -290,3 +290,28 @@ function variabilityterminalassets_rednoise(dataset)
     return data
 end
 
+#Resistance to yield disturbance - "bifurcation" point
+## Resistance to yield disturbance
+function AVCK_MR(inputs, ymax, economicpar)
+    Yrange = 0.0:0.01:ymax
+    data = [avvarcostkickIII(inputs, Y, economicpar) for Y in Yrange]
+    Yindex = isapprox_index(data, economicpar.p)
+    return Yrange[Yindex]
+end
+
+function AVCK_MC_distance_revexp_data(constrain, origymax, revexpratiorange, rise, run, economicpar)
+    ymaxy0vals = calcymaxy0vals(constrain, origymax, revexpratiorange, rise, run, economicpar)
+    data = zeros(length(revexpratiorange), 2)
+    Irange = 0.0:0.1:30.0
+    @threads for revexpi in eachindex(revexpratiorange)
+        inputsyield = maxprofitIII_vals(ymaxy0vals[revexpi,1], ymaxy0vals[revexpi,2], economicpar)
+        if minimum(filter(!isnan, [margcostIII(I, ymaxy0vals[revexpi,1], ymaxy0vals[revexpi,2], economicpar) for I in Irange])) >= economicpar.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
+            data[revexpi, 2] = NaN
+        else
+            data[revexpi, 1] = revexpratiorange[revexpi]
+            data[revexpi, 2] = inputsyield[2] - AVCK_MR(inputsyield[1], ymaxy0vals[revexpi,1], economicpar)
+        end
+    end
+    return data
+end
+

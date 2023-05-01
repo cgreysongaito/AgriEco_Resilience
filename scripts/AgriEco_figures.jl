@@ -103,20 +103,14 @@ let
 end 
  
 #Figure resistance to yield disturbance
-resyield133 = AVCK_MC_distance_revexpcon_data(1.33, 120.0:1.0:180.0)
-resyield110 = AVCK_MC_distance_revexpcon_data(1.10, 120.0:1.0:180.0)
-resyield100 = AVCK_MC_distance_revexpcon_data(1.00, 120.0:1.0:180.0)
-resyield095 = AVCK_MC_distance_revexpcon_data(0.95, 120.0:1.0:180.0)
-
 let 
-    ymaxrange = 120.0:1.0:180.0
+    conymax = AVCK_MC_distance_revexp_data("ymax", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
+    cony0 = AVCK_MC_distance_revexp_data("y0", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
     resyield = figure()
-    plot(resyield133[:,1], resyield133[:,2], color="blue", label="Rev/Exp = 1.33")
-    plot(resyield110[:,1], resyield110[:,2], color="red", label="Rev/Exp = 1.10")
-    plot(resyield100[:,1], resyield100[:,2], color="purple", label="Rev/Exp =1.00")
-    plot(resyield095[:,1], resyield095[:,2], color="orange", label="Rev/Exp = 0.95")
-    xlabel("Ymax")
-    ylabel("Resistance to yield disturbance (Distance between DAVC and Input Decision)")
+    plot(conymax[:,1], conymax[:,2], color="blue", label="ymax constrained")
+    plot(cony0[:,1], cony0[:,2], color="red", label="y0 constrained")
+    xlabel("Rev/Exp")
+    ylabel("Resistance to yield disturbance")
     legend()
     return resyield
     # savefig(joinpath(abpath(), "figs/resyield.png")) 
