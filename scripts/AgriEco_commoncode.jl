@@ -12,16 +12,11 @@ function isapprox_index(data, val)
     end
 end
 
-function profit(I, Y, par)
-    @unpack p, c = par
-    return p * Y - c * I
-end
-
-function cv_calc(data)
-    stddev = std(data)
-    mn = mean(data)
-    return stddev/mn
-end
+# function cv_calc(data)
+#     stddev = std(data)
+#     mn = mean(data)
+#     return stddev/mn
+# end
 
 function prepDataFrame(array)
     return DataFrame(corrrange = array[:,1], wNL = array[:,2], woNL = array[:,3])
@@ -81,7 +76,7 @@ end
     c = 139
 end
 
-### production and marginal functions
+### Production and Parginal functions
 
 function yieldIII(I, ymax, y0)
     return ymax * (I^2) / (y0 + (I^2))
@@ -152,13 +147,8 @@ function avvarcostkickIII(inputs, Y, economicpar)
 end 
 
 ### Noise creation
-@with_kw mutable struct NoisePar
-    yielddisturbed_σ = 20
-    yielddisturbed_r = 0.0
-end
-
 @with_kw mutable struct NoiseParCV
-    yielddisturbed_CV = 0.117
+    yielddisturbed_CV = 0.15
     yielddisturbed_r = 0.0
 end
 
@@ -188,12 +178,6 @@ function convert_neg_zero(paramdata)
     return newparamdata
 end
 
-function yielddisturbed(inputsyield, noisepar, maxyears, seed)
-    yieldnoise = noise_creation(inputsyield[2], noisepar.yielddisturbed_σ, noisepar.yielddisturbed_r, maxyears, seed)
-    convert_neg_zero(yieldnoise)
-    return yieldnoise
-end
-
 function yielddisturbed_CV(inputsyield, noiseparCV, maxyears, seed)
     sd = noiseparCV.yielddisturbed_CV * inputsyield[2]
     yieldnoise = noise_creation(inputsyield[2], sd, noiseparCV.yielddisturbed_r, maxyears, seed)
@@ -201,13 +185,15 @@ function yielddisturbed_CV(inputsyield, noiseparCV, maxyears, seed)
     return yieldnoise
 end
 
-function yieldnoise_createdata(inputsyield, economicpar, noisepar, maxyears, seed)
-    return hcat(1:1:maxyears, yielddisturbed(inputsyield, noisepar, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([economicpar.p],maxyears), repeat([economicpar.c],maxyears))
-end
-
 function yieldnoise_createdata_CV(inputsyield, economicpar, noiseparCV, maxyears, seed)
     return hcat(1:1:maxyears, yielddisturbed_CV(inputsyield, noiseparCV, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([economicpar.p],maxyears), repeat([economicpar.c],maxyears))
 end
+
+#Revenue Expenses helper functions
+# function profit(I, Y, par)
+#     @unpack p, c = par
+#     return p * Y - c * I
+# end
 
 function revenue_calc(yield, p)
     return yield * p
@@ -217,35 +203,16 @@ function expenses_calc(inputs, c)
     return inputs * c
 end
 
-function distribution_prob_convert(histogramdata)
-    sumcounts = sum(histogramdata.weights)
-    probdata = zeros(length(histogramdata.weights))
-    for bini in eachindex(probdata)
-        probdata[bini] = histogramdata.weights[bini]/sumcounts
-    end
-    return probdata
-end
+# function distribution_prob_convert(histogramdata)
+#     sumcounts = sum(histogramdata.weights)
+#     probdata = zeros(length(histogramdata.weights))
+#     for bini in eachindex(probdata)
+#         probdata[bini] = histogramdata.weights[bini]/sumcounts
+#     end
+#     return probdata
+# end
 
-function variabilityterminalassets(distributiondata) #I think you do want CV for here because NL will pull the mean quite far apart
-    meandata = abs(mean(distributiondata))
-    sddata = std(distributiondata)
-    return sddata/meandata
-end
-
-function variabilityterminalassets_rednoise(dataset)
-    corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 4)
-    @threads for ri in eachindex(corrrange)
-        variabilityassetsdata_NL = variabilityterminalassets(dataset[ri,2])
-        variabilityassetsdata_woNL = variabilityterminalassets(dataset[ri,3])
-        data[ri,1] = corrrange[ri]
-        data[ri,2] = variabilityassetsdata_NL
-        data[ri,3] = variabilityassetsdata_woNL
-        data[ri,4] = variabilityassetsdata_NL/variabilityassetsdata_woNL
-    end
-    return data
-end
-
+#Experiment set up functions
 function find_yintercept(slope, ymax, y0)#takes y0 not reciprocal of y0 - but sets up yintercept for reciprocal
     return ymax - slope * 1/y0
 end
@@ -301,3 +268,25 @@ function calcymaxy0vals(constrain, origymax, revexpratios, rise, run, economicpa
     end
     return vals
 end
+
+#Variability amplification and muting functions
+function variabilityterminalassets(distributiondata) #I think you do want CV for here because NL will pull the mean quite far apart
+    meandata = abs(mean(distributiondata))
+    sddata = std(distributiondata)
+    return sddata/meandata
+end
+
+function variabilityterminalassets_rednoise(dataset)
+    corrrange = dataset[:,1]
+    data=zeros(length(corrrange), 4)
+    @threads for ri in eachindex(corrrange)
+        variabilityassetsdata_NL = variabilityterminalassets(dataset[ri,2])
+        variabilityassetsdata_woNL = variabilityterminalassets(dataset[ri,3])
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = variabilityassetsdata_NL
+        data[ri,3] = variabilityassetsdata_woNL
+        data[ri,4] = variabilityassetsdata_NL/variabilityassetsdata_woNL
+    end
+    return data
+end
+
