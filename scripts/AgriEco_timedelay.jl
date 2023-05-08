@@ -30,6 +30,24 @@ function zeroyield(yieldplusnoise)
     end
 end
 
+# function NLtimedelay_data_CV(defaultinputsyield, ymax, y0, yearsdelay, noiseparCV, minfraction, maxyears, seed)
+#     sd = noiseparCV.yielddisturbed_CV * defaultinputsyield[2]
+#     basenoise = noise_creation(0.0, sd, noiseparCV.yielddisturbed_r, maxyears+yearsdelay, seed)
+#     inputsdata = zeros(maxyears+yearsdelay)
+#     yielddata = zeros(maxyears+yearsdelay)
+#     for i in 1:yearsdelay
+#         inputsdata[i] = defaultinputsyield[1]
+#         yielddata[i] = zeroyield(defaultinputsyield[2] + basenoise[i])
+#     end
+#     for i in yearsdelay+1:maxyears+yearsdelay
+#         previousyrsactualyield = mean(yielddata[i-yearsdelay:i-1])
+#         previousyrsprojectedyield = mean([yieldIII(inputs, ymax, y0) for inputs in inputsdata[i-yearsdelay:i-1]])
+#         inputsdata[i] = delayedinputs(defaultinputsyield[1], previousyrsactualyield, previousyrsprojectedyield, minfraction)
+#         yielddata[i] = zeroyield(yieldIII(inputsdata[i], ymax, y0) + basenoise[i])
+#     end
+#     return hcat(inputsdata[yearsdelay+1:maxyears+yearsdelay], yielddata[yearsdelay+1:maxyears+yearsdelay])
+# end
+
 function NLtimedelay_data_CV(defaultinputsyield, ymax, y0, yearsdelay, noiseparCV, minfraction, maxyears, seed)
     sd = noiseparCV.yielddisturbed_CV * defaultinputsyield[2]
     basenoise = noise_creation(0.0, sd, noiseparCV.yielddisturbed_r, maxyears+yearsdelay, seed)
@@ -43,7 +61,9 @@ function NLtimedelay_data_CV(defaultinputsyield, ymax, y0, yearsdelay, noiseparC
         previousyrsactualyield = mean(yielddata[i-yearsdelay:i-1])
         previousyrsprojectedyield = mean([yieldIII(inputs, ymax, y0) for inputs in inputsdata[i-yearsdelay:i-1]])
         inputsdata[i] = delayedinputs(defaultinputsyield[1], previousyrsactualyield, previousyrsprojectedyield, minfraction)
-        yielddata[i] = zeroyield(yieldIII(inputsdata[i], ymax, y0) + basenoise[i])
+        yieldprep = yieldIII(inputsdata[i], ymax, y0)
+        noisefraction = yieldprep/defaultinputsyield[2]
+        yielddata[i] = zeroyield(yieldprep + noisefraction*basenoise[i])
     end
     return hcat(inputsdata[yearsdelay+1:maxyears+yearsdelay], yielddata[yearsdelay+1:maxyears+yearsdelay])
 end
@@ -83,7 +103,7 @@ lowrevexpratio = 1.08
 lowymaxvalue = 140
 rise = 10
 run = 0.02
-CV_timedelay = 0.25
+CV_timedelay = 0.15
 corrrange_timedelay = 0.0:0.01:0.85
 yearsdelay = 3
 minfraction = 0.2
@@ -163,24 +183,32 @@ function NLtimedelay_data_mechanismtest(defaultinputsyield, ymax, y0, yearsdelay
         previousyrsactualyield = mean(yielddata[i-yearsdelay:i-1])
         previousyrsprojectedyield = mean([yieldIII(inputs, ymax, y0) for inputs in inputsdata[i-yearsdelay:i-1]])
         inputsdata[i] = delayedinputs(defaultinputsyield[1], previousyrsactualyield, previousyrsprojectedyield, minfraction)
-        yielddata[i] = zeroyield(yieldIII(inputsdata[i], ymax, y0) + basenoise[i])
+        yieldprep = yieldIII(inputsdata[i], ymax, y0)
+        noisefraction = yieldprep/defaultinputsyield[2]
+        newnoise = noisefraction * basenoise[i]
+        basenoise[i] = newnoise
+        yielddata[i] = zeroyield(yieldprep + newnoise)
         if previousyrsactualyield/previousyrsprojectedyield > minfraction
             fractionsdata[i] = previousyrsactualyield/previousyrsprojectedyield
         else
             fractionsdata[i] = minfraction
         end
     end
-    return hcat(basenoise[yearsdelay+1:maxyears+yearsdelay], fractionsdata[yearsdelay+1:maxyears+yearsdelay])
+    return hcat(basenoise[yearsdelay+4:maxyears+yearsdelay], fractionsdata[yearsdelay+4:maxyears+yearsdelay])
 end
 
+
+vals = calcymaxy0vals("ymax", 140, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
+highdefaultinputsyield = maxprofitIII_vals(vals[3,1], vals[3,2], EconomicPar())
+lowdefaultinputsyield = maxprofitIII_vals(vals[1,1], vals[1,2], EconomicPar())
 let
-    corr = 0.8
-    seed = 125
+    corr = 0.85
+    seed = 1255
     vals = calcymaxy0vals("ymax", 140, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
     highdefaultinputsyield = maxprofitIII_vals(vals[3,1], vals[3,2], EconomicPar())
     lowdefaultinputsyield = maxprofitIII_vals(vals[1,1], vals[1,2], EconomicPar())
-    highdata = NLtimedelay_data_mechanismtest(highdefaultinputsyield, vals[3,1], vals[3,2], 1, NoiseParCV(yielddisturbed_CV = 0.15, yielddisturbed_r = corr), 0.2, 50, seed)
-    lowdata = NLtimedelay_data_mechanismtest(highdefaultinputsyield, vals[1,1], vals[1,2], 1, NoiseParCV(yielddisturbed_CV = 0.15, yielddisturbed_r = corr), 0.2, 50, seed)
+    highdata = NLtimedelay_data_mechanismtest(highdefaultinputsyield, vals[3,1], vals[3,2], 3, NoiseParCV(yielddisturbed_CV = 0.15, yielddisturbed_r = corr), 0.2, 50, seed)
+    lowdata = NLtimedelay_data_mechanismtest(lowdefaultinputsyield, vals[1,1], vals[1,2], 3, NoiseParCV(yielddisturbed_CV = 0.15, yielddisturbed_r = corr), 0.2, 50, seed)
     test = figure()
     subplot(2,1,1)
     plot(1:1:size(highdata,1), highdata[:,1], color="blue")
@@ -191,6 +219,35 @@ let
     tight_layout()
     return test
 end
+
+
+#CV breakdown
+
+constrainymax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_timedelay_data_CV.csv"), DataFrame))
+constrainymax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_timedelay_data_CV.csv"), DataFrame))
+
+let
+    highdata = variabilityterminalassets_breakdown(constrainymax_133_timedelay_data_CV)
+    lowdata = variabilityterminalassets_breakdown(constrainymax_108_timedelay_data_CV)
+    test = figure()
+    subplot(2,2,1)
+    plot(highdata[:,1], highdata[:,2])
+    plot(lowdata[:,1], lowdata[:,2])
+    ylim(0,3500)
+    subplot(2,2,2)
+    plot(highdata[:,1], highdata[:,4])
+    plot(lowdata[:,1], lowdata[:,4])
+    ylim(0,3500)
+    subplot(2,2,3)
+    plot(highdata[:,1], highdata[:,3])
+    plot(lowdata[:,1], lowdata[:,3])
+    subplot(2,2,4)
+    plot(highdata[:,1], highdata[:,5])
+    plot(lowdata[:,1], lowdata[:,5])
+    tight_layout()
+    return test
+end
+
 
 # #Rev-exp
 # function terminalassets_timedelay_rednoise_dataset_abs(ymaxval, revexpabs, yielddisturbance_sd, corrrange, yearsdelay, minfraction, maxyears, reps)

@@ -145,8 +145,8 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    # return timedelays_var_changingrevexp
-    savefig(joinpath(abpath(), "figs/timedelays_var_changingrevexp.pdf")) 
+    return timedelays_var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/timedelays_var_changingrevexp.pdf")) 
 end 
 
 
