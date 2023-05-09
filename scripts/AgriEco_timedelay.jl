@@ -248,6 +248,165 @@ let
     return test
 end
 
+let 
+    vals = calcymaxy0vals("ymax", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+    highdefaultinputsyield = maxprofitIII_vals(vals[2,1], vals[2,2], EconomicPar())
+    lowdefaultinputsyield = maxprofitIII_vals(vals[1,1], vals[1,2], EconomicPar())
+    Irange = 0.0:0.01:20.0
+    datahigh = [yieldIII(I, vals[2,1], vals[2,2]) for I in Irange]
+    datalow = [yieldIII(I, vals[1,1], vals[1,2]) for I in Irange]
+    test = figure(figsize = (5,6.5))
+    subplot(2,1,1)
+    plot(Irange, datahigh, color = "black", linewidth = 3)
+    xlabel("Inputs", fontsize = 20)
+    ylabel("Yield", fontsize = 20)
+    hlines(highdefaultinputsyield[2], 0.0, 20.0)
+    vlines(highdefaultinputsyield[1], 0.0, 175.0)
+    ylim(0.0, 180.0)
+    subplot(2,1,2)
+    plot(Irange, datalow, color = "black", linewidth = 3)
+    hlines(lowdefaultinputsyield[2], 0.0, 20.0)
+    vlines(lowdefaultinputsyield[1], 0.0, 175.0)
+    xlabel("Inputs", fontsize = 20)
+    ylabel("Yield", fontsize = 20)
+    ylim(0.0, 180.0)
+    tight_layout()
+    return test
+end
+
+let 
+    vals = calcymaxy0vals("y0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+    highdefaultinputsyield = maxprofitIII_vals(vals[2,1], vals[2,2], EconomicPar())
+    lowdefaultinputsyield = maxprofitIII_vals(vals[1,1], vals[1,2], EconomicPar())
+    Irange = 0.0:0.01:20.0
+    datahigh = [yieldIII(I, vals[2,1], vals[2,2]) for I in Irange]
+    datalow = [yieldIII(I, vals[1,1], vals[1,2]) for I in Irange]
+    test = figure(figsize = (5,6.5))
+    subplot(2,1,1)
+    plot(Irange, datahigh, color = "black", linewidth = 3)
+    xlabel("Inputs", fontsize = 20)
+    ylabel("Yield", fontsize = 20)
+    hlines(highdefaultinputsyield[2], 0.0, 20.0)
+    vlines(highdefaultinputsyield[1], 0.0, 175.0)
+    vlines(highdefaultinputsyield[1]*1.3, 0.0, 175.0, color="blue")
+    vlines(highdefaultinputsyield[1]*0.7, 0.0, 175.0, color="blue")
+    ylim(0.0, 180.0)
+    subplot(2,1,2)
+    plot(Irange, datalow, color = "black", linewidth = 3)
+    hlines(lowdefaultinputsyield[2], 0.0, 20.0)
+    vlines(lowdefaultinputsyield[1], 0.0, 175.0)
+    vlines(lowdefaultinputsyield[1]*1.3, 0.0, 175.0, color="blue")
+    vlines(lowdefaultinputsyield[1]*0.7, 0.0, 175.0, color="blue")
+    xlabel("Inputs", fontsize = 20)
+    ylabel("Yield", fontsize = 20)
+    ylim(0.0, 180.0)
+    tight_layout()
+    return test
+end
+
+
+let 
+    lowymaxvalue = 140
+    rise= 10
+    run = 0.02
+    ymaxy0vals = calcymaxy0vals("ymax", lowymaxvalue, [1.08,1.33], rise, run, EconomicPar())
+    Irange = 0.0:0.01:20.0
+    Yield1 = [yieldIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    AVC1 = [avvarcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    Yield2 = [yieldIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    AVC2 = [avvarcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    costcurves = figure()
+    subplot(2,1,1)
+    plot(Yield1, MC1, color="blue", label="MC")
+    plot(Yield1, AVC1, color="orange", label="AVC")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,1,2)
+    plot(Yield2, MC2, color="blue", label="MC")
+    plot(Yield2, AVC2, color="orange", label="AVC")
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    tight_layout()
+    return costcurves
+    # savefig(joinpath(abpath(), "figs/costcurves.png"))
+end   
+
+function errorcurveprep(defaultinputsyield, ymax, y0, I, economicpar)
+    inputfraction = I/defaultinputsyield[1]
+    newyield = yieldIII(I, ymax, y0)*inputfraction
+    averagecost = (economicpar.c*I)/newyield
+    return [newyield, averagecost]
+end
+
+function errorcurve(defaultinputsyield, ymax, y0, Irange, economicpar)
+    yielddata = zeros(length(Irange))
+    averagecostdata = zeros(length(Irange))
+    for i in eachindex(Irange)
+        errorcurvevals = errorcurveprep(defaultinputsyield, ymax, y0, Irange[i], economicpar)
+        yielddata[i] = errorcurvevals[1]
+        averagecostdata[i] = errorcurvevals[2]
+    end
+    return hcat(yielddata,averagecostdata )
+end
+
+ymaxy0vals = calcymaxy0vals("ymax", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+highdefaultinputsyield = maxprofitIII_vals(vals[2,1], vals[2,2], EconomicPar())
+lowdefaultinputsyield = maxprofitIII_vals(vals[1,1], vals[1,2], EconomicPar())
+Irange = 0.0:0.01:20.0
+AVCError1 = errorcurve(lowdefaultinputsyield, ymaxy0vals[1,1], ymaxy0vals[1,2], Irange, EconomicPar())
+AVCError1[:,]
+
+let 
+    lowymaxvalue = 140
+    rise= 10
+    run = 0.02
+    ymaxy0vals = calcymaxy0vals("ymax", lowymaxvalue, [1.08,1.33], rise, run, EconomicPar())
+    highdefaultinputsyield = maxprofitIII_vals(vals[2,1], vals[2,2], EconomicPar())
+    lowdefaultinputsyield = maxprofitIII_vals(vals[1,1], vals[1,2], EconomicPar())
+    Irange = 0.0:0.01:20.0
+    Yield1 = [yieldIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    AVC1 = [avvarcostIII(I, ymaxy0vals[1,1],ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    AVCError1 = errorcurve(lowdefaultinputsyield, ymaxy0vals[1,1], ymaxy0vals[1,2], Irange, EconomicPar())
+    Yield2 = [yieldIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    AVC2 = [avvarcostIII(I, ymaxy0vals[2,1],ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    AVCError2 = errorcurve(highdefaultinputsyield, ymaxy0vals[2,1], ymaxy0vals[2,2], Irange, EconomicPar())
+    costcurves = figure()
+    subplot(2,1,1)
+    plot(Yield1, MC1, color="blue", label="MC")
+    plot(Yield1, AVC1, color="orange", label="AVC")
+    plot(AVCError1[:,1], AVCError1[:,2])
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    subplot(2,1,2)
+    plot(Yield2, MC2, color="blue", label="MC")
+    plot(Yield2, AVC2, color="orange", label="AVC")
+    plot(AVCError2[:,1], AVCError2[:,2])
+    hlines(EconomicPar().p, 0.0, 180.0, colors="black", label = "MR")
+    legend()
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xlabel("Yield (Q)")
+    ylabel("Revenue & Cost")
+    tight_layout()
+    return costcurves
+    # savefig(joinpath(abpath(), "figs/costcurves.png"))
+end  
 
 # #Rev-exp
 # function terminalassets_timedelay_rednoise_dataset_abs(ymaxval, revexpabs, yielddisturbance_sd, corrrange, yearsdelay, minfraction, maxyears, reps)

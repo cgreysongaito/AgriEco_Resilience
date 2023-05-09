@@ -145,19 +145,45 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return timedelays_var_changingrevexp
-    # savefig(joinpath(abpath(), "figs/timedelays_var_changingrevexp.pdf")) 
+    # return timedelays_var_changingrevexp
+    savefig(joinpath(abpath(), "figs/timedelays_var_changingrevexp.pdf")) 
 end 
 
-
+# Figure 6 - Resistance to error
 let 
-    test = figure()
+    Irange = 0.0:0.01:20.0
+    Yrange = 0.0:0.1:180.0
+    Yield = [yieldIII(I, 172.407, 9.76042) for I in Irange]
+    MC = [margcostIII(I, 172.407, 9.76042, EconomicPar()) for I in Irange]
+    AVC = [avvarcostIII(I, 172.407, 9.76042, EconomicPar()) for I in Irange]
+    conymax = AVCmin_MR_distance_revexp_data("ymax", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
+    cony0 = AVCmin_MR_distance_revexp_data("y0", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
+    errorresistance = figure(figsize=(7,9))
     subplot(2,1,1)
-    hist(changeboth_108_timedelay_data_CV[end, 2], 20)
+    plot(Yield, MC, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Yield, AVC, color="#404788FF", label="Average Variable Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 140.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(105.84184162864652, 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 140.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
     subplot(2,1,2)
-    hist(changeboth_108_timedelay_data_CV[end, 3], 20)
-    return test
-end
+    # plot(conymax[:,1], conymax[:,2], color="#440154FF", label="ymax constrained",linewidth = 3)
+    plot(cony0[:,1], cony0[:,2], color="#29AF7FFF", label="ymax or y0 constrained", linewidth = 3)
+    xlabel("Revenue/Expenses", fontsize = 15)
+    ylabel("Resistance to error", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    tight_layout()
+    # return errorresistance
+    savefig(joinpath(abpath(), "figs/Figure6errorresistance.pdf"))
+end 
+
 
 # Changing Rev/Exp ratio constrain ymax - CV - 6 years
 constrainymax_133_timedelay_data_CV_6 = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_timedelay_data_CV_6.csv"), DataFrame))
@@ -199,6 +225,50 @@ end
 
 ### Supporting Information
 include("AgriEco_supportinginformation.jl")
+
+#Standard Deviation and mean for time delay mechanism
+constrainymax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_timedelay_data_CV.csv"), DataFrame))
+constrainymax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_timedelay_data_CV.csv"), DataFrame))
+
+let
+    highdata = variabilityterminalassets_breakdown(constrainymax_133_timedelay_data_CV)
+    lowdata = variabilityterminalassets_breakdown(constrainymax_108_timedelay_data_CV)
+    variabilitybreakdown = figure()
+    subplot(2,2,1)
+    plot(highdata[:,1], highdata[:,2])
+    plot(highdata[:,1], highdata[:,4])
+    xlabel("Autocorrelation", fontsize=15)
+    ylabel("Standard Deviation", fontsize=15)
+    ylim(0,3500)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    subplot(2,2,2)
+    plot(lowdata[:,1], lowdata[:,2])
+    plot(lowdata[:,1], lowdata[:,4])
+    xlabel("Autocorrelation", fontsize=15)
+    ylabel("Standard Deviation", fontsize=15)
+    ylim(0,3500)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    subplot(2,2,3)
+    plot(highdata[:,1], highdata[:,3])
+    plot(highdata[:,1], highdata[:,5])
+    xlabel("Autocorrelation", fontsize=15)
+    ylabel("Mean", fontsize=15)
+    ylim(6400, 7200)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    subplot(2,2,4)
+    plot(lowdata[:,1], lowdata[:,3])
+    plot(lowdata[:,1], lowdata[:,5])
+    xlabel("Autocorrelation", fontsize=15)
+    ylabel("Mean", fontsize=15)
+    ylim(1600, 2400)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    tight_layout()
+    return variabilitybreakdown
+end
 
 let 
     ymaxrange = 120.0:1.0:200.0
