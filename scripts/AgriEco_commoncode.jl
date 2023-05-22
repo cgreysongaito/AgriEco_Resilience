@@ -203,15 +203,6 @@ function expenses_calc(inputs, c)
     return inputs * c
 end
 
-# function distribution_prob_convert(histogramdata)
-#     sumcounts = sum(histogramdata.weights)
-#     probdata = zeros(length(histogramdata.weights))
-#     for bini in eachindex(probdata)
-#         probdata[bini] = histogramdata.weights[bini]/sumcounts
-#     end
-#     return probdata
-# end
-
 #Experiment set up functions
 function find_yintercept(slope, ymax, y0)#takes y0 not reciprocal of y0 - but sets up yintercept for reciprocal
     return ymax - slope * 1/y0

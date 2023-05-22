@@ -1,4 +1,13 @@
 ## Expected Terminal Assets
+function distribution_prob_convert(histogramdata)
+    sumcounts = sum(histogramdata.weights)
+    probdata = zeros(length(histogramdata.weights))
+    for bini in eachindex(probdata)
+        probdata[bini] = histogramdata.weights[bini]/sumcounts
+    end
+    return probdata
+end
+
 function expectedterminalassets(distributiondata, numbins)
     histogramdata = fit(Histogram, distributiondata, nbins=numbins)
     probdata = distribution_prob_convert(histogramdata)
