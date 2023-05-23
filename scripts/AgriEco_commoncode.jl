@@ -328,7 +328,7 @@ function AVCmin(ymax, y0, economicpar)
     return minimum(filter(!isnan,AVC))
 end
 
-function AVCmin_MR_distance_revexp_data(constrain, origymax, revexpratiorange, rise, run, economicpar)
+function AVCmin_MR_distance_revexp_data(constrain, origymax, revexpratiorange, Irange, rise, run, economicpar)
     ymaxy0vals = calcymaxy0vals(constrain, origymax, revexpratiorange, rise, run, economicpar)
     data = zeros(length(revexpratiorange), 2)
     @threads for revexpi in eachindex(revexpratiorange)
