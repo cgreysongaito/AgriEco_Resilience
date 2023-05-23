@@ -209,7 +209,7 @@ function find_yintercept(slope, ymax, y0)#takes y0 not reciprocal of y0 - but se
 end
 
 function guess_revexpintercept(revexpval, economicpar, linslope, linint)#Returns y0 (not the reciprocal)
-    ymaxrange = 120.0:2.0:170.0
+    ymaxrange = 100.0:2.0:170.0
     linerecipy0 = [(ymax - linint)/linslope for ymax in ymaxrange]
     curverecipy0 = 1 ./ [calc_y0(revexpval, ymax, economicpar) for ymax in ymaxrange]
     for i in eachindex(linerecipy0)
@@ -233,8 +233,11 @@ function calc_revexpintercept(origymax, origy0, rise, run, revexpval, economicpa
     return y0intercept
 end
 
-function calcymaxy0vals(constrain, origymax, revexpratios, rise, run, economicpar) #Returns y0 values (not the reciprocal)
-    origy0 = calc_y0(minimum(revexpratios), origymax, economicpar)
+# origy0 = calc_y0(minimum(revexpratios), origymax, economicpar)
+
+
+function calcymaxy0vals(constrain, origymax, revexpratios, rise, run, economicpar, startrevexpval::Float64=1.08) #Returns y0 values (not the reciprocal)
+    origy0 = calc_y0(startrevexpval, origymax, economicpar)
     vals = zeros(length(revexpratios), 2)
     if constrain == "ymax"
         for i in eachindex(revexpratios)
@@ -261,7 +264,7 @@ function calcymaxy0vals(constrain, origymax, revexpratios, rise, run, economicpa
 end
 
 #Variability amplification and muting functions
-function variabilityterminalassets(distributiondata) #I think you do want CV for here because NL will pull the mean quite far apart
+function variabilityterminalassets(distributiondata)
     meandata = abs(mean(distributiondata))
     sddata = std(distributiondata)
     return sddata/meandata
