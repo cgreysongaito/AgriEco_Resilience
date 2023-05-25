@@ -40,31 +40,31 @@ end
 
 #Useful functions for setting up parameters
 function param_ratio(ymax, y0, economicpar)
-    return (ymax * economicpar.p) / (2 * sqrt(y0) * economicpar.c)
+    return (0.8 * ymax * economicpar.p) / (2 * sqrt(y0) * economicpar.c)
 end
 
 function param_absolute(ymax, y0, economicpar)
-    return (ymax * economicpar.p) - (2 * sqrt(y0) * economicpar.c)
+    return (0.8 * ymax * economicpar.p) - (2 * sqrt(y0) * economicpar.c)
 end
 
 function calc_c(rev_exp_ratio, ymax, y0, economicpar)
-    return (ymax * economicpar.p) / (2 * sqrt(y0) * rev_exp_ratio)
+    return (0.8 * ymax * economicpar.p) / (2 * sqrt(y0) * rev_exp_ratio)
 end
 
 function calc_y0(rev_exp_ratio, ymax, economicpar)
-    return ((ymax * economicpar.p) / (2 * economicpar.c * rev_exp_ratio) )^2
+    return ((0.8 * ymax * economicpar.p) / (2 * economicpar.c * rev_exp_ratio) )^2
 end
 
 function calc_ymax(rev_exp_ratio, y0, economicpar)
-    return (rev_exp_ratio * 2 * sqrt(y0) * economicpar.c) / economicpar.p
+    return (rev_exp_ratio * 2 * sqrt(y0) * economicpar.c) / (0.8 * economicpar.p)
 end
 
 function calc_c_abs(rev_exp_val, ymax, y0, economicpar)
-    return ( (ymax * economicpar.p) - rev_exp_val ) / (2 * sqrt(y0))
+    return ( (0.8 * ymax * economicpar.p) - rev_exp_val ) / (2 * sqrt(y0))
 end
 
 function calc_y0_abs(rev_exp_val, ymax, economicpar)
-    return (((ymax * economicpar.p) - rev_exp_val ) / (2 * economicpar.c))^2
+    return (((0.8 * ymax * economicpar.p) - rev_exp_val ) / (2 * economicpar.c))^2
 end
 
 
@@ -189,12 +189,6 @@ function yieldnoise_createdata_CV(inputsyield, economicpar, noiseparCV, maxyears
     return hcat(1:1:maxyears, yielddisturbed_CV(inputsyield, noiseparCV, maxyears, seed), repeat([inputsyield[1]], maxyears), repeat([economicpar.p],maxyears), repeat([economicpar.c],maxyears))
 end
 
-#Revenue Expenses helper functions
-# function profit(I, Y, par)
-#     @unpack p, c = par
-#     return p * Y - c * I
-# end
-
 function revenue_calc(yield, p)
     return yield * p
 end
@@ -232,9 +226,6 @@ function calc_revexpintercept(origymax, origy0, rise, run, revexpval, economicpa
     y0intercept = find_revexpintercept(revexpval, economicpar, linslope, linint, guess)
     return y0intercept
 end
-
-# origy0 = calc_y0(minimum(revexpratios), origymax, economicpar)
-
 
 function calcymaxy0vals(constrain, origymax, revexpratios, rise, run, economicpar, startrevexpval::Float64=1.08) #Returns y0 values (not the reciprocal)
     origy0 = calc_y0(startrevexpval, origymax, economicpar)
