@@ -39,37 +39,37 @@ end
 ### Parameters
 
 #Useful functions for setting up parameters
-function param_ratio(ymax, y0, economicpar)
-    return (0.8 * ymax * economicpar.p) / (2 * sqrt(y0) * economicpar.c)
+function param_ratio(Ymax, I0, economicpar)
+    return (0.8 * Ymax * economicpar.p) / (2 * sqrt(I0) * economicpar.c)
 end
 
-function param_absolute(ymax, y0, economicpar)
-    return (0.8 * ymax * economicpar.p) - (2 * sqrt(y0) * economicpar.c)
+function param_absolute(Ymax, I0, economicpar)
+    return (0.8 * Ymax * economicpar.p) - (2 * sqrt(I0) * economicpar.c)
 end
 
-function calc_c(rev_exp_ratio, ymax, y0, economicpar)
-    return (0.8 * ymax * economicpar.p) / (2 * sqrt(y0) * rev_exp_ratio)
+function calc_c(rev_exp_ratio, Ymax, I0, economicpar)
+    return (0.8 * Ymax * economicpar.p) / (2 * sqrt(I0) * rev_exp_ratio)
 end
 
-function calc_y0(rev_exp_ratio, ymax, economicpar)
-    return ((0.8 * ymax * economicpar.p) / (2 * economicpar.c * rev_exp_ratio) )^2
+function calc_I0(rev_exp_ratio, Ymax, economicpar)
+    return ((0.8 * Ymax * economicpar.p) / (2 * economicpar.c * rev_exp_ratio) )^2
 end
 
-function calc_ymax(rev_exp_ratio, y0, economicpar)
-    return (rev_exp_ratio * 2 * sqrt(y0) * economicpar.c) / (0.8 * economicpar.p)
+function calc_Ymax(rev_exp_ratio, I0, economicpar)
+    return (rev_exp_ratio * 2 * sqrt(I0) * economicpar.c) / (0.8 * economicpar.p)
 end
 
-function calc_c_abs(rev_exp_val, ymax, y0, economicpar)
-    return ( (0.8 * ymax * economicpar.p) - rev_exp_val ) / (2 * sqrt(y0))
+function calc_c_abs(rev_exp_val, Ymax, I0, economicpar)
+    return ( (0.8 * Ymax * economicpar.p) - rev_exp_val ) / (2 * sqrt(I0))
 end
 
-function calc_y0_abs(rev_exp_val, ymax, economicpar)
-    return (((0.8 * ymax * economicpar.p) - rev_exp_val ) / (2 * economicpar.c))^2
+function calc_I0_abs(rev_exp_val, Ymax, economicpar)
+    return (((0.8 * Ymax * economicpar.p) - rev_exp_val ) / (2 * economicpar.c))^2
 end
 
 
-# ymax = 174.0 # yield per acre #budget summary field crops budgets 2022 corn conventional
-# y0 = 9.9416
+# Ymax = 174.0 # yield per acre #budget summary field crops budgets 2022 corn conventional
+# I0 = 9.9416
 
 @with_kw mutable struct EconomicPar
     p = 6.70 # market price pert unit (not acre) #budget summary field crops budgets 2022 corn conventional
@@ -78,35 +78,35 @@ end
 
 ### Production and Parginal functions
 
-function yieldIII(I, ymax, y0)
-    return ymax * (I^2) / (y0 + (I^2))
+function yieldIII(I, Ymax, I0)
+    return Ymax * (I^2) / (I0 + (I^2))
 end
 
-function margprodIII(I, ymax, y0)
-    return 2 * I * ymax * y0 / (( y0 + (I^2) )^2)
+function margprodIII(I, Ymax, I0)
+    return 2 * I * Ymax * I0 / (( I0 + (I^2) )^2)
 end
 
-function margcostIII(I, ymax, y0, economicpar)
-    return economicpar.c / margprodIII(I, ymax, y0)
+function margcostIII(I, Ymax, I0, economicpar)
+    return economicpar.c / margprodIII(I, Ymax, I0)
 end
 
-function avvarcostIII(I, ymax, y0, economicpar)
-    Y = yieldIII(I, ymax, y0)
+function avvarcostIII(I, Ymax, I0, economicpar)
+    Y = yieldIII(I, Ymax, I0)
     return economicpar.c * I / Y
 end
 
 ### Input decision functions
 
-function maxprofitIII_param(I, ymax, y0, economicpar)
-    return 2 * I * ymax * y0 / (( y0 + (I^2) )^2) - economicpar.c/economicpar.p
+function maxprofitIII_param(I, Ymax, I0, economicpar)
+    return 2 * I * Ymax * I0 / (( I0 + (I^2) )^2) - economicpar.c/economicpar.p
 end
 
-function testIzeros_profit(testwidth, ymax, y0, economicpar)
-    testIrange = 0.0:testwidth:y0
+function testIzeros_profit(testwidth, Ymax, I0, economicpar)
+    testIrange = 0.0:testwidth:I0
     dataI = zeros(length(testIrange))
     for Ii in eachindex(testIrange)
         try
-        dataI[Ii] = find_zero(I -> maxprofitIII_param(I, ymax, y0, economicpar), testIrange[Ii])
+        dataI[Ii] = find_zero(I -> maxprofitIII_param(I, Ymax, I0, economicpar), testIrange[Ii])
         catch err
             if isa(err, Roots.ConvergenceFailed)
                 dataI[Ii]  = NaN
@@ -119,26 +119,26 @@ function testIzeros_profit(testwidth, ymax, y0, economicpar)
         error("Something is wrong with finding zeros function")
     elseif length(intersects) == 2
         I = maximum(intersects)
-        Y = yieldIII(I, ymax, y0)
+        Y = yieldIII(I, Ymax, I0)
         return [I, Y]
     else
-        testIzeros_profit(testwidth*0.5, ymax, y0, economicpar)
+        testIzeros_profit(testwidth*0.5, Ymax, I0, economicpar)
     end
 end
 
-function maxprofitIII_vals(ymax, y0, economicpar)
-    testwidth = trunc(y0/4, digits=0)
-    Irange = 0.0:0.01:Int64(round(3*y0))
-    MC = [margcostIII(I, ymax, y0, economicpar) for I in Irange]
+function maxprofitIII_vals(Ymax, I0, economicpar)
+    testwidth = trunc(I0/4, digits=0)
+    Irange = 0.0:0.01:Int64(round(3*I0))
+    MC = [margcostIII(I, Ymax, I0, economicpar) for I in Irange]
     if minimum(MC) >= economicpar.p
         return [0,0]
     else
-        return testIzeros_profit(testwidth, ymax, y0, economicpar)
+        return testIzeros_profit(testwidth, Ymax, I0, economicpar)
     end
 end
 
-function d2Id2I(I, ymax, y0)
-    return (2 * y0 * ymax * (-3 * (I^2) + y0))/(( y0 + (I^2) )^3)
+function d2Id2I(I, Ymax, I0)
+    return (2 * I0 * Ymax * (-3 * (I^2) + I0))/(( I0 + (I^2) )^3)
 end
 
 ### Yield disturbance function
@@ -198,58 +198,58 @@ function expenses_calc(inputs, c)
 end
 
 #Experiment set up functions
-function find_yintercept(slope, ymax, y0)#takes y0 not reciprocal of y0 - but sets up yintercept for reciprocal
-    return ymax - slope * 1/y0
+function find_yintercept(slope, Ymax, I0)#takes I0 not reciprocal of I0 - but sets up yintercept for reciprocal
+    return Ymax - slope * 1/I0
 end
 
-function guess_revexpintercept(revexpval, economicpar, linslope, linint)#Returns y0 (not the reciprocal)
-    ymaxrange = 100.0:2.0:170.0
-    linerecipy0 = [(ymax - linint)/linslope for ymax in ymaxrange]
-    curverecipy0 = 1 ./ [calc_y0(revexpval, ymax, economicpar) for ymax in ymaxrange]
-    for i in eachindex(linerecipy0)
-        for j in eachindex(curverecipy0)
-            if isapprox(linerecipy0[i], curverecipy0[j], atol=0.05) == true
-                return 1/curverecipy0[j]
+function guess_revexpintercept(revexpval, economicpar, linslope, linint)#Returns I0 (not the reciprocal)
+    Ymaxrange = 100.0:2.0:170.0
+    linerecipI0 = [(Ymax - linint)/linslope for Ymax in Ymaxrange]
+    curverecipI0 = 1 ./ [calc_I0(revexpval, Ymax, economicpar) for Ymax in Ymaxrange]
+    for i in eachindex(linerecipI0)
+        for j in eachindex(curverecipI0)
+            if isapprox(linerecipI0[i], curverecipI0[j], atol=0.05) == true
+                return 1/curverecipI0[j]
             end
         end
     end
 end
 
-function find_revexpintercept(revexpval, economicpar, linslope, linint, guess) #Returns y0 (not the reciprocal)
-    return find_zero(y0 -> linslope * (1/y0) + linint - (revexpval * 2 * economicpar.c * y0^(1/2))/economicpar.p, guess)
+function find_revexpintercept(revexpval, economicpar, linslope, linint, guess) #Returns I0 (not the reciprocal)
+    return find_zero(I0 -> linslope * (1/I0) + linint - (revexpval * 2 * economicpar.c * I0^(1/2))/economicpar.p, guess)
 end
 
-function calc_revexpintercept(origymax, origy0, rise, run, revexpval, economicpar) #Returns y0 (not the reciprocal)
+function calc_revexpintercept(origYmax, origI0, rise, run, revexpval, economicpar) #Returns I0 (not the reciprocal)
     linslope = rise/run
-    linint = find_yintercept(linslope, origymax, origy0)
+    linint = find_yintercept(linslope, origYmax, origI0)
     guess = guess_revexpintercept(revexpval, economicpar, linslope, linint)
-    y0intercept = find_revexpintercept(revexpval, economicpar, linslope, linint, guess)
-    return y0intercept
+    I0intercept = find_revexpintercept(revexpval, economicpar, linslope, linint, guess)
+    return I0intercept
 end
 
-function calcymaxy0vals(constrain, origymax, revexpratios, rise, run, economicpar, startrevexpval::Float64=1.08) #Returns y0 values (not the reciprocal)
-    origy0 = calc_y0(startrevexpval, origymax, economicpar)
+function calcYmaxI0vals(constrain, origYmax, revexpratios, rise, run, economicpar, startrevexpval::Float64=1.08) #Returns I0 values (not the reciprocal)
+    origI0 = calc_I0(startrevexpval, origYmax, economicpar)
     vals = zeros(length(revexpratios), 2)
-    if constrain == "ymax"
+    if constrain == "Ymax"
         for i in eachindex(revexpratios)
-            vals[i, 1] = origymax
-            vals[i, 2] = calc_y0(revexpratios[i], origymax, economicpar)
+            vals[i, 1] = origYmax
+            vals[i, 2] = calc_I0(revexpratios[i], origYmax, economicpar)
         end
-    elseif constrain =="y0"
+    elseif constrain =="I0"
         for i in eachindex(revexpratios)
-            vals[i, 1] = calc_ymax(revexpratios[i], origy0, economicpar)
-            vals[i, 2] = origy0
+            vals[i, 1] = calc_Ymax(revexpratios[i], origI0, economicpar)
+            vals[i, 2] = origI0
         end
     elseif constrain == "neither"
-        vals[1,1] = origymax
-        vals[1,2] = origy0
+        vals[1,1] = origYmax
+        vals[1,2] = origI0
         for i in 2:length(revexpratios)
-            newy0 = calc_revexpintercept(origymax, origy0, rise, run, revexpratios[i], economicpar)
-            vals[i,1] = calc_ymax(revexpratios[i], newy0, economicpar)
-            vals[i,2] = newy0
+            newI0 = calc_revexpintercept(origYmax, origI0, rise, run, revexpratios[i], economicpar)
+            vals[i,1] = calc_Ymax(revexpratios[i], newI0, economicpar)
+            vals[i,2] = newI0
         end
     else
-        error("constrain should be either ymax, y0, or neither")
+        error("constrain should be either Ymax, I0, or neither")
     end
     return vals
 end
@@ -289,45 +289,45 @@ function variabilityterminalassets_breakdown(dataset)
 end
 
 #Resistance to yield disturbance - "bifurcation" point
-function AVCK_MR(inputs, ymax, economicpar)
-    Yrange = 0.0:0.01:ymax
+function AVCK_MR(inputs, Ymax, economicpar)
+    Yrange = 0.0:0.01:Ymax
     data = [avvarcostkickIII(inputs, Y, economicpar) for Y in Yrange]
     Yindex = isapprox_index(data, economicpar.p)
     return Yrange[Yindex]
 end
 
-function AVCK_MC_distance_revexp_data(constrain, origymax, revexpratiorange, rise, run, economicpar)
-    ymaxy0vals = calcymaxy0vals(constrain, origymax, revexpratiorange, rise, run, economicpar)
+function AVCK_MC_distance_revexp_data(constrain, origYmax, revexpratiorange, rise, run, economicpar)
+    YmaxI0vals = calcYmaxI0vals(constrain, origYmax, revexpratiorange, rise, run, economicpar)
     data = zeros(length(revexpratiorange), 2)
     Irange = 0.0:0.1:30.0
     @threads for revexpi in eachindex(revexpratiorange)
-        inputsyield = maxprofitIII_vals(ymaxy0vals[revexpi,1], ymaxy0vals[revexpi,2], economicpar)
-        if minimum(filter(!isnan, [margcostIII(I, ymaxy0vals[revexpi,1], ymaxy0vals[revexpi,2], economicpar) for I in Irange])) >= economicpar.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
+        inputsyield = maxprofitIII_vals(YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar)
+        if minimum(filter(!isnan, [margcostIII(I, YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar) for I in Irange])) >= economicpar.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
             data[revexpi, 2] = NaN
         else
             data[revexpi, 1] = revexpratiorange[revexpi]
-            data[revexpi, 2] = inputsyield[2] - AVCK_MR(inputsyield[1], ymaxy0vals[revexpi,1], economicpar)
+            data[revexpi, 2] = inputsyield[2] - AVCK_MR(inputsyield[1], YmaxI0vals[revexpi,1], economicpar)
         end
     end
     return data
 end
 
 # Resistance to error
-function AVCmin(ymax, y0, economicpar)
-    Irange = 0.0:0.01:y0
-    AVC = [avvarcostIII(I, ymax, y0, economicpar) for I in Irange]
+function AVCmin(Ymax, I0, economicpar)
+    Irange = 0.0:0.01:I0
+    AVC = [avvarcostIII(I, Ymax, I0, economicpar) for I in Irange]
     return minimum(filter(!isnan,AVC))
 end
 
-function AVCmin_MR_distance_revexp_data(constrain, origymax, revexpratiorange, Irange, rise, run, economicpar)
-    ymaxy0vals = calcymaxy0vals(constrain, origymax, revexpratiorange, rise, run, economicpar)
+function AVCmin_MR_distance_revexp_data(constrain, origYmax, revexpratiorange, Irange, rise, run, economicpar)
+    YmaxI0vals = calcYmaxI0vals(constrain, origYmax, revexpratiorange, rise, run, economicpar)
     data = zeros(length(revexpratiorange), 2)
     @threads for revexpi in eachindex(revexpratiorange)
-        if minimum(filter(!isnan, [margcostIII(I, ymaxy0vals[revexpi,1], ymaxy0vals[revexpi,2], economicpar) for I in Irange])) >= economicpar.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
+        if minimum(filter(!isnan, [margcostIII(I, YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar) for I in Irange])) >= economicpar.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
             data[revexpi, 2] = NaN
         else
             data[revexpi, 1] = revexpratiorange[revexpi]
-            data[revexpi, 2] = economicpar.p - AVCmin(ymaxy0vals[revexpi,1], ymaxy0vals[revexpi,2], economicpar)
+            data[revexpi, 2] = economicpar.p - AVCmin(YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar)
         end
     end
     return data

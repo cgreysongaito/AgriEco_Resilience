@@ -43,8 +43,8 @@ function terminalassets_distribution_CV(NL, inputsyield, economicpar, noiseparCV
     return assetsdebtdata
 end
 
-function terminalassets_posfeed_rednoise_dataset_CV(ymaxy0vals, economicpar, interestpar, yielddisturbance_CV, corrrange, maxyears, reps)
-    defaultinputsyield = maxprofitIII_vals(ymaxy0vals[1],ymaxy0vals[2], economicpar)
+function terminalassets_posfeed_rednoise_dataset_CV(YmaxI0vals, economicpar, interestpar, yielddisturbance_CV, corrrange, maxyears, reps)
+    defaultinputsyield = maxprofitIII_vals(YmaxI0vals[1],YmaxI0vals[2], economicpar)
     data = Array{Vector{Float64}}(undef,length(corrrange), 2)
     @threads for ri in eachindex(corrrange)
         noiseparCV = NoiseParCV(yielddisturbed_CV = yielddisturbance_CV, yielddisturbed_r = corrrange[ri])
@@ -55,7 +55,7 @@ function terminalassets_posfeed_rednoise_dataset_CV(ymaxy0vals, economicpar, int
 end
 
 lowrevexpratio = 1.08
-lowymaxvalue = 140
+lowYmaxvalue = 140
 rise = 10
 run = 0.02
 CV_posfeed = 0.2
@@ -63,36 +63,36 @@ corrrange_posfeed = 0.0:0.01:0.85
 maxyears_posfeed = 50
 reps_posfeed = 1000
 
-#Constrain ymax
+#Constrain Ymax
 let
-    vals = calcymaxy0vals("ymax", lowymaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
-    constrainymax_095_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/constrainymax_095_posfeed_data_CV.csv"), constrainymax_095_posfeed_data_CV)
-    constrainymax_108_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[2,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/constrainymax_108_posfeed_data_CV.csv"), constrainymax_108_posfeed_data_CV)
-    constrainymax_115_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[3,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/constrainymax_115_posfeed_data_CV.csv"), constrainymax_115_posfeed_data_CV)
-    constrainymax_133_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[4,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/constrainymax_133_posfeed_data_CV.csv"), constrainymax_133_posfeed_data_CV)
+    vals = calcYmaxI0vals("Ymax", lowYmaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
+    constrainYmax_095_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/constrainYmax_095_posfeed_data_CV.csv"), constrainYmax_095_posfeed_data_CV)
+    constrainYmax_108_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[2,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/constrainYmax_108_posfeed_data_CV.csv"), constrainYmax_108_posfeed_data_CV)
+    constrainYmax_115_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[3,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/constrainYmax_115_posfeed_data_CV.csv"), constrainYmax_115_posfeed_data_CV)
+    constrainYmax_133_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[4,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/constrainYmax_133_posfeed_data_CV.csv"), constrainYmax_133_posfeed_data_CV)
 end
 
-#Constrain y0
+#Constrain I0
 let
-    vals = calcymaxy0vals("y0", lowymaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
-    constrainy0_095_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/constrainy0_095_posfeed_data_CV.csv"), constrainy0_095_posfeed_data_CV)
-    constrainy0_108_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[2,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/constrainy0_108_posfeed_data_CV.csv"), constrainy0_108_posfeed_data_CV)
-    constrainy0_115_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[3,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/constrainy0_115_posfeed_data_CV.csv"), constrainy0_115_posfeed_data_CV)
-    constrainy0_133_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[4,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
-    CSV.write(joinpath(abpath(), "data/constrainy0_133_posfeed_data_CV.csv"), constrainy0_133_posfeed_data_CV)  
+    vals = calcYmaxI0vals("I0", lowYmaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
+    constrainI0_095_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/constrainI0_095_posfeed_data_CV.csv"), constrainI0_095_posfeed_data_CV)
+    constrainI0_108_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[2,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/constrainI0_108_posfeed_data_CV.csv"), constrainI0_108_posfeed_data_CV)
+    constrainI0_115_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[3,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/constrainI0_115_posfeed_data_CV.csv"), constrainI0_115_posfeed_data_CV)
+    constrainI0_133_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[4,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/constrainI0_133_posfeed_data_CV.csv"), constrainI0_133_posfeed_data_CV)  
 end
 
 # #Rev-exp (absolute)
-# function terminalassets_posfeed_rednoise_dataset_abs(ymaxval, revexpabs, interestpar, yielddisturbance_sd, corrrange, maxyears, reps)
-#     y0val = calc_y0_abs(revexpabs, ymaxval, FarmBasePar().c, FarmBasePar().p)
-#     newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
+# function terminalassets_posfeed_rednoise_dataset_abs(Ymaxval, revexpabs, interestpar, yielddisturbance_sd, corrrange, maxyears, reps)
+#     I0val = calc_I0_abs(revexpabs, Ymaxval, FarmBasePar().c, FarmBasePar().p)
+#     newbasepar = FarmBasePar(Ymax=Ymaxval, I0=I0val)
 #     defaultinputsyield = maxprofitIII_vals(newbasepar)
 #     data = Array{Vector{Float64}}(undef,length(corrrange), 2)
 #     @threads for ri in eachindex(corrrange)

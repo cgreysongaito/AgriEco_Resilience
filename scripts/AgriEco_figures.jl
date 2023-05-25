@@ -4,25 +4,25 @@ include("AgriEco_commoncode.jl")
 ##Figure 2 Schematic
 let 
     Irange = 0.0:0.01:20.0
-    datahymaxhyo = [yieldIII(I, 174.0, 10) for I in Irange]
-    ymaxrange = 120.0:1.0:200.0
-    y0data133rel = [calc_y0(1.33, ymax, EconomicPar()) for ymax in ymaxrange]
-    y0data115rel = [calc_y0(1.15, ymax, EconomicPar()) for ymax in ymaxrange]
-    y0data108rel = [calc_y0(1.08, ymax, EconomicPar()) for ymax in ymaxrange]
+    datahYmaxhyo = [yieldIII(I, 174.0, 10) for I in Irange]
+    Ymaxrange = 120.0:1.0:200.0
+    I0data133rel = [calc_I0(1.33, Ymax, EconomicPar()) for Ymax in Ymaxrange]
+    I0data115rel = [calc_I0(1.15, Ymax, EconomicPar()) for Ymax in Ymaxrange]
+    I0data108rel = [calc_I0(1.08, Ymax, EconomicPar()) for Ymax in Ymaxrange]
     figure2schematicprep = figure(figsize = (5,6.5))
     subplot(2,1,1)
-    plot(Irange, datahymaxhyo, color = "black", linewidth = 3)
+    plot(Irange, datahYmaxhyo, color = "black", linewidth = 3)
     xlabel("Inputs", fontsize = 20)
     ylabel("Yield", fontsize = 20)
     xticks([])
     yticks([])
     ylim(0.0, 180.0)
     subplot(2,1,2)
-    plot(1 ./ y0data133rel, ymaxrange, linestyle="solid", color="black", label="rev/exp = 1.33")
-    plot(1 ./ y0data115rel, ymaxrange, linestyle="dashed", color="black", label="rev/exp = 1.15")
-    plot(1 ./ y0data108rel, ymaxrange, linestyle="dotted", color="black", label="rev/exp = 1.08")
-    xlabel("1/y0", fontsize = 20)
-    ylabel("ymax", fontsize = 20)
+    plot(1 ./ I0data133rel, Ymaxrange, linestyle="solid", color="black", label="rev/exp = 1.33")
+    plot(1 ./ I0data115rel, Ymaxrange, linestyle="dashed", color="black", label="rev/exp = 1.15")
+    plot(1 ./ I0data108rel, Ymaxrange, linestyle="dotted", color="black", label="rev/exp = 1.08")
+    xlabel("1/I0", fontsize = 20)
+    ylabel("Ymax", fontsize = 20)
     xticks([])
     yticks([])
     tight_layout()
@@ -33,35 +33,35 @@ end
 ## Positive feedbacks ##
 #Variability Terminal Assets
 #CV
-# Changing Rev/Exp ratio constrain ymax
-constrainymax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_posfeed_data_CV.csv"), DataFrame))
-constrainymax_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_115_posfeed_data_CV.csv"), DataFrame))
-constrainymax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_posfeed_data_CV.csv"), DataFrame))
-constrainy0_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_133_posfeed_data_CV.csv"), DataFrame))
-constrainy0_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_115_posfeed_data_CV.csv"), DataFrame))
-constrainy0_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_108_posfeed_data_CV.csv"), DataFrame))
+# Changing Rev/Exp ratio constrain Ymax
+constrainYmax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_posfeed_data_CV.csv"), DataFrame))
+constrainYmax_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_115_posfeed_data_CV.csv"), DataFrame))
+constrainYmax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_posfeed_data_CV.csv"), DataFrame))
+constrainI0_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_133_posfeed_data_CV.csv"), DataFrame))
+constrainI0_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_115_posfeed_data_CV.csv"), DataFrame))
+constrainI0_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_108_posfeed_data_CV.csv"), DataFrame))
 
 let 
-    constrainymax_133 = variabilityterminalassets_rednoise(constrainymax_133_posfeed_data_CV)
-    constrainymax_115 = variabilityterminalassets_rednoise(constrainymax_115_posfeed_data_CV)
-    constrainymax_108 = variabilityterminalassets_rednoise(constrainymax_108_posfeed_data_CV)
-    constrainy0_133 = variabilityterminalassets_rednoise(constrainy0_133_posfeed_data_CV)
-    constrainy0_115 = variabilityterminalassets_rednoise(constrainy0_115_posfeed_data_CV)
-    constrainy0_108 = variabilityterminalassets_rednoise(constrainy0_108_posfeed_data_CV)
+    constrainYmax_133 = variabilityterminalassets_rednoise(constrainYmax_133_posfeed_data_CV)
+    constrainYmax_115 = variabilityterminalassets_rednoise(constrainYmax_115_posfeed_data_CV)
+    constrainYmax_108 = variabilityterminalassets_rednoise(constrainYmax_108_posfeed_data_CV)
+    constrainI0_133 = variabilityterminalassets_rednoise(constrainI0_133_posfeed_data_CV)
+    constrainI0_115 = variabilityterminalassets_rednoise(constrainI0_115_posfeed_data_CV)
+    constrainI0_108 = variabilityterminalassets_rednoise(constrainI0_108_posfeed_data_CV)
     posfeed_var_changingrevexp = figure(figsize=(4,6))    
     subplot(2,1,1)
-    plot(constrainymax_133[:,1], constrainymax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(constrainymax_115[:,1], constrainymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(constrainymax_108[:,1], constrainymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(constrainYmax_133[:,1], constrainYmax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainYmax_115[:,1], constrainYmax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainYmax_108[:,1], constrainYmax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
     subplot(2,1,2)
-    plot(constrainy0_133[:,1], constrainy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(constrainy0_115[:,1], constrainy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(constrainy0_108[:,1], constrainy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(constrainI0_133[:,1], constrainI0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainI0_115[:,1], constrainI0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainI0_108[:,1], constrainI0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
@@ -73,21 +73,21 @@ let
 end 
 
 #Figure 4 Resistance to yield disturbance
-calcymaxy0vals("y0", 140, [1.08,1.33], 10, 0.02, EconomicPar())[2,1]
+calcYmaxI0vals("I0", 140, [1.08,1.33], 10, 0.02, EconomicPar())[2,1]
 let 
-    ymaxy0vals = calcymaxy0vals("y0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
-    inputsyield1 = maxprofitIII_vals(ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar())
-    inputsyield2 = maxprofitIII_vals(ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar())
+    YmaxI0vals = calcYmaxI0vals("I0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+    inputsyield1 = maxprofitIII_vals(YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar())
+    inputsyield2 = maxprofitIII_vals(YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar())
     Irange = 0.0:0.01:20.0
     Yrange = 0.0:0.1:180.0
-    Yield1 = [yieldIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2]) for I in Irange]
-    MC1 = [margcostIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    Yield1 = [yieldIII(I, YmaxI0vals[1,1], YmaxI0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar()) for I in Irange]
     DAVC1 = [avvarcostkickIII(inputsyield1[1], Y, EconomicPar()) for Y in Yrange]
-    Yield2 = [yieldIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2]) for I in Irange]
-    MC2 = [margcostIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    Yield2 = [yieldIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar()) for I in Irange]
     DAVC2 = [avvarcostkickIII(inputsyield2[1], Y, EconomicPar()) for Y in Yrange]
-    conymax = AVCK_MC_distance_revexp_data("ymax", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
-    cony0 = AVCK_MC_distance_revexp_data("y0", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
+    conYmax = AVCK_MC_distance_revexp_data("Ymax", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
+    conI0 = AVCK_MC_distance_revexp_data("I0", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
     yielddisturbanceresistance = figure(figsize=(10,8))
     subplot(2,2,1)
     plot(Yield1, MC1, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
@@ -114,8 +114,8 @@ let
     xlabel("Yield", fontsize = 15)
     ylabel("Revenue & Cost", fontsize = 15)
     subplot(2,2,3)
-    plot(conymax[:,1], conymax[:,2], color="#440154FF", label="ymax constrained",linewidth = 3)
-    plot(cony0[:,1], cony0[:,2], color="#73D055FF", label="y0 constrained", linewidth = 3)
+    plot(conYmax[:,1], conYmax[:,2], color="#440154FF", label="Ymax constrained",linewidth = 3)
+    plot(conI0[:,1], conI0[:,2], color="#73D055FF", label="I0 constrained", linewidth = 3)
     xlabel("Revenue/Expenses", fontsize = 15)
     ylabel("Resistance to yield disturbance", fontsize = 15)
     xticks(fontsize=12)
@@ -129,35 +129,35 @@ end
 ## Time Delay ##
 #Variability Terminal Assets
 
-# Changing Rev/Exp ratio constrain ymax - CV
-constrainymax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_timedelay_data_CV.csv"), DataFrame))
-constrainymax_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_115_timedelay_data_CV.csv"), DataFrame))
-constrainymax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_timedelay_data_CV.csv"), DataFrame))
-constrainy0_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_133_timedelay_data_CV.csv"), DataFrame))
-constrainy0_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_115_timedelay_data_CV.csv"), DataFrame))
-constrainy0_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_108_timedelay_data_CV.csv"), DataFrame))
+# Changing Rev/Exp ratio constrain Ymax - CV
+constrainYmax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_timedelay_data_CV.csv"), DataFrame))
+constrainYmax_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_115_timedelay_data_CV.csv"), DataFrame))
+constrainYmax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_timedelay_data_CV.csv"), DataFrame))
+constrainI0_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_133_timedelay_data_CV.csv"), DataFrame))
+constrainI0_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_115_timedelay_data_CV.csv"), DataFrame))
+constrainI0_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_108_timedelay_data_CV.csv"), DataFrame))
 
 let 
-    constrainymax_133 = variabilityterminalassets_rednoise(constrainymax_133_timedelay_data_CV)
-    constrainymax_115 = variabilityterminalassets_rednoise(constrainymax_115_timedelay_data_CV)
-    constrainymax_108 = variabilityterminalassets_rednoise(constrainymax_108_timedelay_data_CV)
-    constrainy0_133 = variabilityterminalassets_rednoise(constrainy0_133_timedelay_data_CV)
-    constrainy0_115 = variabilityterminalassets_rednoise(constrainy0_115_timedelay_data_CV)
-    constrainy0_108 = variabilityterminalassets_rednoise(constrainy0_108_timedelay_data_CV)
+    constrainYmax_133 = variabilityterminalassets_rednoise(constrainYmax_133_timedelay_data_CV)
+    constrainYmax_115 = variabilityterminalassets_rednoise(constrainYmax_115_timedelay_data_CV)
+    constrainYmax_108 = variabilityterminalassets_rednoise(constrainYmax_108_timedelay_data_CV)
+    constrainI0_133 = variabilityterminalassets_rednoise(constrainI0_133_timedelay_data_CV)
+    constrainI0_115 = variabilityterminalassets_rednoise(constrainI0_115_timedelay_data_CV)
+    constrainI0_108 = variabilityterminalassets_rednoise(constrainI0_108_timedelay_data_CV)
     timedelays_var_changingrevexp = figure(figsize=(4,6))    
     subplot(2,1,1)
-    plot(constrainymax_133[:,1], constrainymax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(constrainymax_115[:,1], constrainymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(constrainymax_108[:,1], constrainymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(constrainYmax_133[:,1], constrainYmax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainYmax_115[:,1], constrainYmax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainYmax_108[:,1], constrainYmax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
     subplot(2,1,2)
-    plot(constrainy0_133[:,1], constrainy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(constrainy0_115[:,1], constrainy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(constrainy0_108[:,1], constrainy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(constrainI0_133[:,1], constrainI0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainI0_115[:,1], constrainI0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainI0_108[:,1], constrainI0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
@@ -170,19 +170,19 @@ end
 
 # Figure 6 - Resistance to error
 let 
-    ymaxy0vals = calcymaxy0vals("y0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
-    inputsyield1 = maxprofitIII_vals(ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar())
-    inputsyield2 = maxprofitIII_vals(ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar())
+    YmaxI0vals = calcYmaxI0vals("I0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+    inputsyield1 = maxprofitIII_vals(YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar())
+    inputsyield2 = maxprofitIII_vals(YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar())
     Irange = 0.0:0.01:20.0
     Yrange = 0.0:0.1:180.0
-    Yield1 = [yieldIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2]) for I in Irange]
-    MC1 = [margcostIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar()) for I in Irange]
-    AVC1 = [avvarcostIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar()) for I in Irange]
-    Yield2 = [yieldIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2]) for I in Irange]
-    MC2 = [margcostIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar()) for I in Irange]
-    AVC2 = [avvarcostIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar()) for I in Irange]
-    conymax = AVCmin_MR_distance_revexp_data("ymax", 140, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
-    cony0 = AVCmin_MR_distance_revexp_data("y0", 140, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
+    Yield1 = [yieldIII(I, YmaxI0vals[1,1], YmaxI0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar()) for I in Irange]
+    AVC1 = [avvarcostIII(I, YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar()) for I in Irange]
+    Yield2 = [yieldIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar()) for I in Irange]
+    AVC2 = [avvarcostIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar()) for I in Irange]
+    conYmax = AVCmin_MR_distance_revexp_data("Ymax", 140, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
+    conI0 = AVCmin_MR_distance_revexp_data("I0", 140, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
     errorresistance = figure(figsize=(10,8))
     subplot(2,2,1)
     plot(Yield1, MC1, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
@@ -209,8 +209,8 @@ let
     xlabel("Yield", fontsize = 15)
     ylabel("Revenue & Cost", fontsize = 15)
     subplot(2,2,3)
-    # plot(conymax[:,1], conymax[:,2], color="#440154FF", label="ymax constrained",linewidth = 3)
-    plot(cony0[:,1], cony0[:,2], color="#29AF7FFF", label="ymax or y0 constrained", linewidth = 3)
+    # plot(conYmax[:,1], conYmax[:,2], color="#440154FF", label="Ymax constrained",linewidth = 3)
+    plot(conI0[:,1], conI0[:,2], color="#29AF7FFF", label="Ymax or I0 constrained", linewidth = 3)
     xlabel("Revenue/Expenses", fontsize = 15)
     ylabel("Resistance to error", fontsize = 15)
     xticks(fontsize=12)
@@ -225,20 +225,20 @@ end
 include("AgriEco_supportinginformation.jl")
 
 #Rev/Exp=0.95
-constrainymax_095_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_095_posfeed_data_CV.csv"), DataFrame))
-constrainy0_095_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_095_posfeed_data_CV.csv"), DataFrame))
-constrainymax_095_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_095_timedelay_data_CV.csv"), DataFrame))
-constrainy0_095_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_095_timedelay_data_CV.csv"), DataFrame))
+constrainYmax_095_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_095_posfeed_data_CV.csv"), DataFrame))
+constrainI0_095_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_095_posfeed_data_CV.csv"), DataFrame))
+constrainYmax_095_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_095_timedelay_data_CV.csv"), DataFrame))
+constrainI0_095_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_095_timedelay_data_CV.csv"), DataFrame))
 
 let 
-    constrainymax_095_posfeed = variabilityterminalassets_rednoise(constrainymax_095_posfeed_data_CV)
-    constrainy0_095_posfeed = variabilityterminalassets_rednoise(constrainy0_095_posfeed_data_CV)
-    constrainymax_095_timedelay = variabilityterminalassets_rednoise(constrainymax_095_timedelay_data_CV)
-    constrainy0_095_timedelay = variabilityterminalassets_rednoise(constrainy0_095_timedelay_data_CV)
+    constrainYmax_095_posfeed = variabilityterminalassets_rednoise(constrainYmax_095_posfeed_data_CV)
+    constrainI0_095_posfeed = variabilityterminalassets_rednoise(constrainI0_095_posfeed_data_CV)
+    constrainYmax_095_timedelay = variabilityterminalassets_rednoise(constrainYmax_095_timedelay_data_CV)
+    constrainI0_095_timedelay = variabilityterminalassets_rednoise(constrainI0_095_timedelay_data_CV)
     var095 = figure(figsize=(4,6))    
     subplot(2,1,1)
-    plot(constrainymax_095_posfeed[:,1], constrainymax_095_posfeed[:,4], linestyle="solid", color="black", label="Constrain ymax or y0")
-    # plot(constrainy0_095_posfeed[:,1], constrainy0_095_posfeed[:,4], linestyle="dotted", color="black", label="y0")
+    plot(constrainYmax_095_posfeed[:,1], constrainYmax_095_posfeed[:,4], linestyle="solid", color="black", label="Constrain Ymax or I0")
+    # plot(constrainI0_095_posfeed[:,1], constrainI0_095_posfeed[:,4], linestyle="dotted", color="black", label="I0")
     title("Positive Feedbacks", fontsize = 15)
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
@@ -246,8 +246,8 @@ let
     yticks(fontsize=12)
     legend()
     subplot(2,1,2)
-    plot(constrainymax_095_timedelay[:,1], constrainymax_095_timedelay[:,4], linestyle="solid", color="black", label="Constrain ymax or y0")
-    # plot(constrainy0_095_timedelay[:,1], constrainy0_095_timedelay[:,4], linestyle="dotted", color="black", label="y0")
+    plot(constrainYmax_095_timedelay[:,1], constrainYmax_095_timedelay[:,4], linestyle="solid", color="black", label="Constrain Ymax or I0")
+    # plot(constrainI0_095_timedelay[:,1], constrainI0_095_timedelay[:,4], linestyle="dotted", color="black", label="I0")
     title("Time Delays", fontsize = 15)
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
@@ -261,32 +261,32 @@ end
 
 #Expected Terminal Assets - Positive feedbacks
 let 
-    constrainymax_133 = expectedterminalassets_absolute(constrainymax_133_posfeed_data_CV)
-    constrainymax_115 = expectedterminalassets_absolute(constrainymax_115_posfeed_data_CV)
-    constrainymax_108 = expectedterminalassets_absolute(constrainymax_108_posfeed_data_CV)
-    constrainymax_095 = expectedterminalassets_absolute(constrainymax_095_posfeed_data_CV)
-    constrainy0_133 = expectedterminalassets_absolute(constrainy0_133_posfeed_data_CV)
-    constrainy0_115 = expectedterminalassets_absolute(constrainy0_115_posfeed_data_CV)
-    constrainy0_108 = expectedterminalassets_absolute(constrainy0_108_posfeed_data_CV)
-    constrainy0_095 = expectedterminalassets_absolute(constrainy0_095_posfeed_data_CV)
+    constrainYmax_133 = expectedterminalassets_absolute(constrainYmax_133_posfeed_data_CV)
+    constrainYmax_115 = expectedterminalassets_absolute(constrainYmax_115_posfeed_data_CV)
+    constrainYmax_108 = expectedterminalassets_absolute(constrainYmax_108_posfeed_data_CV)
+    constrainYmax_095 = expectedterminalassets_absolute(constrainYmax_095_posfeed_data_CV)
+    constrainI0_133 = expectedterminalassets_absolute(constrainI0_133_posfeed_data_CV)
+    constrainI0_115 = expectedterminalassets_absolute(constrainI0_115_posfeed_data_CV)
+    constrainI0_108 = expectedterminalassets_absolute(constrainI0_108_posfeed_data_CV)
+    constrainI0_095 = expectedterminalassets_absolute(constrainI0_095_posfeed_data_CV)
     posfeed_eta_changingrevexp = figure(figsize=(4,6))    
     subplot(2,1,1)
-    plot(constrainymax_133[:,1], constrainymax_133[:,2], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(constrainymax_115[:,1], constrainymax_115[:,2], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(constrainymax_108[:,1], constrainymax_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    plot(constrainymax_095[:,1], constrainymax_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
-    title("Constrain ymax", fontsize=15)
+    plot(constrainYmax_133[:,1], constrainYmax_133[:,2], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainYmax_115[:,1], constrainYmax_115[:,2], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainYmax_108[:,1], constrainYmax_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(constrainYmax_095[:,1], constrainYmax_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
+    title("Constrain Ymax", fontsize=15)
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
     subplot(2,1,2)
-    plot(constrainy0_133[:,1], constrainy0_133[:,2], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(constrainy0_115[:,1], constrainy0_115[:,2], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(constrainy0_108[:,1], constrainy0_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    plot(constrainy0_095[:,1], constrainy0_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
-    title("Constrain y0", fontsize=15)
+    plot(constrainI0_133[:,1], constrainI0_133[:,2], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainI0_115[:,1], constrainI0_115[:,2], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainI0_108[:,1], constrainI0_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(constrainI0_095[:,1], constrainI0_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
+    title("Constrain I0", fontsize=15)
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
@@ -299,32 +299,32 @@ end
 
 #Expected Terminal Assets - Time delay
 let 
-    constrainymax_133 = expectedterminalassets_absolute(constrainymax_133_timedelay_data_CV)
-    constrainymax_115 = expectedterminalassets_absolute(constrainymax_115_timedelay_data_CV)
-    constrainymax_108 = expectedterminalassets_absolute(constrainymax_108_timedelay_data_CV)
-    constrainymax_095 = expectedterminalassets_absolute(constrainymax_095_timedelay_data_CV)
-    constrainy0_133 = expectedterminalassets_absolute(constrainy0_133_timedelay_data_CV)
-    constrainy0_115 = expectedterminalassets_absolute(constrainy0_115_timedelay_data_CV)
-    constrainy0_108 = expectedterminalassets_absolute(constrainy0_108_timedelay_data_CV)
-    constrainy0_095 = expectedterminalassets_absolute(constrainy0_095_timedelay_data_CV)
+    constrainYmax_133 = expectedterminalassets_absolute(constrainYmax_133_timedelay_data_CV)
+    constrainYmax_115 = expectedterminalassets_absolute(constrainYmax_115_timedelay_data_CV)
+    constrainYmax_108 = expectedterminalassets_absolute(constrainYmax_108_timedelay_data_CV)
+    constrainYmax_095 = expectedterminalassets_absolute(constrainYmax_095_timedelay_data_CV)
+    constrainI0_133 = expectedterminalassets_absolute(constrainI0_133_timedelay_data_CV)
+    constrainI0_115 = expectedterminalassets_absolute(constrainI0_115_timedelay_data_CV)
+    constrainI0_108 = expectedterminalassets_absolute(constrainI0_108_timedelay_data_CV)
+    constrainI0_095 = expectedterminalassets_absolute(constrainI0_095_timedelay_data_CV)
     timedelays_eta_changingrevexp = figure(figsize=(4,6))    
     subplot(2,1,1)
-    plot(constrainymax_133[:,1], constrainymax_133[:,2], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(constrainymax_115[:,1], constrainymax_115[:,2], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(constrainymax_108[:,1], constrainymax_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    plot(constrainymax_095[:,1], constrainymax_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
-    title("Constrain ymax", fontsize=15)
+    plot(constrainYmax_133[:,1], constrainYmax_133[:,2], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainYmax_115[:,1], constrainYmax_115[:,2], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainYmax_108[:,1], constrainYmax_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(constrainYmax_095[:,1], constrainYmax_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
+    title("Constrain Ymax", fontsize=15)
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
     subplot(2,1,2)
-    plot(constrainy0_133[:,1], constrainy0_133[:,2], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-    plot(constrainy0_115[:,1], constrainy0_115[:,2], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-    plot(constrainy0_108[:,1], constrainy0_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    plot(constrainy0_095[:,1], constrainy0_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
-    title("Constrain y0", fontsize=15)
+    plot(constrainI0_133[:,1], constrainI0_133[:,2], linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(constrainI0_115[:,1], constrainI0_115[:,2], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(constrainI0_108[:,1], constrainI0_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    plot(constrainI0_095[:,1], constrainI0_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
+    title("Constrain I0", fontsize=15)
     xlabel("Autocorrelation", fontsize = 15)
     ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
@@ -336,12 +336,12 @@ let
 end 
 
 #Standard Deviation and mean for time delay mechanism
-constrainymax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_timedelay_data_CV.csv"), DataFrame))
-constrainymax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_timedelay_data_CV.csv"), DataFrame))
+constrainYmax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_timedelay_data_CV.csv"), DataFrame))
+constrainYmax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_timedelay_data_CV.csv"), DataFrame))
 
 let
-    highdata = variabilityterminalassets_breakdown(constrainymax_133_timedelay_data_CV)
-    lowdata = variabilityterminalassets_breakdown(constrainymax_108_timedelay_data_CV)
+    highdata = variabilityterminalassets_breakdown(constrainYmax_133_timedelay_data_CV)
+    lowdata = variabilityterminalassets_breakdown(constrainYmax_108_timedelay_data_CV)
     variabilitybreakdown = figure()
     subplot(2,2,1)
     plot(highdata[:,1], highdata[:,2])
@@ -380,32 +380,32 @@ let
 end
 
 let 
-    ymaxrange = 120.0:1.0:200.0
-    y0data225abs = [calc_y0_abs(225, ymax, 139, 6.70) for ymax in ymaxrange]
-    y0data75abs = [calc_y0_abs(75, ymax, 139, 6.70) for ymax in ymaxrange]
+    Ymaxrange = 120.0:1.0:200.0
+    I0data225abs = [calc_I0_abs(225, Ymax, 139, 6.70) for Ymax in Ymaxrange]
+    I0data75abs = [calc_I0_abs(75, Ymax, 139, 6.70) for Ymax in Ymaxrange]
     abs = figure()
-    plot(1 ./ y0data225abs, ymaxrange, linestyle="dashed", color="black", label="rev-exp = 225")
-    plot(1 ./ y0data75abs, ymaxrange, linestyle="dotted", color="black", label="rev-exp = 75")
-    xlabel("1/y0", fontsize = 20)
-    ylabel("ymax", fontsize = 20)
+    plot(1 ./ I0data225abs, Ymaxrange, linestyle="dashed", color="black", label="rev-exp = 225")
+    plot(1 ./ I0data75abs, Ymaxrange, linestyle="dotted", color="black", label="rev-exp = 75")
+    xlabel("1/I0", fontsize = 20)
+    ylabel("Ymax", fontsize = 20)
     return abs
     # savefig(joinpath(abpath(), "figs/abs_constrainedgraph.pdf"))
 end
 
-# Showing that changing y0 and c keeps geometry the same (as long as rev/exp is constrained)
-#setting y0 and c arbitrarily but still ratio is 1.33
+# Showing that changing I0 and c keeps geometry the same (as long as rev/exp is constrained)
+#setting I0 and c arbitrarily but still ratio is 1.33
 
 calc_c(1.33, 174, 10, 6.70)
-parratio2 = FarmBasePar(y0 = 10, ymax = 174, p = 6.70, c = 138.59335)
+parratio2 = FarmBasePar(I0 = 10, Ymax = 174, p = 6.70, c = 138.59335)
 
-param_ratio(FarmBasePar(y0 = 10, ymax = 120, p = 6.70, c = 138.59335))
-param_ratio(FarmBasePar(y0 = 5, ymax = 120, p = 6.70, c = 138.59335))
+param_ratio(FarmBasePar(I0 = 10, Ymax = 120, p = 6.70, c = 138.59335))
+param_ratio(FarmBasePar(I0 = 5, Ymax = 120, p = 6.70, c = 138.59335))
 param_ratio(parratio2)
 let 
-    par1 = FarmBasePar(y0 = 10, ymax = 174, p = 6.70, c = 138.59335)
-    par2 = FarmBasePar(y0 = 10, ymax = 120, p = 6.70, c = 138.59335)
-    par3 = FarmBasePar(y0 = 5, ymax = 174, p = 6.70, c = 138.59335)
-    par4 = FarmBasePar(y0 = 5, ymax = 120, p = 6.70, c = 138.59335)
+    par1 = FarmBasePar(I0 = 10, Ymax = 174, p = 6.70, c = 138.59335)
+    par2 = FarmBasePar(I0 = 10, Ymax = 120, p = 6.70, c = 138.59335)
+    par3 = FarmBasePar(I0 = 5, Ymax = 174, p = 6.70, c = 138.59335)
+    par4 = FarmBasePar(I0 = 5, Ymax = 120, p = 6.70, c = 138.59335)
     Irange = 0.0:0.01:10.0
     Yield1 = [yieldIII(I, par1) for I in Irange]
     MC1 = [margcostIII(I, par1) for I in Irange]

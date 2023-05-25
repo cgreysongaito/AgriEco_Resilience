@@ -30,7 +30,7 @@ function zeroyield(yieldplusnoise)
     end
 end
 
-function NLtimedelay_data_CV(defaultinputsyield, ymax, y0, yearsdelay, noiseparCV, minfraction, maxyears, seed)
+function NLtimedelay_data_CV(defaultinputsyield, Ymax, I0, yearsdelay, noiseparCV, minfraction, maxyears, seed)
     sd = noiseparCV.yielddisturbed_CV * defaultinputsyield[2]
     basenoise = noise_creation(0.0, sd, noiseparCV.yielddisturbed_r, maxyears+yearsdelay, seed)
     inputsdata = zeros(maxyears+yearsdelay)
@@ -41,20 +41,20 @@ function NLtimedelay_data_CV(defaultinputsyield, ymax, y0, yearsdelay, noiseparC
     end
     for i in yearsdelay+1:maxyears+yearsdelay
         previousyrsactualyield = mean(yielddata[i-yearsdelay:i-1])
-        previousyrsprojectedyield = mean([yieldIII(inputs, ymax, y0) for inputs in inputsdata[i-yearsdelay:i-1]])
+        previousyrsprojectedyield = mean([yieldIII(inputs, Ymax, I0) for inputs in inputsdata[i-yearsdelay:i-1]])
         inputsdata[i] = delayedinputs(defaultinputsyield[1], previousyrsactualyield, previousyrsprojectedyield, minfraction)
-        yieldprep = yieldIII(inputsdata[i], ymax, y0)
+        yieldprep = yieldIII(inputsdata[i], Ymax, I0)
         noisefraction = yieldprep/defaultinputsyield[2]
         yielddata[i] = zeroyield(yieldprep + noisefraction*basenoise[i])
     end
     return hcat(inputsdata[yearsdelay+1:maxyears+yearsdelay], yielddata[yearsdelay+1:maxyears+yearsdelay])
 end
 
-function terminalassets_distribution_NLtimedelay_CV(NL, defaultinputsyield, ymax, y0, yearsdelay, economicpar, noiseparCV, minfraction, maxyears, reps)
+function terminalassets_distribution_NLtimedelay_CV(NL, defaultinputsyield, Ymax, I0, yearsdelay, economicpar, noiseparCV, minfraction, maxyears, reps)
     assetsdebtdata =  zeros(reps)
     if NL == "with"
         for i in 1:reps
-            basedataNL = NLtimedelay_data_CV(defaultinputsyield, ymax, y0, yearsdelay, noiseparCV, minfraction, maxyears, i)
+            basedataNL = NLtimedelay_data_CV(defaultinputsyield, Ymax, I0, yearsdelay, noiseparCV, minfraction, maxyears, i)
             simdata = simulation_NLtimedelay(basedataNL, economicpar)
             assetsdebtdata[i] = simdata[end]
         end
@@ -70,19 +70,19 @@ function terminalassets_distribution_NLtimedelay_CV(NL, defaultinputsyield, ymax
     return assetsdebtdata
 end
 
-function terminalassets_timedelay_rednoise_dataset_CV(ymaxy0vals, economicpar, yielddisturbance_CV, corrrange, yearsdelay, minfraction, maxyears, reps)
-    defaultinputsyield = maxprofitIII_vals(ymaxy0vals[1], ymaxy0vals[2], economicpar)
+function terminalassets_timedelay_rednoise_dataset_CV(YmaxI0vals, economicpar, yielddisturbance_CV, corrrange, yearsdelay, minfraction, maxyears, reps)
+    defaultinputsyield = maxprofitIII_vals(YmaxI0vals[1], YmaxI0vals[2], economicpar)
     data = Array{Vector{Float64}}(undef,length(corrrange), 2)
     @threads for ri in eachindex(corrrange)
         noiseparCV = NoiseParCV(yielddisturbed_CV = yielddisturbance_CV, yielddisturbed_r = corrrange[ri])
-        data[ri, 1] = terminalassets_distribution_NLtimedelay_CV("with", defaultinputsyield, ymaxy0vals[1], ymaxy0vals[2], yearsdelay, economicpar, noiseparCV, minfraction, maxyears, reps)
-        data[ri, 2] = terminalassets_distribution_NLtimedelay_CV("without", defaultinputsyield, ymaxy0vals[1], ymaxy0vals[2], yearsdelay, economicpar, noiseparCV, minfraction, maxyears, reps)
+        data[ri, 1] = terminalassets_distribution_NLtimedelay_CV("with", defaultinputsyield, YmaxI0vals[1], YmaxI0vals[2], yearsdelay, economicpar, noiseparCV, minfraction, maxyears, reps)
+        data[ri, 2] = terminalassets_distribution_NLtimedelay_CV("without", defaultinputsyield, YmaxI0vals[1], YmaxI0vals[2], yearsdelay, economicpar, noiseparCV, minfraction, maxyears, reps)
     end
     return hcat(corrrange, data)
 end
 
 lowrevexpratio = 1.08
-lowymaxvalue = 140
+lowYmaxvalue = 140
 rise = 10
 run = 0.02
 CV_timedelay = 0.2
@@ -92,42 +92,42 @@ minfraction = 0.2
 maxyears_timedelay = 50
 reps_timedelay = 1000
 
-#Constrain ymax
+#Constrain Ymax
 let
-    vals = calcymaxy0vals("ymax", lowymaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
-    constrainymax_095_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/constrainymax_095_timedelay_data_CV.csv"), constrainymax_095_timedelay_data_CV)
-    constrainymax_108_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/constrainymax_108_timedelay_data_CV.csv"), constrainymax_108_timedelay_data_CV)
-    constrainymax_115_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/constrainymax_115_timedelay_data_CV.csv"), constrainymax_115_timedelay_data_CV)
-    constrainymax_133_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[4,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/constrainymax_133_timedelay_data_CV.csv"), constrainymax_133_timedelay_data_CV)
+    vals = calcYmaxI0vals("Ymax", lowYmaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
+    constrainYmax_095_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/constrainYmax_095_timedelay_data_CV.csv"), constrainYmax_095_timedelay_data_CV)
+    constrainYmax_108_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/constrainYmax_108_timedelay_data_CV.csv"), constrainYmax_108_timedelay_data_CV)
+    constrainYmax_115_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/constrainYmax_115_timedelay_data_CV.csv"), constrainYmax_115_timedelay_data_CV)
+    constrainYmax_133_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[4,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/constrainYmax_133_timedelay_data_CV.csv"), constrainYmax_133_timedelay_data_CV)
 end
 
-#Constrain y0
+#Constrain I0
 let
-    vals = calcymaxy0vals("y0", lowymaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
-    constrainy0_095_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/constrainy0_095_timedelay_data_CV.csv"), constrainy0_095_timedelay_data_CV)
-    constrainy0_108_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/constrainy0_108_timedelay_data_CV.csv"), constrainy0_108_timedelay_data_CV)
-    constrainy0_115_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/constrainy0_115_timedelay_data_CV.csv"), constrainy0_115_timedelay_data_CV)
-    constrainy0_133_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[4,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/constrainy0_133_timedelay_data_CV.csv"), constrainy0_133_timedelay_data_CV)  
+    vals = calcYmaxI0vals("I0", lowYmaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
+    constrainI0_095_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/constrainI0_095_timedelay_data_CV.csv"), constrainI0_095_timedelay_data_CV)
+    constrainI0_108_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/constrainI0_108_timedelay_data_CV.csv"), constrainI0_108_timedelay_data_CV)
+    constrainI0_115_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/constrainI0_115_timedelay_data_CV.csv"), constrainI0_115_timedelay_data_CV)
+    constrainI0_133_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[4,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/constrainI0_133_timedelay_data_CV.csv"), constrainI0_133_timedelay_data_CV)  
 end
 
 #Attempt to understand mechanism
 
 #CV breakdown
 
-# constrainymax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_timedelay_data_CV.csv"), DataFrame))
-# constrainymax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_timedelay_data_CV.csv"), DataFrame))
+# constrainYmax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_timedelay_data_CV.csv"), DataFrame))
+# constrainYmax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_timedelay_data_CV.csv"), DataFrame))
 
 # let
-#     highdata = variabilityterminalassets_breakdown(constrainymax_133_timedelay_data_CV)
-#     lowdata = variabilityterminalassets_breakdown(constrainymax_108_timedelay_data_CV)
+#     highdata = variabilityterminalassets_breakdown(constrainYmax_133_timedelay_data_CV)
+#     lowdata = variabilityterminalassets_breakdown(constrainYmax_108_timedelay_data_CV)
 #     test = figure()
 #     subplot(2,2,1)
 #     plot(highdata[:,1], highdata[:,2])
@@ -148,7 +148,7 @@ end
 # end
 
 # let 
-#     vals = calcymaxy0vals("ymax", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+#     vals = calcYmaxI0vals("Ymax", 140, [1.08,1.33], 10, 0.02, EconomicPar())
 #     highdefaultinputsyield = maxprofitIII_vals(vals[2,1], vals[2,2], EconomicPar())
 #     lowdefaultinputsyield = maxprofitIII_vals(vals[1,1], vals[1,2], EconomicPar())
 #     Irange = 0.0:0.01:20.0
@@ -174,7 +174,7 @@ end
 # end
 
 # let 
-#     vals = calcymaxy0vals("y0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+#     vals = calcYmaxI0vals("I0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
 #     highdefaultinputsyield = maxprofitIII_vals(vals[2,1], vals[2,2], EconomicPar())
 #     lowdefaultinputsyield = maxprofitIII_vals(vals[1,1], vals[1,2], EconomicPar())
 #     Irange = 0.0:0.01:20.0
@@ -204,9 +204,9 @@ end
 # end
 
 # #Rev-exp
-# function terminalassets_timedelay_rednoise_dataset_abs(ymaxval, revexpabs, yielddisturbance_sd, corrrange, yearsdelay, minfraction, maxyears, reps)
-#     y0val = calc_y0_abs(revexpabs, ymaxval, FarmBasePar().c, FarmBasePar().p)
-#     newbasepar = FarmBasePar(ymax=ymaxval, y0=y0val)
+# function terminalassets_timedelay_rednoise_dataset_abs(Ymaxval, revexpabs, yielddisturbance_sd, corrrange, yearsdelay, minfraction, maxyears, reps)
+#     I0val = calc_I0_abs(revexpabs, Ymaxval, FarmBasePar().c, FarmBasePar().p)
+#     newbasepar = FarmBasePar(Ymax=Ymaxval, I0=I0val)
 #     defaultinputsyield = maxprofitIII_vals(newbasepar)
 #     data = Array{Vector{Float64}}(undef,length(corrrange), 2)
 #     @threads for ri in eachindex(corrrange)
