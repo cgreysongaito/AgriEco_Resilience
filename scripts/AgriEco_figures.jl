@@ -54,7 +54,7 @@ let
     plot(constrainymax_115[:,1], constrainymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
     plot(constrainymax_108[:,1], constrainymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("VarwNL/VarwoNL", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -63,7 +63,7 @@ let
     plot(constrainy0_115[:,1], constrainy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
     plot(constrainy0_108[:,1], constrainy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("VarwNL/VarwoNL", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -73,16 +73,18 @@ let
 end 
 
 #Figure 4 Resistance to yield disturbance
+calcymaxy0vals("y0", 140, [1.08,1.33], 10, 0.02, EconomicPar())[2,1]
 let 
-    inputsyield1 = maxprofitIII_vals(140, 9.76042, EconomicPar())
-    inputsyield2 = maxprofitIII_vals(172.407, 9.76042, EconomicPar())
+    ymaxy0vals = calcymaxy0vals("y0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+    inputsyield1 = maxprofitIII_vals(ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar())
+    inputsyield2 = maxprofitIII_vals(ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar())
     Irange = 0.0:0.01:20.0
     Yrange = 0.0:0.1:180.0
-    Yield1 = [yieldIII(I, 140, 9.76042) for I in Irange]
-    MC1 = [margcostIII(I, 140, 9.76042, EconomicPar()) for I in Irange]
+    Yield1 = [yieldIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar()) for I in Irange]
     DAVC1 = [avvarcostkickIII(inputsyield1[1], Y, EconomicPar()) for Y in Yrange]
-    Yield2 = [yieldIII(I, 172.407, 9.76042) for I in Irange]
-    MC2 = [margcostIII(I, 172.407, 9.76042, EconomicPar()) for I in Irange]
+    Yield2 = [yieldIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar()) for I in Irange]
     DAVC2 = [avvarcostkickIII(inputsyield2[1], Y, EconomicPar()) for Y in Yrange]
     conymax = AVCK_MC_distance_revexp_data("ymax", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
     cony0 = AVCK_MC_distance_revexp_data("y0", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
@@ -148,7 +150,7 @@ let
     plot(constrainymax_115[:,1], constrainymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
     plot(constrainymax_108[:,1], constrainymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("VarwNL/VarwoNL", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -157,7 +159,7 @@ let
     plot(constrainy0_115[:,1], constrainy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
     plot(constrainy0_108[:,1], constrainy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("VarwNL/VarwoNL", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -168,16 +170,17 @@ end
 
 # Figure 6 - Resistance to error
 let 
-    inputsyield1 = maxprofitIII_vals(140, 9.76042, EconomicPar())
-    inputsyield2 = maxprofitIII_vals(172.407, 9.76042, EconomicPar())
+    ymaxy0vals = calcymaxy0vals("y0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+    inputsyield1 = maxprofitIII_vals(ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar())
+    inputsyield2 = maxprofitIII_vals(ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar())
     Irange = 0.0:0.01:20.0
     Yrange = 0.0:0.1:180.0
-    Yield1 = [yieldIII(I, 140, 9.76042) for I in Irange]
-    MC1 = [margcostIII(I, 140, 9.76042, EconomicPar()) for I in Irange]
-    AVC1 = [avvarcostIII(I, 140, 9.76042, EconomicPar()) for I in Irange]
-    Yield2 = [yieldIII(I, 172.407, 9.76042) for I in Irange]
-    MC2 = [margcostIII(I, 172.407, 9.76042, EconomicPar()) for I in Irange]
-    AVC2 = [avvarcostIII(I, 172.407, 9.76042, EconomicPar()) for I in Irange]
+    Yield1 = [yieldIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    AVC1 = [avvarcostIII(I, ymaxy0vals[1,1], ymaxy0vals[1,2], EconomicPar()) for I in Irange]
+    Yield2 = [yieldIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar()) for I in Irange]
+    AVC2 = [avvarcostIII(I, ymaxy0vals[2,1], ymaxy0vals[2,2], EconomicPar()) for I in Irange]
     conymax = AVCmin_MR_distance_revexp_data("ymax", 140, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
     cony0 = AVCmin_MR_distance_revexp_data("y0", 140, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
     errorresistance = figure(figsize=(10,8))
@@ -218,45 +221,6 @@ let
     savefig(joinpath(abpath(), "figs/Figure6errorresistance_prep.pdf"))
 end 
 
-
-# # Changing Rev/Exp ratio constrain ymax - CV - 6 years
-# constrainymax_133_timedelay_data_CV_6 = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_133_timedelay_data_CV_6.csv"), DataFrame))
-# constrainymax_115_timedelay_data_CV_6 = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_115_timedelay_data_CV_6.csv"), DataFrame))
-# constrainymax_108_timedelay_data_CV_6 = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainymax_108_timedelay_data_CV_6.csv"), DataFrame))
-# let 
-#     constrainymax_133 = variabilityterminalassets_rednoise(constrainymax_133_timedelay_data_CV_6)
-#     constrainymax_115 = variabilityterminalassets_rednoise(constrainymax_115_timedelay_data_CV_6)
-#     constrainymax_108 = variabilityterminalassets_rednoise(constrainymax_108_timedelay_data_CV_6)
-#     var_changingrevexp = figure(figsize=(5,4))    
-#     plot(constrainymax_133[:,1], constrainymax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-#     plot(constrainymax_115[:,1], constrainymax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-#     plot(constrainymax_108[:,1], constrainymax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-#     xlabel("Autocorrelation")
-#     ylabel("VarwNL/VarwoNL")
-#     legend()
-#     return var_changingrevexp
-#     # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelaybacks.pdf")) 
-# end 
-
-# # Changing Rev/Exp ratio constrain y0 -CV 6 years
-# constrainy0_133_timedelay_data_CV_6 = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_133_timedelay_data_CV_6.csv"), DataFrame))
-# constrainy0_115_timedelay_data_CV_6 = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_115_timedelay_data_CV_6.csv"), DataFrame))
-# constrainy0_108_timedelay_data_CV_6 = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainy0_108_timedelay_data_CV_6.csv"), DataFrame))
-# let 
-#     constrainy0_133 = variabilityterminalassets_rednoise(constrainy0_133_timedelay_data_CV_6)
-#     constrainy0_115 = variabilityterminalassets_rednoise(constrainy0_115_timedelay_data_CV_6)
-#     constrainy0_108 = variabilityterminalassets_rednoise(constrainy0_108_timedelay_data_CV_6)
-#     var_changingrevexp = figure(figsize=(5,4))    
-#     plot(constrainy0_133[:,1], constrainy0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
-#     plot(constrainy0_115[:,1], constrainy0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
-#     plot(constrainy0_108[:,1], constrainy0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-#     xlabel("Autocorrelation")
-#     ylabel("VarwNL/VarwoNL")
-#     legend()
-#     return var_changingrevexp
-#     # savefig(joinpath(abpath(), "figs/var_changingrevexp_timedelaybacks.pdf")) 
-# end 
-
 ### Supporting Information
 include("AgriEco_supportinginformation.jl")
 
@@ -277,7 +241,7 @@ let
     # plot(constrainy0_095_posfeed[:,1], constrainy0_095_posfeed[:,4], linestyle="dotted", color="black", label="y0")
     title("Positive Feedbacks", fontsize = 15)
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("VarwNL/VarwoNL", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -286,7 +250,7 @@ let
     # plot(constrainy0_095_timedelay[:,1], constrainy0_095_timedelay[:,4], linestyle="dotted", color="black", label="y0")
     title("Time Delays", fontsize = 15)
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("VarwNL/VarwoNL", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -313,7 +277,7 @@ let
     plot(constrainymax_095[:,1], constrainymax_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
     title("Constrain ymax", fontsize=15)
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("Expected Terminal Assets", fontsize = 15)
+    ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -324,7 +288,7 @@ let
     plot(constrainy0_095[:,1], constrainy0_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
     title("Constrain y0", fontsize=15)
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("Expected Terminal Assets", fontsize = 15)
+    ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -351,7 +315,7 @@ let
     plot(constrainymax_095[:,1], constrainymax_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
     title("Constrain ymax", fontsize=15)
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("Expected Terminal Assets", fontsize = 15)
+    ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -362,7 +326,7 @@ let
     plot(constrainy0_095[:,1], constrainy0_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
     title("Constrain y0", fontsize=15)
     xlabel("Autocorrelation", fontsize = 15)
-    ylabel("Expected Terminal Assets", fontsize = 15)
+    ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -426,27 +390,6 @@ let
     ylabel("ymax", fontsize = 20)
     return abs
     # savefig(joinpath(abpath(), "figs/abs_constrainedgraph.pdf"))
-end
-
-#Figure profit variability (with yield disturbance)  ### CHANGE to 1.02
-
-profitvar133 = AVCKslope_revexpcon_data(1.33, 120.0:1.0:180.0)
-profitvar110 = AVCKslope_revexpcon_data(1.10, 120.0:1.0:180.0)
-profitvar100 = AVCKslope_revexpcon_data(1.00, 120.0:1.0:180.0)
-profitvar095 = AVCKslope_revexpcon_data(0.95, 120.0:1.0:180.0)
-
-let 
-    ymaxrange = 120.0:1.0:180.0
-    profitvarfigure = figure()
-    plot(profitvar133[:,1], profitvar133[:,2], color="blue", label="Rev/Exp = 1.33")
-    plot(profitvar110[:,1], profitvar110[:,2], color="red", label="Rev/Exp = 1.10")
-    plot(profitvar100[:,1], profitvar100[:,2], color="purple", label="Rev/Exp = 1.10")
-    plot(profitvar095[:,1], profitvar095[:,2], color="orange", label="Rev/Exp = 0.95")
-    xlabel("Ymax")
-    ylabel("Profit Variability (DAVC Slope)")
-    legend()
-    return profitvarfigure
-    # savefig(joinpath(abpath(), "figs/profitvarfigure.png")) 
 end
 
 # Showing that changing y0 and c keeps geometry the same (as long as rev/exp is constrained)
