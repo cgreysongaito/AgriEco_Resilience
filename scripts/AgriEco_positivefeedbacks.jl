@@ -55,7 +55,7 @@ function terminalassets_posfeed_rednoise_dataset_CV(YmaxI0vals, economicpar, int
 end
 
 lowrevexpratio = 1.08
-lowYmaxvalue = 140
+lowYmaxvalue = 174
 rise = 10
 run = 0.02
 CV_posfeed = 0.2
@@ -64,6 +64,7 @@ maxyears_posfeed = 50
 reps_posfeed = 1000
 
 #Constrain Ymax
+calcYmaxI0vals("Ymax", lowYmaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
 let
     vals = calcYmaxI0vals("Ymax", lowYmaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
     constrainYmax_095_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
@@ -77,6 +78,7 @@ let
 end
 
 #Constrain I0
+calcYmaxI0vals("I0", lowYmaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
 let
     vals = calcYmaxI0vals("I0", lowYmaxvalue, [0.95,1.08,1.15,1.33], rise, run, EconomicPar())
     constrainI0_095_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))

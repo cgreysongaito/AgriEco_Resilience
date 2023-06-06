@@ -5,7 +5,7 @@ include("AgriEco_commoncode.jl")
 let 
     Irange = 0.0:0.01:20.0
     datahYmaxhyo = [yieldIII(I, 174.0, 10) for I in Irange]
-    Ymaxrange = 120.0:1.0:200.0
+    Ymaxrange = 160.0:1.0:230.0
     I0data133rel = [calc_I0(1.33, Ymax, EconomicPar()) for Ymax in Ymaxrange]
     I0data115rel = [calc_I0(1.15, Ymax, EconomicPar()) for Ymax in Ymaxrange]
     I0data108rel = [calc_I0(1.08, Ymax, EconomicPar()) for Ymax in Ymaxrange]
@@ -73,9 +73,8 @@ let
 end 
 
 #Figure 4 Resistance to yield disturbance
-calcYmaxI0vals("I0", 140, [1.08,1.33], 10, 0.02, EconomicPar())[2,1]
 let 
-    YmaxI0vals = calcYmaxI0vals("I0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+    YmaxI0vals = calcYmaxI0vals("I0", 174, [1.08,1.33], 10, 0.02, EconomicPar())
     inputsyield1 = maxprofitIII_vals(YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar())
     inputsyield2 = maxprofitIII_vals(YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar())
     Irange = 0.0:0.01:20.0
@@ -86,16 +85,16 @@ let
     Yield2 = [yieldIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2]) for I in Irange]
     MC2 = [margcostIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar()) for I in Irange]
     DAVC2 = [avvarcostkickIII(inputsyield2[1], Y, EconomicPar()) for Y in Yrange]
-    conYmax = AVCK_MC_distance_revexp_data("Ymax", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
-    conI0 = AVCK_MC_distance_revexp_data("I0", 140, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
+    conYmax = AVCK_MC_distance_revexp_data("Ymax", 174, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
+    conI0 = AVCK_MC_distance_revexp_data("I0", 174, 1.08:0.01:1.33, 10, 0.02, EconomicPar())
     yielddisturbanceresistance = figure(figsize=(10,8))
     subplot(2,2,1)
     plot(Yield1, MC1, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
-    hlines(EconomicPar().p, 0.0, 140.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     plot(Yrange, DAVC1, color="#404788FF", label = "Noise Average Variable Costs", linewidth = 3)
     vlines(inputsyield1[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)
-    xlim(0.0, 140.0)
+    xlim(0.0, 174.0)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -103,11 +102,11 @@ let
     ylabel("Revenue & Cost", fontsize = 15)
     subplot(2,2,2)
     plot(Yield2, MC2, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
-    hlines(EconomicPar().p, 0.0, 140.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     plot(Yrange, DAVC2, color="#404788FF", label = "Noise Average Variable Costs", linewidth = 3)
     vlines(inputsyield2[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)
-    xlim(0.0, 140.0)
+    xlim(0.0, 174.0)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -170,7 +169,7 @@ end
 
 # Figure 6 - Resistance to error
 let 
-    YmaxI0vals = calcYmaxI0vals("I0", 140, [1.08,1.33], 10, 0.02, EconomicPar())
+    YmaxI0vals = calcYmaxI0vals("I0", 174, [1.08,1.33], 10, 0.02, EconomicPar())
     inputsyield1 = maxprofitIII_vals(YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar())
     inputsyield2 = maxprofitIII_vals(YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar())
     Irange = 0.0:0.01:20.0
@@ -181,16 +180,16 @@ let
     Yield2 = [yieldIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2]) for I in Irange]
     MC2 = [margcostIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar()) for I in Irange]
     AVC2 = [avvarcostIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar()) for I in Irange]
-    conYmax = AVCmin_MR_distance_revexp_data("Ymax", 140, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
-    conI0 = AVCmin_MR_distance_revexp_data("I0", 140, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
+    conYmax = AVCmin_MR_distance_revexp_data("Ymax", 174, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
+    conI0 = AVCmin_MR_distance_revexp_data("I0", 174, 1.08:0.01:1.33, Irange, 10, 0.02, EconomicPar())
     errorresistance = figure(figsize=(10,8))
     subplot(2,2,1)
     plot(Yield1, MC1, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
     plot(Yield1, AVC1, color="#404788FF", label="Average Variable Costs", linewidth = 3)
-    hlines(EconomicPar().p, 0.0, 140.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     vlines(inputsyield1[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)
-    xlim(0.0, 140.0)
+    xlim(0.0, 174.0)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -199,10 +198,10 @@ let
     subplot(2,2,2)
     plot(Yield2, MC2, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
     plot(Yield2, AVC2, color="#404788FF", label="Average Variable Costs", linewidth = 3)
-    hlines(EconomicPar().p, 0.0, 140.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     vlines(inputsyield2[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)
-    xlim(0.0, 140.0)
+    xlim(0.0, 174.0)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -255,8 +254,8 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    # return var095
-    savefig(joinpath(abpath(), "figs/var_095.pdf")) 
+    return var095
+    # savefig(joinpath(abpath(), "figs/var_095.pdf")) 
 end 
 
 #Expected Terminal Assets - Positive feedbacks
