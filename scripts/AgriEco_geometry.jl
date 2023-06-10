@@ -4,7 +4,7 @@ include("AgriEco_commoncode.jl")
 #Distance to MR AVC intersection
 #Marginal revenue versus marginal cost figures
 let 
-    lowYmaxvalue = 140
+    lowYmaxvalue = 174
     rise= 10
     run = 0.02
     YmaxI0vals = calcYmaxI0vals("Ymax", lowYmaxvalue, [1.08,1.15,1.33], rise, run, EconomicPar())

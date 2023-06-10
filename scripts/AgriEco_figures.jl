@@ -53,7 +53,7 @@ let
     plot(constrainYmax_133[:,1], constrainYmax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
     plot(constrainYmax_115[:,1], constrainYmax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
     plot(constrainYmax_108[:,1], constrainYmax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -62,7 +62,7 @@ let
     plot(constrainI0_133[:,1], constrainI0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
     plot(constrainI0_115[:,1], constrainI0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
     plot(constrainI0_108[:,1], constrainI0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -115,7 +115,7 @@ let
     subplot(2,2,3)
     plot(conYmax[:,1], conYmax[:,2], color="#440154FF", label="Ymax constrained",linewidth = 3)
     plot(conI0[:,1], conI0[:,2], color="#73D055FF", label="I0 constrained", linewidth = 3)
-    xlabel("Revenue/Expenses", fontsize = 15)
+    xlabel("Relative Profits", fontsize = 15)
     ylabel("Resistance to yield disturbance", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -148,7 +148,7 @@ let
     plot(constrainYmax_133[:,1], constrainYmax_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
     plot(constrainYmax_115[:,1], constrainYmax_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
     plot(constrainYmax_108[:,1], constrainYmax_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -157,7 +157,7 @@ let
     plot(constrainI0_133[:,1], constrainI0_133[:,4], linestyle="solid", color="black", label="Rev/Exp = 1.33")
     plot(constrainI0_115[:,1], constrainI0_115[:,4], linestyle="dashed", color="black", label="Rev/Exp = 1.15")
     plot(constrainI0_108[:,1], constrainI0_108[:,4], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -210,7 +210,7 @@ let
     subplot(2,2,3)
     # plot(conYmax[:,1], conYmax[:,2], color="#440154FF", label="Ymax constrained",linewidth = 3)
     plot(conI0[:,1], conI0[:,2], color="#29AF7FFF", label="Ymax or I0 constrained", linewidth = 3)
-    xlabel("Revenue/Expenses", fontsize = 15)
+    xlabel("Relative Profits", fontsize = 15)
     ylabel("Resistance to error", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -222,6 +222,49 @@ end
 
 ### Supporting Information
 include("AgriEco_supportinginformation.jl")
+
+#Maintaining geometry while changing I₀ and c
+let 
+    newI0 = 2500
+    newc = calc_c(1.08, 174, newI0, EconomicPar())
+    inputsyield1 = maxprofitIII_vals(174, 0.25, EconomicPar())
+    inputsyield2 = maxprofitIII_vals(174, 2500, EconomicPar(c=newc))
+    Irange = 0.0:0.01:200.0
+    Yield1 = [yieldIII(I, 174, 0.25) for I in Irange]
+    MC1 = [margcostIII(I, 174, 0.25, EconomicPar()) for I in Irange]
+    AVC1 = [avvarcostIII(I, 174, 0.25, EconomicPar()) for I in Irange]
+    Yield2 = [yieldIII(I, 174, newI0) for I in Irange]
+    MC2 = [margcostIII(I, 174, newI0, EconomicPar(c=newc)) for I in Irange]
+    AVC2 = [avvarcostIII(I, 174, newI0, EconomicPar(c=newc)) for I in Irange]
+    costcurves = figure(figsize=(5,6))
+    subplot(2,1,1)
+    plot(Yield1, MC1, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Yield1, AVC1, color="#404788FF", label="Average Variable Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 180.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(inputsyield1[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    legend()
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    subplot(2,1,2)
+    plot(Yield2, MC2, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Yield2, AVC2, color="#404788FF", label="Average Variable Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 180.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(inputsyield2[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    legend()
+    ylim(0.0, 10.0)
+    xlim(0.0, 180.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    tight_layout()
+    # return costcurves
+    savefig(joinpath(abpath(), "figs/SIchangingI0c.pdf"))
+end    
 
 #Rev/Exp=0.95
 constrainYmax_095_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_095_posfeed_data_CV.csv"), DataFrame))
@@ -239,7 +282,7 @@ let
     plot(constrainYmax_095_posfeed[:,1], constrainYmax_095_posfeed[:,4], linestyle="solid", color="black", label="Constrain Ymax or I0")
     # plot(constrainI0_095_posfeed[:,1], constrainI0_095_posfeed[:,4], linestyle="dotted", color="black", label="I0")
     title("Positive Feedbacks", fontsize = 15)
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -248,14 +291,14 @@ let
     plot(constrainYmax_095_timedelay[:,1], constrainYmax_095_timedelay[:,4], linestyle="solid", color="black", label="Constrain Ymax or I0")
     # plot(constrainI0_095_timedelay[:,1], constrainI0_095_timedelay[:,4], linestyle="dotted", color="black", label="I0")
     title("Time Delays", fontsize = 15)
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return var095
-    # savefig(joinpath(abpath(), "figs/var_095.pdf")) 
+    # return var095
+    savefig(joinpath(abpath(), "figs/var_095.pdf")) 
 end 
 
 #Expected Terminal Assets - Positive feedbacks
@@ -275,7 +318,7 @@ let
     plot(constrainYmax_108[:,1], constrainYmax_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     plot(constrainYmax_095[:,1], constrainYmax_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
     title("Constrain Ymax", fontsize=15)
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -286,7 +329,7 @@ let
     plot(constrainI0_108[:,1], constrainI0_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     plot(constrainI0_095[:,1], constrainI0_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
     title("Constrain I0", fontsize=15)
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -313,7 +356,7 @@ let
     plot(constrainYmax_108[:,1], constrainYmax_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     plot(constrainYmax_095[:,1], constrainYmax_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
     title("Constrain Ymax", fontsize=15)
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
@@ -324,7 +367,7 @@ let
     plot(constrainI0_108[:,1], constrainI0_108[:,2], linestyle="dotted", color="black", label="Rev/Exp = 1.08")
     plot(constrainI0_095[:,1], constrainI0_095[:,2], linestyle="dashdot", color="black", label="Rev/Exp = 0.95")
     title("Constrain I0", fontsize=15)
-    xlabel("Autocorrelation", fontsize = 15)
+    xlabel("Noise correlation", fontsize = 15)
     ylabel("Expected Final Assets", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)

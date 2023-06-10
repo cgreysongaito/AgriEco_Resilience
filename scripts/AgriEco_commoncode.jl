@@ -73,7 +73,7 @@ end
 
 @with_kw mutable struct EconomicPar
     p = 6.70 # market price pert unit (not acre) #budget summary field crops budgets 2022 corn conventional
-    c = 139
+    c = 863.5555555555555
 end
 
 ### Production and Parginal functions
@@ -101,8 +101,10 @@ function maxprofitIII_param(I, Ymax, I0, economicpar)
     return 2 * I * Ymax * I0 / (( I0 + (I^2) )^2) - economicpar.c/economicpar.p
 end
 
+174, 0.164848
+
 function testIzeros_profit(testwidth, Ymax, I0, economicpar)
-    testIrange = 0.0:testwidth:I0
+    testIrange = 0.0:testwidth:2*sqrt(I0)
     dataI = zeros(length(testIrange))
     for Ii in eachindex(testIrange)
         try
@@ -113,7 +115,6 @@ function testIzeros_profit(testwidth, Ymax, I0, economicpar)
             end
         end
     end
-    
     intersects = unique(round.(filter(!isnan, dataI), digits=7))
     if length(intersects) > 2 || length(intersects) < 1
         error("Something is wrong with finding zeros function")
@@ -127,8 +128,8 @@ function testIzeros_profit(testwidth, Ymax, I0, economicpar)
 end
 
 function maxprofitIII_vals(Ymax, I0, economicpar)
-    testwidth = trunc(I0/4, digits=0)
-    Irange = 0.0:0.01:Int64(round(3*I0))
+    testwidth = trunc(I0/4, digits=3)
+    Irange = 0.0:0.01:Int64(round(5*I0))
     MC = [margcostIII(I, Ymax, I0, economicpar) for I in Irange]
     if minimum(MC) >= economicpar.p
         return [0,0]
@@ -295,11 +296,16 @@ function AVCK_MR(inputs, Ymax, economicpar)
     Yindex = isapprox_index(data, economicpar.p)
     return Yrange[Yindex]
 end
-
+maxprofitIII_vals(174, 0.25, EconomicPar())
+AVCK_MR(0.6369418, 174, EconomicPar())
+maxprofitIII_vals(174, 0.220491, EconomicPar())
+AVCK_MR(0.6235089, 174, EconomicPar())
+maxprofitIII_vals(174, 0.164848, EconomicPar())
+AVCK_MR(0.6369418, 174, EconomicPar())
 function AVCK_MC_distance_revexp_data(constrain, origYmax, revexpratiorange, rise, run, economicpar)
     YmaxI0vals = calcYmaxI0vals(constrain, origYmax, revexpratiorange, rise, run, economicpar)
     data = zeros(length(revexpratiorange), 2)
-    Irange = 0.0:0.1:30.0
+    Irange = 0.0:0.1:20.0
     @threads for revexpi in eachindex(revexpratiorange)
         inputsyield = maxprofitIII_vals(YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar)
         if minimum(filter(!isnan, [margcostIII(I, YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar) for I in Irange])) >= economicpar.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
