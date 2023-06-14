@@ -1,7 +1,19 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
 
-#Distance to MR AVC intersection
+let 
+    Irange = 0.0:0.01:20.0
+    datahYmaxhyo = [yieldIII(I, 174.0, 0.25) for I in Irange]
+    yield = figure(figsize = (5,6.5))
+    plot(Irange, datahYmaxhyo, color = "black", linewidth = 3)
+    xlabel("Inputs", fontsize = 20)
+    ylabel("Yield", fontsize = 20)
+    xticks([])
+    yticks([])
+    ylim(0.0, 180.0)
+    xlim(0.0,2.0)
+    return yield
+end
 #Marginal revenue versus marginal cost figures
 let 
     lowYmaxvalue = 174
