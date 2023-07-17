@@ -31,9 +31,7 @@ let
 end
 
 ## Positive feedbacks ##
-#Variability Terminal Assets
-#CV
-# Changing Rev/Exp ratio constrain Ymax
+#Figure 3 Amplification or muting of white to reddened noise with positive feedback
 constrainYmax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_posfeed_data_CV.csv"), DataFrame))
 constrainYmax_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_115_posfeed_data_CV.csv"), DataFrame))
 constrainYmax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_posfeed_data_CV.csv"), DataFrame))
@@ -126,9 +124,7 @@ let
 end 
 
 ## Time Delay ##
-#Variability Terminal Assets
-
-# Changing Rev/Exp ratio constrain Ymax - CV
+# Figure 5 Amplification or muting of white to reddened noise with time delay
 constrainYmax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_timedelay_data_CV.csv"), DataFrame))
 constrainYmax_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_115_timedelay_data_CV.csv"), DataFrame))
 constrainYmax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_timedelay_data_CV.csv"), DataFrame))

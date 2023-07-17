@@ -90,17 +90,3 @@ let
     constrainI0_133_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[4,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/constrainI0_133_posfeed_data_CV.csv"), constrainI0_133_posfeed_data_CV)  
 end
-
-# #Rev-exp (absolute)
-# function terminalassets_posfeed_rednoise_dataset_abs(Ymaxval, revexpabs, interestpar, yielddisturbance_sd, corrrange, maxyears, reps)
-#     I0val = calc_I0_abs(revexpabs, Ymaxval, FarmBasePar().c, FarmBasePar().p)
-#     newbasepar = FarmBasePar(Ymax=Ymaxval, I0=I0val)
-#     defaultinputsyield = maxprofitIII_vals(newbasepar)
-#     data = Array{Vector{Float64}}(undef,length(corrrange), 2)
-#     @threads for ri in eachindex(corrrange)
-#         noisepar = NoisePar(yielddisturbed_σ = yielddisturbance_sd, yielddisturbed_r = corrrange[ri])
-#         data[ri, 1] = terminalassets_distribution("with", defaultinputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-#         data[ri, 2] = terminalassets_distribution("without", defaultinputsyield, newbasepar, noisepar, interestpar, maxyears, reps)
-#     end
-#     return hcat(corrrange, data)
-# end
