@@ -31,5 +31,5 @@ Christopher J. Greyson-Gaito<sup>*1.</sup>, Aaron Delaporte<sup>2.</sup>, Alfons
 1. Download the GitHub/Zenodo repo
 2. Open the repo in Visual Studio Code (if you haven't already done so, set up [Julia in Visual Studio Code](https://www.julia-vscode.org/))
 3. Most of the analysis here requires multiple cores. Thus to set up multiple cores on your computer, in Visual Studio Code find the Julia: Num Threads setting in the Extension Settings of the Visual Studio Code Julia Extension. Change this setting to at most the number of logical cores in your computer. Restart Julia. All parallel computing will run automatically regardless of the number of cores selected.
-
+4. Run AgriEco_positivefeedbacks.jl and AgriEco_timedelay.jl to create the date required for AgriEco_figures.jl. Note, depending on the number of cores in your computer, this may take a some time.
 5. Run scripts/AgriEco_figures.jl to produce the figures in the manuscript.
