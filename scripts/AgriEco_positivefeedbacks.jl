@@ -90,3 +90,9 @@ let
     constrainI0_133_posfeed_data_CV = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(vals[4,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/constrainI0_133_posfeed_data_CV.csv"), constrainI0_133_posfeed_data_CV)  
 end
+
+
+#Trying ETAwNL-ETAwoNL along the rev/expenses line
+
+
+#Trying CVwNL/CVwoNL along the rev/expenses line

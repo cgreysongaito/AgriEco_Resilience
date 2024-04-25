@@ -41,12 +41,12 @@ let
     I0data125abs = [calc_I0_abs(125, Ymax, EconomicPar()) for Ymax in Ymaxrange]
     I0data25abs = [calc_I0_abs(25, Ymax, EconomicPar()) for Ymax in Ymaxrange]
     figure2schematicprep = figure()
+    plot(1 ./ I0data25abs, Ymaxrange, color="blue", label="rev-exp = 50")
+    plot(1 ./ I0data125abs,Ymaxrange, color="blue", label="rev-exp = 100")
+    plot(1 ./ I0data225abs, Ymaxrange, color="blue", label="rev-exp = 150")
     plot(1 ./ I0data133rel, Ymaxrange, linestyle="solid", color="black", label="rev/exp = 1.33")
     plot(1 ./ I0data115rel, Ymaxrange, linestyle="dashed", color="black", label="rev/exp = 1.15")
     plot(1 ./ I0data108rel, Ymaxrange, linestyle="dotted", color="black", label="rev/exp = 1.08")
-    plot(1 ./ I0data225abs, Ymaxrange, linestyle="solid", color="blue", label="rev-exp = 150")
-    plot(1 ./ I0data125abs, Ymaxrange, linestyle="dashed", color="blue", label="rev-exp = 100")
-    plot(1 ./ I0data25abs, Ymaxrange, linestyle="dotted", color="blue", label="rev-exp = 50")
     xlabel("1/I0", fontsize = 20)
     ylabel("Ymax", fontsize = 20)
     xticks([])
