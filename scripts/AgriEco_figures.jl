@@ -40,7 +40,7 @@ let
     I0data225abs = [calc_I0_abs(225, Ymax, EconomicPar()) for Ymax in Ymaxrange]
     I0data125abs = [calc_I0_abs(125, Ymax, EconomicPar()) for Ymax in Ymaxrange]
     I0data25abs = [calc_I0_abs(25, Ymax, EconomicPar()) for Ymax in Ymaxrange]
-    figure2schematicprep = figure()
+    relabsfigure = figure()
     plot(1 ./ I0data25abs, Ymaxrange, color="blue", label="rev-exp = 50")
     plot(1 ./ I0data125abs,Ymaxrange, color="blue", label="rev-exp = 100")
     plot(1 ./ I0data225abs, Ymaxrange, color="blue", label="rev-exp = 150")
@@ -51,8 +51,8 @@ let
     ylabel("Ymax", fontsize = 20)
     xticks([])
     yticks([])
-    return figure2schematicprep
-    # savefig(joinpath(abpath(), "figs/figure2schematicprep.pdf"))
+    # return relabsfigure
+    savefig(joinpath(abpath(), "figs/relabsfigure.pdf"))
 end
 
 ## Positive feedbacks ##
