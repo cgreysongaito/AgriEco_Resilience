@@ -1,5 +1,6 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
+include("AgriEco_relprofitscurve.jl")
 
 @with_kw mutable struct InterestPar
     debtinterest = 4
@@ -92,7 +93,47 @@ let
 end
 
 
-#Trying ETAwNL-ETAwoNL along the rev/expenses line
+revexpcurve_vals = calcYmaxI0vals_relprofcurve_final([0.95,1.08,1.15,1.33], [150,174,200], EconomicPar())
+
+#Rev/Exp = 0.95 - along the curve
+let 
+    revexpcurve095_lowymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[1][1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve095_lowymax_posfeed_data.csv"), revexpcurve095_lowymax_posfeed_data)
+    revexpcurve095_medymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[1][2,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve095_medymax_posfeed_data.csv"), revexpcurve095_medymax_posfeed_data)
+    revexpcurve095_highymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[1][3,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve095_highymax_posfeed_data.csv"), revexpcurve095_highymax_posfeed_data)
+end
+
+#Rev/Exp = 1.08 - along the curve
+let 
+    revexpcurve108_lowymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[2][1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve108_lowymax_posfeed_data.csv"), revexpcurve108_lowymax_posfeed_data)
+    revexpcurve108_medymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[2][2,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve108_medymax_posfeed_data.csv"), revexpcurve108_medymax_posfeed_data)
+    revexpcurve108_highymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[2][3,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve108_highymax_posfeed_data.csv"), revexpcurve108_highymax_posfeed_data)
+end
+
+#Rev/Exp = 1.15 - along the curve
+let 
+    revexpcurve115_lowymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[3][1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve115_lowymax_posfeed_data.csv"), revexpcurve115_lowymax_posfeed_data)
+    revexpcurve115_medymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[3][2,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve115_medymax_posfeed_data.csv"), revexpcurve115_medymax_posfeed_data)
+    revexpcurve115_highymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[3][3,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve115_highymax_posfeed_data.csv"), revexpcurve115_highymax_posfeed_data)
+end
+
+#Rev/Exp = 1.30 - along the curve
+let 
+    revexpcurve133_lowymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[4][1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve133_lowymax_posfeed_data.csv"), revexpcurve133_lowymax_posfeed_data)
+    revexpcurve133_medymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[4][2,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve133_medymax_posfeed_data.csv"), revexpcurve133_medymax_posfeed_data)
+    revexpcurve133_highymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[4][3,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+    CSV.write(joinpath(abpath(), "data/revexpcurve133_highymax_posfeed_data.csv"), revexpcurve133_highymax_posfeed_data)
+end
 
 
-#Trying CVwNL/CVwoNL along the rev/expenses line
+

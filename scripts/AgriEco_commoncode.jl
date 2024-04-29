@@ -101,8 +101,6 @@ function maxprofitIII_param(I, Ymax, I0, economicpar)
     return 2 * I * Ymax * I0 / (( I0 + (I^2) )^2) - economicpar.c/economicpar.p
 end
 
-174, 0.164848
-
 function testIzeros_profit(testwidth, Ymax, I0, economicpar)
     testIrange = 0.0:testwidth:2*sqrt(I0)
     dataI = zeros(length(testIrange))

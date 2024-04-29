@@ -241,6 +241,14 @@ let
     savefig(joinpath(abpath(), "figs/Figure6errorresistance_prep.pdf"))
 end 
 
+
+#Trying ETAwNL-ETAwoNL along the rev/expenses line
+
+
+#Trying CVwNL/CVwoNL along the rev/expenses line
+
+
+
 ### Supporting Information
 include("AgriEco_supportinginformation.jl")
 
