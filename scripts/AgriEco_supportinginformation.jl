@@ -29,3 +29,15 @@ function expectedterminalassets_absolute(dataset)
     end
     return data
 end
+
+function expectedterminalassets_residual(dataset)
+    corrrange = dataset[:,1]
+    data=zeros(length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        expectedtermassetsdata_wNL = expectedterminalassets(dataset[ri,2], 30)
+        expectedtermassetsdata_woNL = expectedterminalassets(dataset[ri,3], 30)
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = expectedtermassetsdata_wNL-expectedtermassetsdata_woNL
+    end
+    return data
+end

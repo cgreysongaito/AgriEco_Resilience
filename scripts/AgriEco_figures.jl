@@ -148,6 +148,87 @@ let
     savefig(joinpath(abpath(), "figs/Figure4yielddisturbanceresistance_prep.pdf"))
 end 
 
+#Variability along revenue/expenses curve
+revexpcurve108_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_posfeed_data.csv"), DataFrame))
+revexpcurve108_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_posfeed_data.csv"), DataFrame))
+revexpcurve108_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_highymax_posfeed_data.csv"), DataFrame))
+revexpcurve133_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_lowymax_posfeed_data.csv"), DataFrame))
+revexpcurve133_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_medymax_posfeed_data.csv"), DataFrame))
+revexpcurve133_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_highymax_posfeed_data.csv"), DataFrame))
+
+#In previous version of this analysis - the lines did split between low and high - here though they do not split. what is wrong or is this the correct thing?
+lowymax_108 = variabilityterminalassets_rednoise(revexpcurve108_lowymax_posfeed_data)
+medymax_108 = variabilityterminalassets_rednoise(revexpcurve108_medymax_posfeed_data)
+highymax_108 = variabilityterminalassets_rednoise(revexpcurve108_highymax_posfeed_data)
+lowymax_133 = variabilityterminalassets_rednoise(revexpcurve133_lowymax_posfeed_data)
+medymax_133 = variabilityterminalassets_rednoise(revexpcurve133_medymax_posfeed_data)
+highymax_133 = variabilityterminalassets_rednoise(revexpcurve133_highymax_posfeed_data)
+
+let 
+    lowymax_108 = variabilityterminalassets_rednoise(revexpcurve108_lowymax_posfeed_data)
+    medymax_108 = variabilityterminalassets_rednoise(revexpcurve108_medymax_posfeed_data)
+    highymax_108 = variabilityterminalassets_rednoise(revexpcurve108_highymax_posfeed_data)
+    lowymax_133 = variabilityterminalassets_rednoise(revexpcurve133_lowymax_posfeed_data)
+    medymax_133 = variabilityterminalassets_rednoise(revexpcurve133_medymax_posfeed_data)
+    highymax_133 = variabilityterminalassets_rednoise(revexpcurve133_highymax_posfeed_data)
+    posfeed_var_changingrevexp = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(lowymax_108[:,1], lowymax_108[:,4], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_108[:,1], medymax_108[:,4], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_108[:,1], highymax_108[:,4], linestyle="dotted", color="black", label="High Ymax")
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    subplot(2,1,2)
+    plot(lowymax_133[:,1], lowymax_133[:,4], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_133[:,1], medymax_133[:,4], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_133[:,1], highymax_133[:,4], linestyle="dotted", color="black", label="High Ymax")
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    tight_layout()
+    return posfeed_var_changingrevexp
+    # savefig(joinpath(abpath(), "figs/posfeed_var_changingrevexp.pdf")) 
+end 
+
+#Expected terminal assets residual
+let 
+    lowymax_108 = expectedterminalassets_residual(revexpcurve108_lowymax_posfeed_data)
+    medymax_108 = expectedterminalassets_residual(revexpcurve108_medymax_posfeed_data)
+    highymax_108 = expectedterminalassets_residual(revexpcurve108_highymax_posfeed_data)
+    lowymax_133 = expectedterminalassets_residual(revexpcurve133_lowymax_posfeed_data)
+    medymax_133 = expectedterminalassets_residual(revexpcurve133_medymax_posfeed_data)
+    highymax_133 = expectedterminalassets_residual(revexpcurve133_highymax_posfeed_data)
+    posfeed_eta_changingrevexp = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(lowymax_108[:,1], lowymax_108[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_108[:,1], medymax_108[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_108[:,1], highymax_108[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.08", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("Expected Final Assets Residuals", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    subplot(2,1,2)
+    plot(lowymax_133[:,1], lowymax_133[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_133[:,1], medymax_133[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_133[:,1], highymax_133[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.33", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("Expected Final Assets Residuals", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    tight_layout()
+    return posfeed_eta_changingrevexp
+    # savefig(joinpath(abpath(), "figs/posfeed_eta_changingrevexp.pdf")) 
+end
+
 ## Time Delay ##
 # Figure 5 Amplification or muting of white to reddened noise with time delay
 constrainYmax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_timedelay_data_CV.csv"), DataFrame))
