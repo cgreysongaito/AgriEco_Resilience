@@ -94,6 +94,7 @@ end
 
 
 revexpcurve_vals = calcYmaxI0vals_relprofcurve_final([0.95,1.08,1.15,1.33], [150,174,200], EconomicPar())
+revexpcurve_vals[1][3,:]
 
 #Rev/Exp = 0.95 - along the curve
 let 
@@ -125,7 +126,7 @@ let
     CSV.write(joinpath(abpath(), "data/revexpcurve115_highymax_posfeed_data.csv"), revexpcurve115_highymax_posfeed_data)
 end
 
-#Rev/Exp = 1.30 - along the curve
+#Rev/Exp = 1.33 - along the curve
 let 
     revexpcurve133_lowymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[4][1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
     CSV.write(joinpath(abpath(), "data/revexpcurve133_lowymax_posfeed_data.csv"), revexpcurve133_lowymax_posfeed_data)
