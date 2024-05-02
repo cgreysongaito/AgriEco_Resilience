@@ -387,10 +387,110 @@ let
 end 
 
 
-#Trying ETAwNL-ETAwoNL along the rev/expenses line
+#Examining marginal curves for all constrained ymax/io combinations
+calcYmaxI0vals("I0", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
 
+function marginalcurves(ymaxval, I0val, par)
+    inputsyield = maxprofitIII_vals(ymaxval, I0val, par)
+    Irange = 0.0:0.01:20.0
+    Yield = [yieldIII(I, ymaxval, I0val) for I in Irange]
+    MC = [margcostIII(I, ymaxval, I0val, par) for I in Irange]
+    data = Array{Array{Float64}}(undef,2)
+    data[1] = inputsyield
+    data[2] = hcat(Yield, MC)
+    return data
+end
 
-#Trying CVwNL/CVwoNL along the rev/expenses line
+marginalcurves(174, 0.25, EconomicPar())[2][:,2]
+
+calcYmaxI0vals("I0", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())[2,1]
+
+let 
+    YmaxI0valsI0con = calcYmaxI0vals("I0", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
+    YmaxI0valsYmaxcon = calcYmaxI0vals("Ymax", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
+    I0108 = marginalcurves(YmaxI0valsI0con[1,1], YmaxI0valsI0con[1,2], EconomicPar())
+    Ymax108 = marginalcurves(YmaxI0valsYmaxcon[1,1], YmaxI0valsYmaxcon[1,2], EconomicPar())
+    I0115 = marginalcurves(YmaxI0valsI0con[2,1], YmaxI0valsI0con[2,2], EconomicPar())
+    Ymax115 = marginalcurves(YmaxI0valsYmaxcon[2,1], YmaxI0valsYmaxcon[2,2], EconomicPar())
+    I0133 = marginalcurves(YmaxI0valsI0con[3,1], YmaxI0valsI0con[3,2], EconomicPar())
+    Ymax133 = marginalcurves(YmaxI0valsYmaxcon[3,1], YmaxI0valsYmaxcon[3,2], EconomicPar())
+    marginalcurvesfig = figure(figsize=(10,8))
+    subplot(3,2,1)
+    plot(I0108[2][:,1], I0108[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(I0108[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    title("I0 constrained, R/E=1.08")
+    subplot(3,2,2)
+    plot(Ymax108[2][:,1], Ymax108[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(Ymax108[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    title("Ymax constrained, R/E=1.08")
+    subplot(3,2,3)
+    plot(I0115[2][:,1], I0115[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(I0115[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    title("I0 constrained, R/E=1.15")
+    subplot(3,2,4)
+    plot(Ymax115[2][:,1], Ymax115[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(Ymax115[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    title("Ymax constrained, R/E=1.15")
+    subplot(3,2,5)
+    plot(I0133[2][:,1], I0133[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(I0133[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    title("I0 constrained, R/E=1.33")
+    subplot(3,2,6)
+    plot(Ymax133[2][:,1], Ymax133[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(Ymax133[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    title("Ymax constrained, R/E=1.33")
+    tight_layout()
+    return marginalcurvesfig
+end
+    
 
 
 

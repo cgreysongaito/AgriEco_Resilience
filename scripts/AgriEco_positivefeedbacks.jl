@@ -116,6 +116,10 @@ let
     CSV.write(joinpath(abpath(), "data/revexpcurve108_highymax_posfeed_data.csv"), revexpcurve108_highymax_posfeed_data)
 end
 
+revexpcurve108_lowymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[2][1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+revexpcurve108_medymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[2][2,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+revexpcurve108_highymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[2][3,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
+
 #Rev/Exp = 1.15 - along the curve
 let 
     revexpcurve115_lowymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[3][1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))

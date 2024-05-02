@@ -276,13 +276,15 @@ end
 
 function variabilityterminalassets_breakdown(dataset)
     corrrange = dataset[:,1]
-    data=zeros(length(corrrange), 5)
+    data=zeros(length(corrrange), 7)
     @threads for ri in eachindex(corrrange)
         data[ri,1] = corrrange[ri]
         data[ri,2] = std(dataset[ri,2])
         data[ri,3] = mean(dataset[ri,2])
         data[ri,4] = std(dataset[ri,3])
         data[ri,5] = mean(dataset[ri,3])
+        data[ri,6] = std(dataset[ri,2])/mean(dataset[ri,2])
+        data[ri,7] = std(dataset[ri,3])/mean(dataset[ri,3])
     end
     return data
 end
