@@ -148,6 +148,33 @@ let
     savefig(joinpath(abpath(), "figs/Figure4yielddisturbanceresistance_prep.pdf"))
 end 
 
+
+let 
+    conYmax = AVCK_MC_distance_revexp_data("Ymax", 174, 1.08:0.01:1.33, 10, 0.02, 0.2, EconomicPar())
+    conI0 = AVCK_MC_distance_revexp_data("I0", 174, 1.08:0.01:1.33, 10, 0.02, 0.2, EconomicPar())
+    yielddisturbanceresistance = figure(figsize=(10,8))
+    subplot(2,1,1)
+    plot(conYmax[:,1], conYmax[:,2], color="#440154FF", label="Ymax constrained",linewidth = 3)
+    plot(conI0[:,1], conI0[:,2], color="#73D055FF", label="I0 constrained", linewidth = 3)
+    xlabel("Relative Profits", fontsize = 15)
+    ylabel("Resistance to yield disturbance", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    subplot(2,1,2)
+    plot(conYmax[:,1], conYmax[:,3], color="#440154FF", label="Ymax constrained",linewidth = 3)
+    plot(conI0[:,1], conI0[:,3], color="#73D055FF", label="I0 constrained", linewidth = 3)
+    xlabel("Relative Profits", fontsize = 15)
+    ylabel("Resistance to yield disturbance", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    tight_layout()
+    return yielddisturbanceresistance
+    # savefig(joinpath(abpath(), "figs/Figure4yielddisturbanceresistance_prep.pdf"))
+end 
+
+
 #Variability along revenue/expenses curve
 revexpcurve108_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_posfeed_data.csv"), DataFrame))
 revexpcurve108_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_posfeed_data.csv"), DataFrame))
@@ -392,18 +419,15 @@ calcYmaxI0vals("I0", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
 
 function marginalcurves(ymaxval, I0val, par)
     inputsyield = maxprofitIII_vals(ymaxval, I0val, par)
-    Irange = 0.0:0.01:20.0
+    Irange = 0.0:0.0001:20.0
     Yield = [yieldIII(I, ymaxval, I0val) for I in Irange]
     MC = [margcostIII(I, ymaxval, I0val, par) for I in Irange]
+    AVC = [avvarcostIII(I, ymaxval, I0val, EconomicPar()) for I in Irange]
     data = Array{Array{Float64}}(undef,2)
     data[1] = inputsyield
-    data[2] = hcat(Yield, MC)
+    data[2] = hcat(Yield, MC, AVC)
     return data
 end
-
-marginalcurves(174, 0.25, EconomicPar())[2][:,2]
-
-calcYmaxI0vals("I0", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())[2,1]
 
 let 
     YmaxI0valsI0con = calcYmaxI0vals("I0", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
@@ -414,9 +438,11 @@ let
     Ymax115 = marginalcurves(YmaxI0valsYmaxcon[2,1], YmaxI0valsYmaxcon[2,2], EconomicPar())
     I0133 = marginalcurves(YmaxI0valsI0con[3,1], YmaxI0valsI0con[3,2], EconomicPar())
     Ymax133 = marginalcurves(YmaxI0valsYmaxcon[3,1], YmaxI0valsYmaxcon[3,2], EconomicPar())
+    print([minimum(filter(!isnan, I0108[2][:,3])), minimum(filter(!isnan, Ymax108[2][:,3])), minimum(filter(!isnan, I0115[2][:,3])), minimum(filter(!isnan, Ymax115[2][:,3])), minimum(filter(!isnan, I0133[2][:,3])), minimum(filter(!isnan, Ymax133[2][:,3])) ])
     marginalcurvesfig = figure(figsize=(10,8))
     subplot(3,2,1)
     plot(I0108[2][:,1], I0108[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(I0108[2][:,1], I0108[2][:,3], color="#404788FF", label="Average Variable Costs", linewidth = 3)
     hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     vlines(I0108[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)
@@ -429,6 +455,7 @@ let
     title("I0 constrained, R/E=1.08")
     subplot(3,2,2)
     plot(Ymax108[2][:,1], Ymax108[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Ymax108[2][:,1], Ymax108[2][:,3], color="#404788FF", label="Average Variable Costs", linewidth = 3)
     hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     vlines(Ymax108[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)
@@ -441,6 +468,7 @@ let
     title("Ymax constrained, R/E=1.08")
     subplot(3,2,3)
     plot(I0115[2][:,1], I0115[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(I0115[2][:,1], I0115[2][:,3], color="#404788FF", label="Average Variable Costs", linewidth = 3)
     hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     vlines(I0115[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)
@@ -453,6 +481,7 @@ let
     title("I0 constrained, R/E=1.15")
     subplot(3,2,4)
     plot(Ymax115[2][:,1], Ymax115[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Ymax115[2][:,1], Ymax115[2][:,3], color="#404788FF", label="Average Variable Costs", linewidth = 3)
     hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     vlines(Ymax115[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)
@@ -465,6 +494,7 @@ let
     title("Ymax constrained, R/E=1.15")
     subplot(3,2,5)
     plot(I0133[2][:,1], I0133[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(I0133[2][:,1], I0133[2][:,3], color="#404788FF", label="Average Variable Costs", linewidth = 3)
     hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     vlines(I0133[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)
@@ -477,6 +507,7 @@ let
     title("I0 constrained, R/E=1.33")
     subplot(3,2,6)
     plot(Ymax133[2][:,1], Ymax133[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Ymax133[2][:,1], Ymax133[2][:,3], color="#404788FF", label="Average Variable Costs", linewidth = 3)
     hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
     vlines(Ymax133[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
     ylim(0.0, 10.0)

@@ -296,15 +296,10 @@ function AVCK_MR(inputs, Ymax, economicpar)
     Yindex = isapprox_index(data, economicpar.p)
     return Yrange[Yindex]
 end
-maxprofitIII_vals(174, 0.25, EconomicPar())
-AVCK_MR(0.6369418, 174, EconomicPar())
-maxprofitIII_vals(174, 0.220491, EconomicPar())
-AVCK_MR(0.6235089, 174, EconomicPar())
-maxprofitIII_vals(174, 0.164848, EconomicPar())
-AVCK_MR(0.6369418, 174, EconomicPar())
-function AVCK_MC_distance_revexp_data(constrain, origYmax, revexpratiorange, rise, run, economicpar)
+
+function AVCK_MC_distance_revexp_data(constrain, origYmax, revexpratiorange, rise, run, noiseCV, economicpar)
     YmaxI0vals = calcYmaxI0vals(constrain, origYmax, revexpratiorange, rise, run, economicpar)
-    data = zeros(length(revexpratiorange), 2)
+    data = zeros(length(revexpratiorange), 3)
     Irange = 0.0:0.1:20.0
     @threads for revexpi in eachindex(revexpratiorange)
         inputsyield = maxprofitIII_vals(YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar)
@@ -313,6 +308,7 @@ function AVCK_MC_distance_revexp_data(constrain, origYmax, revexpratiorange, ris
         else
             data[revexpi, 1] = revexpratiorange[revexpi]
             data[revexpi, 2] = inputsyield[2] - AVCK_MR(inputsyield[1], YmaxI0vals[revexpi,1], economicpar)
+            data[revexpi, 3] = data[revexpi, 2]/(noiseCV*inputsyield[2])
         end
     end
     return data
