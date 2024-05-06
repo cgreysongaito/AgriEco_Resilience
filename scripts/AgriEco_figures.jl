@@ -152,12 +152,12 @@ end
 let 
     conYmax = AVCK_MC_distance_revexp_data("Ymax", 174, 1.08:0.01:1.33, 10, 0.02, 0.2, EconomicPar())
     conI0 = AVCK_MC_distance_revexp_data("I0", 174, 1.08:0.01:1.33, 10, 0.02, 0.2, EconomicPar())
-    yielddisturbanceresistance = figure(figsize=(10,8))
+    yielddisturbanceresistance = figure(figsize=(6,8))
     subplot(2,1,1)
     plot(conYmax[:,1], conYmax[:,2], color="#440154FF", label="Ymax constrained",linewidth = 3)
     plot(conI0[:,1], conI0[:,2], color="#73D055FF", label="I0 constrained", linewidth = 3)
     xlabel("Relative Profits", fontsize = 15)
-    ylabel("Resistance to yield disturbance", fontsize = 15)
+    ylabel("Resistance to yield disturbance \n(wo standardizing)", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
     legend()
@@ -170,8 +170,8 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return yielddisturbanceresistance
-    # savefig(joinpath(abpath(), "figs/Figure4yielddisturbanceresistance_prep.pdf"))
+    # return yielddisturbanceresistance
+    savefig(joinpath(abpath(), "figs/resistancetoyieldstandardizing.pdf"))
 end 
 
 
