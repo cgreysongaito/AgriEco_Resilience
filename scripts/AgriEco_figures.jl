@@ -183,14 +183,6 @@ revexpcurve133_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(
 revexpcurve133_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_medymax_posfeed_data.csv"), DataFrame))
 revexpcurve133_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_highymax_posfeed_data.csv"), DataFrame))
 
-#In previous version of this analysis - the lines did split between low and high - here though they do not split. what is wrong or is this the correct thing?
-lowymax_108 = variabilityterminalassets_rednoise(revexpcurve108_lowymax_posfeed_data)
-medymax_108 = variabilityterminalassets_rednoise(revexpcurve108_medymax_posfeed_data)
-highymax_108 = variabilityterminalassets_rednoise(revexpcurve108_highymax_posfeed_data)
-lowymax_133 = variabilityterminalassets_rednoise(revexpcurve133_lowymax_posfeed_data)
-medymax_133 = variabilityterminalassets_rednoise(revexpcurve133_medymax_posfeed_data)
-highymax_133 = variabilityterminalassets_rednoise(revexpcurve133_highymax_posfeed_data)
-
 let 
     lowymax_108 = variabilityterminalassets_rednoise(revexpcurve108_lowymax_posfeed_data)
     medymax_108 = variabilityterminalassets_rednoise(revexpcurve108_medymax_posfeed_data)
@@ -198,7 +190,7 @@ let
     lowymax_133 = variabilityterminalassets_rednoise(revexpcurve133_lowymax_posfeed_data)
     medymax_133 = variabilityterminalassets_rednoise(revexpcurve133_medymax_posfeed_data)
     highymax_133 = variabilityterminalassets_rednoise(revexpcurve133_highymax_posfeed_data)
-    posfeed_var_changingrevexp = figure(figsize=(4,6))    
+    posfeed_var_alongrelprofcurve = figure(figsize=(4,6))    
     subplot(2,1,1)
     plot(lowymax_108[:,1], lowymax_108[:,4], linestyle="solid", color="black", label="Low Ymax")
     plot(medymax_108[:,1], medymax_108[:,4], linestyle="dashed", color="black", label="Med Ymax")
@@ -207,6 +199,8 @@ let
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
+    ylim(1.02,1.15)
+    title("Relative Profits = 1.08")
     legend()
     subplot(2,1,2)
     plot(lowymax_133[:,1], lowymax_133[:,4], linestyle="solid", color="black", label="Low Ymax")
@@ -216,10 +210,12 @@ let
     ylabel("CVwNL/CVwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
+    ylim(1.02,1.15)
+    title("Relative Profits = 1.33")
     legend()
     tight_layout()
-    return posfeed_var_changingrevexp
-    # savefig(joinpath(abpath(), "figs/posfeed_var_changingrevexp.pdf")) 
+    # return posfeed_var_alongrelprofcurve
+    savefig(joinpath(abpath(), "figs/posfeed_var_alongrelprofcurve.pdf")) 
 end 
 
 #Split sd and mean
@@ -359,6 +355,49 @@ let
     # return timedelays_var_changingrevexp
     savefig(joinpath(abpath(), "figs/timedelays_var_changingrevexp.pdf")) 
 end 
+
+#Variability along revenue/expenses curve
+revexpcurve108_lowymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_timedelay_data.csv"), DataFrame))
+revexpcurve108_medymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_timedelay_data.csv"), DataFrame))
+revexpcurve108_highymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_highymax_timedelay_data.csv"), DataFrame))
+revexpcurve133_lowymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_lowymax_timedelay_data.csv"), DataFrame))
+revexpcurve133_medymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_medymax_timedelay_data.csv"), DataFrame))
+revexpcurve133_highymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_highymax_timedelay_data.csv"), DataFrame))
+
+let 
+    lowymax_108 = variabilityterminalassets_rednoise(revexpcurve108_lowymax_timedelay_data)
+    medymax_108 = variabilityterminalassets_rednoise(revexpcurve108_medymax_timedelay_data)
+    highymax_108 = variabilityterminalassets_rednoise(revexpcurve108_highymax_timedelay_data)
+    lowymax_133 = variabilityterminalassets_rednoise(revexpcurve133_lowymax_timedelay_data)
+    medymax_133 = variabilityterminalassets_rednoise(revexpcurve133_medymax_timedelay_data)
+    highymax_133 = variabilityterminalassets_rednoise(revexpcurve133_highymax_timedelay_data)
+    timedelay_var_alongrelprofcurve = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(lowymax_108[:,1], lowymax_108[:,4], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_108[:,1], medymax_108[:,4], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_108[:,1], highymax_108[:,4], linestyle="dotted", color="black", label="High Ymax")
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    ylim(0.80,1.05)
+    title("Relative Profits = 1.08")
+    legend()
+    subplot(2,1,2)
+    plot(lowymax_133[:,1], lowymax_133[:,4], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_133[:,1], medymax_133[:,4], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_133[:,1], highymax_133[:,4], linestyle="dotted", color="black", label="High Ymax")
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("CVwNL/CVwoNL", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    ylim(0.80,1.05)
+    title("Relative Profits = 1.33")
+    legend()
+    tight_layout()
+    # return timedelay_var_alongrelprofcurve
+    savefig(joinpath(abpath(), "figs/timedelay_var_alongrelprofcurve.pdf")) 
+end
 
 # Figure 6 - Resistance to error
 let 

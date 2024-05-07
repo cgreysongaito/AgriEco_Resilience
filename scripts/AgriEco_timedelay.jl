@@ -1,5 +1,6 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
+include("AgriEco_relprofitscurve.jl")
 
 function delayedinputs(defaultinputs, lastyrsactualyield, lastyrsprojectedyield, minfraction,)
     lastyrsoutcome = lastyrsactualyield/lastyrsprojectedyield
@@ -118,4 +119,52 @@ let
     CSV.write(joinpath(abpath(), "data/constrainI0_115_timedelay_data_CV.csv"), constrainI0_115_timedelay_data_CV)
     constrainI0_133_timedelay_data_CV = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(vals[4,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
     CSV.write(joinpath(abpath(), "data/constrainI0_133_timedelay_data_CV.csv"), constrainI0_133_timedelay_data_CV)  
+end
+
+
+revexpcurve_vals = calcYmaxI0vals_relprofcurve_final([0.95,1.08,1.15,1.33], [150,174,200], EconomicPar())
+CV_timedelay = 0.2
+corrrange_timedelay = 0.0:0.01:0.85
+yearsdelay = 3
+minfraction = 0.2
+maxyears_timedelay = 50
+reps_timedelay = 1000
+#Rev/Exp = 0.95 - along the curve
+let 
+    revexpcurve095_lowymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[1][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve095_lowymax_timedelay_data.csv"), revexpcurve095_lowymax_timedelay_data)
+    revexpcurve095_medymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[1][2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve095_medymax_timedelay_data.csv"), revexpcurve095_medymax_timedelay_data)
+    revexpcurve095_highymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[1][3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve095_highymax_timedelay_data.csv"), revexpcurve095_highymax_timedelay_data)
+end
+
+#Rev/Exp = 1.08 - along the curve
+let 
+    revexpcurve108_lowymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[2][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve108_lowymax_timedelay_data.csv"), revexpcurve108_lowymax_timedelay_data)
+    revexpcurve108_medymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[2][2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve108_medymax_timedelay_data.csv"), revexpcurve108_medymax_timedelay_data)
+    revexpcurve108_highymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[2][3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve108_highymax_timedelay_data.csv"), revexpcurve108_highymax_timedelay_data)
+end
+
+#Rev/Exp = 1.15 - along the curve
+let 
+    revexpcurve115_lowymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[3][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve115_lowymax_timedelay_data.csv"), revexpcurve115_lowymax_timedelay_data)
+    revexpcurve115_medymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[3][2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve115_medymax_timedelay_data.csv"), revexpcurve115_medymax_timedelay_data)
+    revexpcurve115_highymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[3][3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve115_highymax_timedelay_data.csv"), revexpcurve115_highymax_timedelay_data)
+end
+
+#Rev/Exp = 1.33 - along the curve
+let 
+    revexpcurve133_lowymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[4][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve133_lowymax_timedelay_data.csv"), revexpcurve133_lowymax_timedelay_data)
+    revexpcurve133_medymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[4][2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve133_medymax_timedelay_data.csv"), revexpcurve133_medymax_timedelay_data)
+    revexpcurve133_highymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[4][3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/revexpcurve133_highymax_timedelay_data.csv"), revexpcurve133_highymax_timedelay_data)
 end
