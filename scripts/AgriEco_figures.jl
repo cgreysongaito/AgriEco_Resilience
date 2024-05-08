@@ -148,6 +148,47 @@ let
     savefig(joinpath(abpath(), "figs/Figure4yielddisturbanceresistance_prep.pdf"))
 end 
 
+let 
+    YmaxI0vals = calcYmaxI0vals("I0", 174, [1.08,1.33], 10, 0.02, EconomicPar())
+    inputsyield1 = maxprofitIII_vals(YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar())
+    inputsyield2 = maxprofitIII_vals(YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar())
+    Irange = 0.0:0.01:20.0
+    Yrange = 0.0:0.1:180.0
+    Yield1 = [yieldIII(I, YmaxI0vals[1,1], YmaxI0vals[1,2]) for I in Irange]
+    MC1 = [margcostIII(I, YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar()) for I in Irange]
+    DAVC1 = [avvarcostkickIII(inputsyield1[1], Y, EconomicPar()) for Y in Yrange]
+    Yield2 = [yieldIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2]) for I in Irange]
+    MC2 = [margcostIII(I, YmaxI0vals[2,1], YmaxI0vals[2,2], EconomicPar()) for I in Irange]
+    DAVC2 = [avvarcostkickIII(inputsyield2[1], Y, EconomicPar()) for Y in Yrange]
+    yielddisturbanceresistance = figure(figsize=(5,8))
+    subplot(2,1,1)
+    plot(Yield1, MC1, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    plot(Yrange, DAVC1, color="#404788FF", label = "Noise Average Variable Costs", linewidth = 3)
+    vlines(inputsyield1[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    subplot(2,1,2)
+    plot(Yield2, MC2, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    plot(Yrange, DAVC2, color="#404788FF", label = "Noise Average Variable Costs", linewidth = 3)
+    vlines(inputsyield2[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    tight_layout()
+    # return yielddisturbanceresistance
+    savefig(joinpath(abpath(), "figs/yielddisturbanceresistance_marginalcurves.pdf"))
+end 
 
 let 
     conYmax = AVCK_MC_distance_revexp_data("Ymax", 174, 1.08:0.01:1.33, 10, 0.02, 0.2, EconomicPar())
@@ -282,39 +323,6 @@ let
     return posfeed_var_changingrevexp
     # savefig(joinpath(abpath(), "figs/posfeed_var_changingrevexp.pdf")) 
 end  #I THINK BECAUSE WE ARE USING CV FOR NOISE THEN WE GET THE SAME CVwNL/CVwoNL response no matter what ymax level
-#Expected terminal assets residual
-let 
-    lowymax_108 = expectedterminalassets_residual(revexpcurve108_lowymax_posfeed_data)
-    medymax_108 = expectedterminalassets_residual(revexpcurve108_medymax_posfeed_data)
-    highymax_108 = expectedterminalassets_residual(revexpcurve108_highymax_posfeed_data)
-    lowymax_133 = expectedterminalassets_residual(revexpcurve133_lowymax_posfeed_data)
-    medymax_133 = expectedterminalassets_residual(revexpcurve133_medymax_posfeed_data)
-    highymax_133 = expectedterminalassets_residual(revexpcurve133_highymax_posfeed_data)
-    posfeed_eta_changingrevexp = figure(figsize=(4,6))    
-    subplot(2,1,1)
-    plot(lowymax_108[:,1], lowymax_108[:,2], linestyle="solid", color="black", label="Low Ymax")
-    plot(medymax_108[:,1], medymax_108[:,2], linestyle="dashed", color="black", label="Med Ymax")
-    plot(highymax_108[:,1], highymax_108[:,2], linestyle="dotted", color="black", label="High Ymax")
-    title("1.08", fontsize=15)
-    xlabel("Noise correlation", fontsize = 15)
-    ylabel("Expected Final Assets Residuals", fontsize = 15)
-    xticks(fontsize=12)
-    yticks(fontsize=12)
-    legend()
-    subplot(2,1,2)
-    plot(lowymax_133[:,1], lowymax_133[:,2], linestyle="solid", color="black", label="Low Ymax")
-    plot(medymax_133[:,1], medymax_133[:,2], linestyle="dashed", color="black", label="Med Ymax")
-    plot(highymax_133[:,1], highymax_133[:,2], linestyle="dotted", color="black", label="High Ymax")
-    title("1.33", fontsize=15)
-    xlabel("Noise correlation", fontsize = 15)
-    ylabel("Expected Final Assets Residuals", fontsize = 15)
-    xticks(fontsize=12)
-    yticks(fontsize=12)
-    legend()
-    tight_layout()
-    return posfeed_eta_changingrevexp
-    # savefig(joinpath(abpath(), "figs/posfeed_eta_changingrevexp.pdf")) 
-end
 
 ## Time Delay ##
 # Figure 5 Amplification or muting of white to reddened noise with time delay
@@ -561,7 +569,42 @@ let
     return marginalcurvesfig
 end
     
-
+let 
+    YmaxI0valsI0con = calcYmaxI0vals("I0", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
+    YmaxI0valsYmaxcon = calcYmaxI0vals("Ymax", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
+    I0133 = marginalcurves(YmaxI0valsI0con[3,1], YmaxI0valsI0con[3,2], EconomicPar())
+    Ymax133 = marginalcurves(YmaxI0valsYmaxcon[3,1], YmaxI0valsYmaxcon[3,2], EconomicPar())
+    marginalcurvesfig = figure(figsize=(8,3))
+    subplot(1,2,1)
+    plot(I0133[2][:,1], I0133[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(I0133[2][:,1], I0133[2][:,3], color="#404788FF", label="Average Variable Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(I0133[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    title("I0 constrained, R/E=1.33")
+    subplot(1,2,2)
+    plot(Ymax133[2][:,1], Ymax133[2][:,2], color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Ymax133[2][:,1], Ymax133[2][:,3], color="#404788FF", label="Average Variable Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    vlines(Ymax133[1][2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    title("Ymax constrained, R/E=1.33")
+    tight_layout()
+    # return marginalcurvesfig
+    savefig(joinpath(abpath(), "figs/averagevariablecostcurves.pdf"))
+end
 
 
 ### Supporting Information
@@ -817,6 +860,75 @@ let
     # return timedelays_eta_changingrevexp
     savefig(joinpath(abpath(), "figs/timedelays_eta_changingrevexp.pdf")) 
 end 
+
+#Expected terminal assets residual
+let 
+    lowymax_108 = expectedterminalassets_residual(revexpcurve108_lowymax_posfeed_data)
+    medymax_108 = expectedterminalassets_residual(revexpcurve108_medymax_posfeed_data)
+    highymax_108 = expectedterminalassets_residual(revexpcurve108_highymax_posfeed_data)
+    lowymax_133 = expectedterminalassets_residual(revexpcurve133_lowymax_posfeed_data)
+    medymax_133 = expectedterminalassets_residual(revexpcurve133_medymax_posfeed_data)
+    highymax_133 = expectedterminalassets_residual(revexpcurve133_highymax_posfeed_data)
+    posfeed_eta_changingrevexp = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(lowymax_108[:,1], lowymax_108[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_108[:,1], medymax_108[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_108[:,1], highymax_108[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.08", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("Expected Final Assets \nResiduals", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    subplot(2,1,2)
+    plot(lowymax_133[:,1], lowymax_133[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_133[:,1], medymax_133[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_133[:,1], highymax_133[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.33", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("Expected Final Assets \nResiduals", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    tight_layout()
+    # return posfeed_eta_changingrevexp
+    savefig(joinpath(abpath(), "figs/posfeed_etaresidual_alongrelprofcurve.pdf")) 
+end
+
+let 
+    lowymax_108 = expectedterminalassets_residual(revexpcurve108_lowymax_timedelay_data)
+    medymax_108 = expectedterminalassets_residual(revexpcurve108_medymax_timedelay_data)
+    highymax_108 = expectedterminalassets_residual(revexpcurve108_highymax_timedelay_data)
+    lowymax_133 = expectedterminalassets_residual(revexpcurve133_lowymax_timedelay_data)
+    medymax_133 = expectedterminalassets_residual(revexpcurve133_medymax_timedelay_data)
+    highymax_133 = expectedterminalassets_residual(revexpcurve133_highymax_timedelay_data)
+    timedelay_etaresidual_alongrelprofitcurve = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(lowymax_108[:,1], lowymax_108[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_108[:,1], medymax_108[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_108[:,1], highymax_108[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.08", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("Expected Final Assets \nResiduals", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    subplot(2,1,2)
+    plot(lowymax_133[:,1], lowymax_133[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_133[:,1], medymax_133[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_133[:,1], highymax_133[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.33", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("Expected Final Assets \nResiduals", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    tight_layout()
+    # return timedelay_etaresidual_alongrelprofitcurve
+    savefig(joinpath(abpath(), "figs/timedelay_etaresidual_alongrelprofitcurve.pdf")) 
+end
+
+
 
 #Standard Deviation and mean for time delay mechanism
 constrainYmax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_timedelay_data_CV.csv"), DataFrame))
