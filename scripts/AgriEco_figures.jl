@@ -1,6 +1,41 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
 
+#Data
+constrainYmax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_posfeed_data_CV.csv"), DataFrame))
+constrainYmax_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_115_posfeed_data_CV.csv"), DataFrame))
+constrainYmax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_posfeed_data_CV.csv"), DataFrame))
+constrainI0_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_133_posfeed_data_CV.csv"), DataFrame))
+constrainI0_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_115_posfeed_data_CV.csv"), DataFrame))
+constrainI0_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_108_posfeed_data_CV.csv"), DataFrame))
+
+revexpcurve108_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_posfeed_data.csv"), DataFrame))
+revexpcurve108_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_posfeed_data.csv"), DataFrame))
+revexpcurve108_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_highymax_posfeed_data.csv"), DataFrame))
+revexpcurve133_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_lowymax_posfeed_data.csv"), DataFrame))
+revexpcurve133_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_medymax_posfeed_data.csv"), DataFrame))
+revexpcurve133_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_highymax_posfeed_data.csv"), DataFrame))
+
+constrainYmax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_timedelay_data_CV.csv"), DataFrame))
+constrainYmax_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_115_timedelay_data_CV.csv"), DataFrame))
+constrainYmax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_timedelay_data_CV.csv"), DataFrame))
+constrainI0_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_133_timedelay_data_CV.csv"), DataFrame))
+constrainI0_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_115_timedelay_data_CV.csv"), DataFrame))
+constrainI0_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_108_timedelay_data_CV.csv"), DataFrame))
+
+revexpcurve108_lowymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_timedelay_data.csv"), DataFrame))
+revexpcurve108_medymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_timedelay_data.csv"), DataFrame))
+revexpcurve108_highymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_highymax_timedelay_data.csv"), DataFrame))
+revexpcurve133_lowymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_lowymax_timedelay_data.csv"), DataFrame))
+revexpcurve133_medymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_medymax_timedelay_data.csv"), DataFrame))
+revexpcurve133_highymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_highymax_timedelay_data.csv"), DataFrame))
+
+constrainYmax_095_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_095_posfeed_data_CV.csv"), DataFrame))
+constrainI0_095_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_095_posfeed_data_CV.csv"), DataFrame))
+constrainYmax_095_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_095_timedelay_data_CV.csv"), DataFrame))
+constrainI0_095_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_095_timedelay_data_CV.csv"), DataFrame))
+
+
 ##Figure 2 Schematic
 let 
     Irange = 0.0:0.01:20.0
@@ -57,13 +92,6 @@ end
 
 ## Positive feedbacks ##
 #Figure 3 Amplification or muting of white to reddened noise with positive feedback
-constrainYmax_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_posfeed_data_CV.csv"), DataFrame))
-constrainYmax_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_115_posfeed_data_CV.csv"), DataFrame))
-constrainYmax_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_posfeed_data_CV.csv"), DataFrame))
-constrainI0_133_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_133_posfeed_data_CV.csv"), DataFrame))
-constrainI0_115_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_115_posfeed_data_CV.csv"), DataFrame))
-constrainI0_108_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_108_posfeed_data_CV.csv"), DataFrame))
-
 let 
     constrainYmax_133 = variabilityterminalassets_rednoise(constrainYmax_133_posfeed_data_CV)
     constrainYmax_115 = variabilityterminalassets_rednoise(constrainYmax_115_posfeed_data_CV)
@@ -217,12 +245,6 @@ end
 
 
 #Variability along revenue/expenses curve
-revexpcurve108_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_posfeed_data.csv"), DataFrame))
-revexpcurve108_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_posfeed_data.csv"), DataFrame))
-revexpcurve108_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_highymax_posfeed_data.csv"), DataFrame))
-revexpcurve133_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_lowymax_posfeed_data.csv"), DataFrame))
-revexpcurve133_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_medymax_posfeed_data.csv"), DataFrame))
-revexpcurve133_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_highymax_posfeed_data.csv"), DataFrame))
 
 let 
     lowymax_108 = variabilityterminalassets_rednoise(revexpcurve108_lowymax_posfeed_data)
@@ -326,13 +348,6 @@ end  #I THINK BECAUSE WE ARE USING CV FOR NOISE THEN WE GET THE SAME CVwNL/CVwoN
 
 ## Time Delay ##
 # Figure 5 Amplification or muting of white to reddened noise with time delay
-constrainYmax_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_133_timedelay_data_CV.csv"), DataFrame))
-constrainYmax_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_115_timedelay_data_CV.csv"), DataFrame))
-constrainYmax_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_108_timedelay_data_CV.csv"), DataFrame))
-constrainI0_133_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_133_timedelay_data_CV.csv"), DataFrame))
-constrainI0_115_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_115_timedelay_data_CV.csv"), DataFrame))
-constrainI0_108_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_108_timedelay_data_CV.csv"), DataFrame))
-
 let 
     constrainYmax_133 = variabilityterminalassets_rednoise(constrainYmax_133_timedelay_data_CV)
     constrainYmax_115 = variabilityterminalassets_rednoise(constrainYmax_115_timedelay_data_CV)
@@ -365,13 +380,6 @@ let
 end 
 
 #Variability along revenue/expenses curve
-revexpcurve108_lowymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_timedelay_data.csv"), DataFrame))
-revexpcurve108_medymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_timedelay_data.csv"), DataFrame))
-revexpcurve108_highymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_highymax_timedelay_data.csv"), DataFrame))
-revexpcurve133_lowymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_lowymax_timedelay_data.csv"), DataFrame))
-revexpcurve133_medymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_medymax_timedelay_data.csv"), DataFrame))
-revexpcurve133_highymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_highymax_timedelay_data.csv"), DataFrame))
-
 let 
     lowymax_108 = variabilityterminalassets_rednoise(revexpcurve108_lowymax_timedelay_data)
     medymax_108 = variabilityterminalassets_rednoise(revexpcurve108_medymax_timedelay_data)
@@ -751,10 +759,6 @@ let
 end 
 
 #Rev/Exp=0.95
-constrainYmax_095_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_095_posfeed_data_CV.csv"), DataFrame))
-constrainI0_095_posfeed_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_095_posfeed_data_CV.csv"), DataFrame))
-constrainYmax_095_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainYmax_095_timedelay_data_CV.csv"), DataFrame))
-constrainI0_095_timedelay_data_CV = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/constrainI0_095_timedelay_data_CV.csv"), DataFrame))
 
 let 
     constrainYmax_095_posfeed = variabilityterminalassets_rednoise(constrainYmax_095_posfeed_data_CV)
@@ -929,6 +933,35 @@ let
     savefig(joinpath(abpath(), "figs/timedelays_eta_alongrelprofcurve.pdf")) 
 end 
 
+test=expectedterminalassets_absolute(revexpcurve108_lowymax_timedelay_data)
+test[:,2]
+function changerelative(data)
+    ini=data[1,2]
+    max=maximum(data[:,2])
+    min=minimum(data[:,2])
+    return (max-min)/ini
+end
+
+changerelative(test)
+
+#Checking whether reduction in ETA residual relative to absolute value
+let 
+    lowymax_108 = expectedterminalassets_absolute(revexpcurve108_lowymax_timedelay_data)
+    medymax_108 = expectedterminalassets_absolute(revexpcurve108_medymax_timedelay_data)
+    highymax_108 = expectedterminalassets_absolute(revexpcurve108_highymax_timedelay_data)
+    lowymax_133 = expectedterminalassets_absolute(revexpcurve133_lowymax_timedelay_data)
+    medymax_133 = expectedterminalassets_absolute(revexpcurve133_medymax_timedelay_data)
+    highymax_133 = expectedterminalassets_absolute(revexpcurve133_highymax_timedelay_data)
+    low108change = changerelative(lowymax_108) 
+    med108change = changerelative(medymax_108)
+    high108change = changerelative(highymax_108)
+    low133change = changerelative(lowymax_133)
+    med133change = changerelative(medymax_133)
+    high133change = changerelative(highymax_133)
+    vals = [low108change,med108change,high108change,low133change,med133change,high133change]  
+    params = ["low108","med108","high108","low133","med133","high133"]
+    return hcat(params,vals)
+end
 #Expected Terminal Assets residual (constrained) - Positive feedbacks
 let 
     constrainYmax_133 = expectedterminalassets_residual(constrainYmax_133_posfeed_data_CV)
