@@ -121,7 +121,6 @@ let
     CSV.write(joinpath(abpath(), "data/constrainI0_133_timedelay_data_CV.csv"), constrainI0_133_timedelay_data_CV)  
 end
 
-
 revexpcurve_vals = calcYmaxI0vals_relprofcurve_final([0.95,1.08,1.15,1.33], [150,174,200], EconomicPar())
 CV_timedelay = 0.2
 corrrange_timedelay = 0.0:0.01:0.85
@@ -129,6 +128,7 @@ yearsdelay = 3
 minfraction = 0.2
 maxyears_timedelay = 50
 reps_timedelay = 1000
+
 #Rev/Exp = 0.95 - along the curve
 let 
     revexpcurve095_lowymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[1][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))

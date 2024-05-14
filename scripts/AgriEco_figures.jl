@@ -1040,6 +1040,9 @@ end
 
 #Expected terminal assets residual (along rel profits curve)
 let 
+    noiseCV = 0.2
+    YmaxI0vals = calcYmaxI0vals_relprofcurve_final([0.95,1.08,1.15,1.33], [150,174,200], EconomicPar())
+    Yieldvals = calcYield_relprofcurve_final(YmaxI0vals)
     lowymax_108 = expectedterminalassets_residual(revexpcurve108_lowymax_posfeed_data)
     medymax_108 = expectedterminalassets_residual(revexpcurve108_medymax_posfeed_data)
     highymax_108 = expectedterminalassets_residual(revexpcurve108_highymax_posfeed_data)
@@ -1048,9 +1051,9 @@ let
     highymax_133 = expectedterminalassets_residual(revexpcurve133_highymax_posfeed_data)
     posfeed_etaresidual_alongrelprof = figure(figsize=(4,6))    
     subplot(2,1,1)
-    plot(lowymax_108[:,1], lowymax_108[:,2], linestyle="solid", color="black", label="Low Ymax")
-    plot(medymax_108[:,1], medymax_108[:,2], linestyle="dashed", color="black", label="Med Ymax")
-    plot(highymax_108[:,1], highymax_108[:,2], linestyle="dotted", color="black", label="High Ymax")
+    plot(lowymax_108[:,1], lowymax_108[:,2] ./ (noiseCV*Yieldvals[2][1]), linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_108[:,1], medymax_108[:,2] ./ (noiseCV*Yieldvals[2][2]), linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_108[:,1], highymax_108[:,2] ./ (noiseCV*Yieldvals[2][3]), linestyle="dotted", color="black", label="High Ymax")
     title("1.08", fontsize=15)
     xlabel("Noise correlation", fontsize = 15)
     ylabel("Expected Final Assets \nResiduals", fontsize = 15)
@@ -1058,9 +1061,9 @@ let
     yticks(fontsize=12)
     legend()
     subplot(2,1,2)
-    plot(lowymax_133[:,1], lowymax_133[:,2], linestyle="solid", color="black", label="Low Ymax")
-    plot(medymax_133[:,1], medymax_133[:,2], linestyle="dashed", color="black", label="Med Ymax")
-    plot(highymax_133[:,1], highymax_133[:,2], linestyle="dotted", color="black", label="High Ymax")
+    plot(lowymax_133[:,1], lowymax_133[:,2] ./ (noiseCV*Yieldvals[4][1]), linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_133[:,1], medymax_133[:,2] ./ (noiseCV*Yieldvals[4][2]), linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_133[:,1], highymax_133[:,2] ./ (noiseCV*Yieldvals[4][3]), linestyle="dotted", color="black", label="High Ymax")
     title("1.33", fontsize=15)
     xlabel("Noise correlation", fontsize = 15)
     ylabel("Expected Final Assets \nResiduals", fontsize = 15)
@@ -1068,11 +1071,33 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    # return posfeed_etaresidual_alongrelprof
-    savefig(joinpath(abpath(), "figs/posfeed_etaresidual_alongrelprof.pdf")) 
+    return posfeed_etaresidual_alongrelprof
+    # savefig(joinpath(abpath(), "figs/posfeed_etaresidual_alongrelprof.pdf")) 
+end
+
+#Standardizing by sd of noise removes differences between low and high ymax in both positive feedback and time delay
+#but does it make sense to standarized by sd of noise for positive feedback (because by definition the sds will be different)
+
+function calcYield_relprofcurve_prep(singrelcurveYmaxI0vals)
+    vals = zeros(3)
+    for i in 1:3
+        vals[i] = maxprofitIII_vals(singrelcurveYmaxI0vals[i,1], singrelcurveYmaxI0vals[i,2], EconomicPar())[2]
+    end
+    return vals
+end
+
+function calcYield_relprofcurve_final(YmaxI0vals)
+    vals = Array{Vector{Float64}}(undef,4)
+    for i in 1:4
+        vals[i] = calcYieldInputs_relprofcurve_prep(YmaxI0vals[i])
+    end
+    return vals
 end
 
 let 
+    noiseCV=0.2
+    YmaxI0vals = calcYmaxI0vals_relprofcurve_final([0.95,1.08,1.15,1.33], [150,174,200], EconomicPar())
+    Yieldvals = calcYield_relprofcurve_final(YmaxI0vals)
     lowymax_108 = expectedterminalassets_residual(revexpcurve108_lowymax_timedelay_data)
     medymax_108 = expectedterminalassets_residual(revexpcurve108_medymax_timedelay_data)
     highymax_108 = expectedterminalassets_residual(revexpcurve108_highymax_timedelay_data)
@@ -1081,9 +1106,9 @@ let
     highymax_133 = expectedterminalassets_residual(revexpcurve133_highymax_timedelay_data)
     timedelay_etaresidual_alongrelprofitcurve = figure(figsize=(4,6))    
     subplot(2,1,1)
-    plot(lowymax_108[:,1], lowymax_108[:,2], linestyle="solid", color="black", label="Low Ymax")
-    plot(medymax_108[:,1], medymax_108[:,2], linestyle="dashed", color="black", label="Med Ymax")
-    plot(highymax_108[:,1], highymax_108[:,2], linestyle="dotted", color="black", label="High Ymax")
+    plot(lowymax_108[:,1], lowymax_108[:,2] ./ (noiseCV*Yieldvals[2][1]) , linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_108[:,1], medymax_108[:,2] ./ (noiseCV*Yieldvals[2][2]), linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_108[:,1], highymax_108[:,2] ./ (noiseCV*Yieldvals[2][3]), linestyle="dotted", color="black", label="High Ymax")
     title("1.08", fontsize=15)
     xlabel("Noise correlation", fontsize = 15)
     ylabel("Expected Final Assets \nResiduals", fontsize = 15)
@@ -1091,9 +1116,9 @@ let
     yticks(fontsize=12)
     legend()
     subplot(2,1,2)
-    plot(lowymax_133[:,1], lowymax_133[:,2], linestyle="solid", color="black", label="Low Ymax")
-    plot(medymax_133[:,1], medymax_133[:,2], linestyle="dashed", color="black", label="Med Ymax")
-    plot(highymax_133[:,1], highymax_133[:,2], linestyle="dotted", color="black", label="High Ymax")
+    plot(lowymax_133[:,1], lowymax_133[:,2] ./ (noiseCV*Yieldvals[4][1]), linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_133[:,1], medymax_133[:,2] ./ (noiseCV*Yieldvals[4][2]), linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_133[:,1], highymax_133[:,2] ./ (noiseCV*Yieldvals[4][3]), linestyle="dotted", color="black", label="High Ymax")
     title("1.33", fontsize=15)
     xlabel("Noise correlation", fontsize = 15)
     ylabel("Expected Final Assets \nResiduals", fontsize = 15)
@@ -1101,8 +1126,8 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    # return timedelay_etaresidual_alongrelprofitcurve
-    savefig(joinpath(abpath(), "figs/timedelay_etaresidual_alongrelprofitcurve.pdf")) 
+    return timedelay_etaresidual_alongrelprofitcurve
+    # savefig(joinpath(abpath(), "figs/timedelay_etaresidual_alongrelprofitcurve.pdf")) 
 end
 
 
