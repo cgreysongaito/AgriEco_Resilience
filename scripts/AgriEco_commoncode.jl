@@ -253,6 +253,15 @@ function calcYmaxI0vals(constrain, origYmax, revexpratios, rise, run, economicpa
     return vals
 end
 
+function calcYmaxI0vals_Ymaxrelprof(Ymaxval, revexpratios, economicpar) #Returns I0 values (not the reciprocal)
+    vals = zeros(length(revexpratios), 2)
+    for i in eachindex(revexpratios)
+        vals[i, 1] = Ymaxval
+        vals[i, 2] = calc_I0(revexpratios[i], Ymaxval, economicpar)
+    end
+    return vals
+end
+
 #Variability amplification and muting functions
 function variabilityterminalassets(distributiondata)
     meandata = abs(mean(distributiondata))
@@ -314,6 +323,23 @@ function AVCK_MC_distance_revexp_data(constrain, origYmax, revexpratiorange, ris
     return data
 end
 
+function AVCK_MC_distance_ymaxrelprofcurve_data(Ymaxval, revexpratiorange, noiseCV, economicpar)
+    YmaxI0vals = calcYmaxI0vals_Ymaxrelprof(Ymaxval, revexpratiorange, economicpar)
+    data = zeros(length(revexpratiorange), 3)
+    Irange = 0.0:0.1:20.0
+    @threads for revexpi in eachindex(revexpratiorange)
+        inputsyield = maxprofitIII_vals(YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar)
+        if minimum(filter(!isnan, [margcostIII(I, YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar) for I in Irange])) >= economicpar.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
+            data[revexpi, 2] = NaN
+        else
+            data[revexpi, 1] = revexpratiorange[revexpi]
+            data[revexpi, 2] = inputsyield[2] - AVCK_MR(inputsyield[1], YmaxI0vals[revexpi,1], economicpar)
+            data[revexpi, 3] = data[revexpi, 2]/(noiseCV*inputsyield[2])
+        end
+    end
+    return data
+end
+
 # Resistance to error
 function AVCmin(Ymax, I0, economicpar)
     Irange = 0.0:0.01:I0
@@ -334,3 +360,25 @@ function AVCmin_MR_distance_revexp_data(constrain, origYmax, revexpratiorange, I
     end
     return data
 end
+
+AVCmin_MR_distance_revexp_data("Ymax", 150, 1.08:0.01:1.33, 0.0:0.01:20.0, 10, 0.02, EconomicPar())
+
+function AVCmin_MR_distance_ymaxrelprofcurve_data(Ymaxval, revexpratiorange, Irange, economicpar)
+    YmaxI0vals = calcYmaxI0vals_Ymaxrelprof(Ymaxval, revexpratiorange, economicpar)
+    data = zeros(length(revexpratiorange), 2)
+    @threads for revexpi in eachindex(revexpratiorange)
+        if minimum(filter(!isnan, [margcostIII(I, YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar) for I in Irange])) >= economicpar.p #|| minimum(filter(!isnan, [avvarcostIII(I, par) for I in Irange])) >= par.p
+            data[revexpi, 2] = NaN
+        else
+            data[revexpi, 1] = revexpratiorange[revexpi]
+            data[revexpi, 2] = economicpar.p - AVCmin(YmaxI0vals[revexpi,1], YmaxI0vals[revexpi,2], economicpar)
+        end
+    end
+    return data
+end
+
+calcYmaxI0vals_Ymaxrelprof(150, 1.08:0.01:1.33, EconomicPar())
+
+AVCmin_MR_distance_ymaxrelprofcurve_data(150, 1.08:0.01:1.33, 0.0:0.01:20.0, EconomicPar())
+
+#TODO work out what is going on with ymax versus io constrained. why does making ymax constant and increasing relative profits does that make juttery line
