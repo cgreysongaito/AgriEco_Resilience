@@ -342,7 +342,7 @@ end
 
 # Resistance to error
 function AVCmin(Ymax, I0, economicpar)
-    Irange = 0.0:0.01:I0
+    Irange = 0.0:0.01:100*I0
     AVC = [avvarcostIII(I, Ymax, I0, economicpar) for I in Irange]
     return minimum(filter(!isnan,AVC))
 end

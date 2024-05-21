@@ -293,8 +293,8 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return yielddisturbanceresistance
-    # savefig(joinpath(abpath(), "figs/Figure4yielddisturbanceresistance_prep.pdf"))
+    # return yielddisturbanceresistance
+    savefig(joinpath(abpath(), "figs/yielddisturbanceresistance_relprofcurve.pdf"))
 end 
 
 #Variability along revenue/expenses curve
@@ -509,8 +509,8 @@ let
     xlabel("Yield", fontsize = 15)
     ylabel("Revenue & Cost", fontsize = 15)
     subplot(2,2,3)
-    #plot(conYmax[:,1], conYmax[:,2], color="#440154FF", label="Ymax constrained",linewidth = 3)
-    plot(conI0[:,1], conI0[:,2], color="#29AF7FFF", label="Ymax or I0 constrained", linewidth = 3)
+    plot(conYmax[:,1], conYmax[:,2], color="#440154FF", label="Ymax constrained",linewidth = 3)
+    #plot(conI0[:,1], conI0[:,2], color="#29AF7FFF", label="Ymax or I0 constrained", linewidth = 3)
     xlabel("Relative Profits", fontsize = 15)
     ylabel("Resistance to error", fontsize = 15)
     xticks(fontsize=12)
@@ -520,7 +520,7 @@ let
     return errorresistance
     # savefig(joinpath(abpath(), "figs/Figure6errorresistance_prep.pdf"))
 end 
-AVCmin_MR_distance_ymaxrelprofcurve_data(Ymaxval, revexpratiorange, Irange, economicpar)
+
 let 
     YmaxI0vals = calcYmaxI0vals_Ymaxrelprof(174, [1.08,1.33], EconomicPar())
     inputsyield1 = maxprofitIII_vals(YmaxI0vals[1,1], YmaxI0vals[1,2], EconomicPar())
@@ -571,10 +571,9 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return errorresistance
-    # savefig(joinpath(abpath(), "figs/Figure6errorresistance_prep.pdf"))
+    # return errorresistance
+    savefig(joinpath(abpath(), "figs/errorresistance_relprofcurveymax.pdf"))
 end 
-
 
 #Examining marginal curves for all constrained ymax/io combinations
 calcYmaxI0vals("I0", 174, [1.08,1.15,1.33], 10, 0.02, EconomicPar())
