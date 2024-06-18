@@ -93,6 +93,19 @@ let
 end
 
 revexpcurve_vals = calcYmaxI0vals_relprofcurve_final([0.95,1.08,1.15,1.33], [150,174,200], EconomicPar())
+revexpcurve_vals108133 = calcYmaxI0vals_relprofcurve_final([1.08,1.33], [150,174,200], EconomicPar())
+
+function fourfifths(ymaxi0data)
+    changedata = zeros(size(ymaxi0data,1))
+    for i in 1:size(ymaxi0data,1)
+            changedata[i] = (2*sqrt(ymaxi0data[i,2])-1)*100
+    end
+    return changedata
+end
+
+fourfifths(revexpcurve_vals108133[1])
+
+fourfifths(revexpcurve_vals108133[2])
 #Rev/Exp = 0.95 - along the curve
 let 
     revexpcurve095_lowymax_posfeed_data = prepDataFrame(terminalassets_posfeed_rednoise_dataset_CV(revexpcurve_vals[1][1,:], EconomicPar(), InterestPar(), CV_posfeed, corrrange_posfeed, maxyears_posfeed, reps_posfeed))
