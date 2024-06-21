@@ -381,4 +381,92 @@ calcYmaxI0vals_Ymaxrelprof(150, 1.08:0.01:1.33, EconomicPar())
 
 AVCmin_MR_distance_ymaxrelprofcurve_data(150, 1.08:0.01:1.33, 0.0:0.01:20.0, EconomicPar())
 
-#TODO work out what is going on with ymax versus io constrained. why does making ymax constant and increasing relative profits does that make juttery line
+function marginalcurves(ymaxval, I0val, par)
+    inputsyield = maxprofitIII_vals(ymaxval, I0val, par)
+    Irange = 0.0:0.0001:20.0
+    Yield = [yieldIII(I, ymaxval, I0val) for I in Irange]
+    MC = [margcostIII(I, ymaxval, I0val, par) for I in Irange]
+    AVC = [avvarcostIII(I, ymaxval, I0val, EconomicPar()) for I in Irange]
+    data = Array{Array{Float64}}(undef,2)
+    data[1] = inputsyield
+    data[2] = hcat(Yield, MC, AVC)
+    return data
+end
+
+function calcYmaxI0vals_relprofcurve_prep(revexpval, Ymaxvals, economicpar) #Returns I0 values (not the reciprocal)
+    vals = zeros(length(Ymaxvals),2)
+    for i in eachindex(Ymaxvals)
+        vals[i,1] = Ymaxvals[i]
+        vals[i,2] = calc_I0(revexpval, Ymaxvals[i], economicpar)
+    end
+    return vals
+end
+
+function calcYmaxI0vals_relprofcurve_final(revexpvals, Ymaxvals, economicpar) #Returns I0 values (not the reciprocal)
+    vals = Array{Array{Float64}}(undef,length(revexpvals))
+    for i in eachindex(revexpvals)
+        vals[i] = calcYmaxI0vals_relprofcurve_prep(revexpvals[i], Ymaxvals, economicpar)
+    end
+    return vals
+end
+
+
+## Expected Terminal Assets
+function distribution_prob_convert(histogramdata)
+    sumcounts = sum(histogramdata.weights)
+    probdata = zeros(length(histogramdata.weights))
+    for bini in eachindex(probdata)
+        probdata[bini] = histogramdata.weights[bini]/sumcounts
+    end
+    return probdata
+end
+
+function expectedterminalassets(distributiondata, numbins)
+    histogramdata = fit(Histogram, distributiondata, nbins=numbins)
+    probdata = distribution_prob_convert(histogramdata)
+    expectedassets = 0
+    for bini in eachindex(probdata)
+        midpoint = histogramdata.edges[1][bini]+step(histogramdata.edges[1])/2
+        expectedassets += midpoint*probdata[bini]
+    end
+    return expectedassets
+end
+
+function expectedterminalassets_absolute(dataset)
+    corrrange = dataset[:,1]
+    data=zeros(length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        expectedtermassetsdata = expectedterminalassets(dataset[ri,2], 30)
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = expectedtermassetsdata
+    end
+    return data
+end
+
+function expectedterminalassets_residual(dataset)
+    corrrange = dataset[:,1]
+    data=zeros(length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        expectedtermassetsdata_wNL = expectedterminalassets(dataset[ri,2], 30)
+        expectedtermassetsdata_woNL = expectedterminalassets(dataset[ri,3], 30)
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = expectedtermassetsdata_wNL-expectedtermassetsdata_woNL
+    end
+    return data
+end
+
+function calcYield_relprofcurve_prep(singrelcurveYmaxI0vals)
+    vals = zeros(3)
+    for i in 1:3
+        vals[i] = maxprofitIII_vals(singrelcurveYmaxI0vals[i,1], singrelcurveYmaxI0vals[i,2], EconomicPar())[2]
+    end
+    return vals
+end
+
+function calcYield_relprofcurve_final(YmaxI0vals)
+    vals = Array{Vector{Float64}}(undef,4)
+    for i in 1:4
+        vals[i] = calcYieldInputs_relprofcurve_prep(YmaxI0vals[i])
+    end
+    return vals
+end
