@@ -219,6 +219,7 @@ let
     ylabel("EFAwNL - EFAwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
+    ylim(-400,850)
     legend()
     subplot(2,1,2)
     plot(lowymax_133[:,1], lowymax_133[:,2], linestyle="solid", color="black", label="Low Ymax")
@@ -229,6 +230,7 @@ let
     ylabel("EFAwNL - EFAwoNL", fontsize = 15)
     xticks(fontsize=12)
     yticks(fontsize=12)
+    ylim(-400,850)
     legend()
     tight_layout()
     # return timedelay_etaresidual_alongrelprofitcurve
