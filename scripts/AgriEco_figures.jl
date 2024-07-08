@@ -329,6 +329,103 @@ let
     savefig(joinpath(abpath(), "figs/errorresistance_relprofcurveymax.pdf"))
 end 
 
+let 
+    YmaxI0vals_low = calcYmaxI0vals_Ymaxrelprof(150, [1.08,1.33], EconomicPar())
+    YmaxI0vals_high = calcYmaxI0vals_Ymaxrelprof(200, [1.08,1.33], EconomicPar())
+    inputsyieldlow1 = maxprofitIII_vals(YmaxI0vals_low[1,1], YmaxI0vals_low[1,2], EconomicPar())
+    inputsyieldlow2 = maxprofitIII_vals(YmaxI0vals_low[2,1], YmaxI0vals_low[2,2], EconomicPar())
+    inputsyieldhigh1 = maxprofitIII_vals(YmaxI0vals_high[1,1], YmaxI0vals_high[1,2], EconomicPar())
+    inputsyieldhigh2 = maxprofitIII_vals(YmaxI0vals_high[2,1], YmaxI0vals_high[2,2], EconomicPar())
+    Irange = 0.0:0.01:20.0
+    Yrange = 0.0:0.1:180.0
+    Yieldlow1 = [yieldIII(I, YmaxI0vals_low[1,1], YmaxI0vals_low[1,2]) for I in Irange]
+    MClow1 = [margcostIII(I, YmaxI0vals_low[1,1], YmaxI0vals_low[1,2], EconomicPar()) for I in Irange]
+    AVClow1 = [avvarcostIII(I, YmaxI0vals_low[1,1], YmaxI0vals_low[1,2], EconomicPar()) for I in Irange]
+    return minimum(filter(!isnan, AVClow1))
+end
+
+
+let 
+    YmaxI0vals_low = calcYmaxI0vals_Ymaxrelprof(150, [1.08,1.33], EconomicPar())
+    YmaxI0vals_high = calcYmaxI0vals_Ymaxrelprof(200, [1.08,1.33], EconomicPar())
+    inputsyieldlow1 = maxprofitIII_vals(YmaxI0vals_low[1,1], YmaxI0vals_low[1,2], EconomicPar())
+    inputsyieldlow2 = maxprofitIII_vals(YmaxI0vals_low[2,1], YmaxI0vals_low[2,2], EconomicPar())
+    inputsyieldhigh1 = maxprofitIII_vals(YmaxI0vals_high[1,1], YmaxI0vals_high[1,2], EconomicPar())
+    inputsyieldhigh2 = maxprofitIII_vals(YmaxI0vals_high[2,1], YmaxI0vals_high[2,2], EconomicPar())
+    Irange = 0.0:0.01:20.0
+    Yrange = 0.0:0.1:180.0
+    Yieldlow1 = [yieldIII(I, YmaxI0vals_low[1,1], YmaxI0vals_low[1,2]) for I in Irange]
+    MClow1 = [margcostIII(I, YmaxI0vals_low[1,1], YmaxI0vals_low[1,2], EconomicPar()) for I in Irange]
+    AVClow1 = [avvarcostIII(I, YmaxI0vals_low[1,1], YmaxI0vals_low[1,2], EconomicPar()) for I in Irange]
+    Yieldlow2 = [yieldIII(I, YmaxI0vals_low[2,1], YmaxI0vals_low[2,2]) for I in Irange]
+    MClow2 = [margcostIII(I, YmaxI0vals_low[2,1], YmaxI0vals_low[2,2], EconomicPar()) for I in Irange]
+    AVClow2 = [avvarcostIII(I, YmaxI0vals_low[2,1], YmaxI0vals_low[2,2], EconomicPar()) for I in Irange]
+    Yieldhigh1 = [yieldIII(I, YmaxI0vals_high[1,1], YmaxI0vals_high[1,2]) for I in Irange]
+    MChigh1 = [margcostIII(I, YmaxI0vals_high[1,1], YmaxI0vals_high[1,2], EconomicPar()) for I in Irange]
+    AVChigh1 = [avvarcostIII(I, YmaxI0vals_high[1,1], YmaxI0vals_high[1,2], EconomicPar()) for I in Irange]
+    Yieldhigh2 = [yieldIII(I, YmaxI0vals_high[2,1], YmaxI0vals_high[2,2]) for I in Irange]
+    MChigh2 = [margcostIII(I, YmaxI0vals_high[2,1], YmaxI0vals_high[2,2], EconomicPar()) for I in Irange]
+    AVChigh2 = [avvarcostIII(I, YmaxI0vals_high[2,1], YmaxI0vals_high[2,2], EconomicPar()) for I in Irange]
+    errorresistance = figure(figsize=(10,8))
+    subplot(2,2,1)
+    plot(Yieldlow1, MClow1, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Yieldlow1, AVClow1, color="#404788FF", label="Average Variable Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    hlines(minimum(filter(!isnan, AVClow1)), 0.0, 174.0, colors="black", linestyle="dashed", linewidth = 2)
+    vlines(inputsyieldlow1[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    title("Low Ymax", fontsize=15)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    subplot(2,2,2)
+    plot(Yieldhigh1, MChigh1, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Yieldhigh1, AVChigh1, color="#404788FF", label="Average Variable Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    hlines(minimum(filter(!isnan, AVChigh1)), 0.0, 174.0, colors="black", linestyle="dashed", linewidth = 2)
+    vlines(inputsyieldhigh1[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    title("High Ymax", fontsize=15)
+    subplot(2,2,3)
+    plot(Yieldlow2, MClow2, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Yieldlow2, AVClow2, color="#404788FF", label="Average Variable Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    hlines(minimum(filter(!isnan, AVClow2)), 0.0, 174.0, colors="black", linestyle="dashed", linewidth = 2)
+    vlines(inputsyieldlow2[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    subplot(2,2,4)
+    plot(Yieldhigh2, MChigh2, color="#238A8DFF", label="Marginal Costs", linewidth = 3)
+    plot(Yieldhigh2, AVChigh2, color="#404788FF", label="Average Variable Costs", linewidth = 3)
+    hlines(EconomicPar().p, 0.0, 174.0, colors="#FDE725FF", label = "Marginal Revenue", linewidth = 3)
+    hlines(minimum(filter(!isnan, AVChigh2)), 0.0, 174.0, colors="black", linestyle="dashed", linewidth = 2)
+    vlines(inputsyieldhigh2[2], 0.0, 10.0, colors="black", linestyle="dashed", linewidth=2)
+    ylim(0.0, 10.0)
+    xlim(0.0, 174.0)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    legend()
+    xlabel("Yield", fontsize = 15)
+    ylabel("Revenue & Cost", fontsize = 15)
+    tight_layout()
+    return errorresistance
+    # savefig(joinpath(abpath(), "figs/errorresistance_relprofcurveymax.pdf"))
+end 
+
 ### Supporting Information
 include("AgriEco_supportinginformation.jl")
 
