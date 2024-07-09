@@ -361,8 +361,6 @@ function AVCmin_MR_distance_revexp_data(constrain, origYmax, revexpratiorange, I
     return data
 end
 
-AVCmin_MR_distance_revexp_data("Ymax", 150, 1.08:0.01:1.33, 0.0:0.01:20.0, 10, 0.02, EconomicPar())
-
 function AVCmin_MR_distance_ymaxrelprofcurve_data(Ymaxval, revexpratiorange, Irange, economicpar)
     YmaxI0vals = calcYmaxI0vals_Ymaxrelprof(Ymaxval, revexpratiorange, economicpar)
     data = zeros(length(revexpratiorange), 2)
@@ -376,10 +374,6 @@ function AVCmin_MR_distance_ymaxrelprofcurve_data(Ymaxval, revexpratiorange, Ira
     end
     return data
 end
-
-calcYmaxI0vals_Ymaxrelprof(150, 1.08:0.01:1.33, EconomicPar())
-
-AVCmin_MR_distance_ymaxrelprofcurve_data(150, 1.08:0.01:1.33, 0.0:0.01:20.0, EconomicPar())
 
 function marginalcurves(ymaxval, I0val, par)
     inputsyield = maxprofitIII_vals(ymaxval, I0val, par)
@@ -455,18 +449,30 @@ function expectedterminalassets_residual(dataset)
     return data
 end
 
-function calcYield_relprofcurve_prep(singrelcurveYmaxI0vals)
-    vals = zeros(3)
-    for i in 1:3
-        vals[i] = maxprofitIII_vals(singrelcurveYmaxI0vals[i,1], singrelcurveYmaxI0vals[i,2], EconomicPar())[2]
+function expectedterminalassets_residualstand(dataset)
+    corrrange = dataset[:,1]
+    data=zeros(length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        expectedtermassetsdata_wNL = expectedterminalassets(dataset[ri,2], 30)
+        expectedtermassetsdata_woNL = expectedterminalassets(dataset[ri,3], 30)
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = (expectedtermassetsdata_wNL-expectedtermassetsdata_woNL)/expectedtermassetsdata_woNL
     end
-    return vals
+    return data
 end
 
-function calcYield_relprofcurve_final(YmaxI0vals)
-    vals = Array{Vector{Float64}}(undef,4)
-    for i in 1:4
-        vals[i] = calcYieldInputs_relprofcurve_prep(YmaxI0vals[i])
-    end
-    return vals
-end
+# function calcYield_relprofcurve_prep(singrelcurveYmaxI0vals)
+#     vals = zeros(3)
+#     for i in 1:3
+#         vals[i] = maxprofitIII_vals(singrelcurveYmaxI0vals[i,1], singrelcurveYmaxI0vals[i,2], EconomicPar())[2]
+#     end
+#     return vals
+# end
+
+# function calcYield_relprofcurve_final(YmaxI0vals)
+#     vals = Array{Vector{Float64}}(undef,4)
+#     for i in 1:4
+#         vals[i] = calcYieldInputs_relprofcurve_prep(YmaxI0vals[i])
+#     end
+#     return vals
+# end

@@ -237,6 +237,86 @@ let
     savefig(joinpath(abpath(), "figs/timedelay_etaresidual_alongrelprofitcurve.pdf")) 
 end
 
+let 
+    lowymax_108 = expectedterminalassets_residualstand(revexpcurve108_lowymax_timedelay_data)
+    medymax_108 = expectedterminalassets_residualstand(revexpcurve108_medymax_timedelay_data)
+    highymax_108 = expectedterminalassets_residualstand(revexpcurve108_highymax_timedelay_data)
+    lowymax_133 = expectedterminalassets_residualstand(revexpcurve133_lowymax_timedelay_data)
+    medymax_133 = expectedterminalassets_residualstand(revexpcurve133_medymax_timedelay_data)
+    highymax_133 = expectedterminalassets_residualstand(revexpcurve133_highymax_timedelay_data)
+    timedelay_etaresidual_alongrelprofitcurve = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(lowymax_108[:,1], lowymax_108[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_108[:,1], medymax_108[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_108[:,1], highymax_108[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.08", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("(EFAwNL - EFAwoNL)/EFAwoNL", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    # ylim(-400,850)
+    legend()
+    subplot(2,1,2)
+    plot(lowymax_133[:,1], lowymax_133[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_133[:,1], medymax_133[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_133[:,1], highymax_133[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.33", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("(EFAwNL - EFAwoNL)/EFAwoNL", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    # ylim(-400,850)
+    legend()
+    tight_layout()
+    return timedelay_etaresidual_alongrelprofitcurve
+    # savefig(joinpath(abpath(), "figs/timedelay_etaresidual_alongrelprofitcurve.pdf")) 
+end
+
+let 
+    YmaxI0valslow = calcYmaxI0vals_Ymaxrelprof(150, [1.08,1.33], EconomicPar())
+    YmaxI0valsmed = calcYmaxI0vals_Ymaxrelprof(174, [1.08,1.33], EconomicPar())
+    YmaxI0valshigh = calcYmaxI0vals_Ymaxrelprof(200, [1.08,1.33], EconomicPar())
+    inputsyieldlow108 = maxprofitIII_vals(YmaxI0valslow[1,1], YmaxI0valslow[1,2], EconomicPar())
+    inputsyieldlow133 = maxprofitIII_vals(YmaxI0valslow[2,1], YmaxI0valslow[2,2], EconomicPar())
+    inputsyieldmed108 = maxprofitIII_vals(YmaxI0valsmed[1,1], YmaxI0valsmed[1,2], EconomicPar())
+    inputsyieldmed133 = maxprofitIII_vals(YmaxI0valsmed[2,1], YmaxI0valsmed[2,2], EconomicPar())
+    inputsyieldhigh108 = maxprofitIII_vals(YmaxI0valshigh[1,1], YmaxI0valshigh[1,2], EconomicPar())
+    inputsyieldhigh133 = maxprofitIII_vals(YmaxI0valshigh[2,1], YmaxI0valshigh[2,2], EconomicPar())
+    lowymax_108 = expectedterminalassets_residual(revexpcurve108_lowymax_timedelay_data) ./ inputsyieldlow108[2]
+    medymax_108 = expectedterminalassets_residual(revexpcurve108_medymax_timedelay_data) ./ inputsyieldhigh108[2]
+    highymax_108 = expectedterminalassets_residual(revexpcurve108_highymax_timedelay_data) ./ inputsyieldhigh108[2]
+    lowymax_133 = expectedterminalassets_residual(revexpcurve133_lowymax_timedelay_data) ./ inputsyieldlow133[2]
+    medymax_133 = expectedterminalassets_residual(revexpcurve133_medymax_timedelay_data) ./ inputsyieldmed133[2]
+    highymax_133 = expectedterminalassets_residual(revexpcurve133_highymax_timedelay_data) ./ inputsyieldhigh133[2]
+    timedelay_etaresidual_alongrelprofitcurve = figure(figsize=(4,6))    
+    subplot(2,1,1)
+    plot(lowymax_108[:,1], lowymax_108[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_108[:,1], medymax_108[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_108[:,1], highymax_108[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.08", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("(EFAwNL - EFAwoNL)/EFAwoNL", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    # ylim(-400,850)
+    legend()
+    subplot(2,1,2)
+    plot(lowymax_133[:,1], lowymax_133[:,2], linestyle="solid", color="black", label="Low Ymax")
+    plot(medymax_133[:,1], medymax_133[:,2], linestyle="dashed", color="black", label="Med Ymax")
+    plot(highymax_133[:,1], highymax_133[:,2], linestyle="dotted", color="black", label="High Ymax")
+    title("1.33", fontsize=15)
+    xlabel("Noise correlation", fontsize = 15)
+    ylabel("(EFAwNL - EFAwoNL)/EFAwoNL", fontsize = 15)
+    xticks(fontsize=12)
+    yticks(fontsize=12)
+    # ylim(-400,850)
+    legend()
+    tight_layout()
+    return timedelay_etaresidual_alongrelprofitcurve
+    # savefig(joinpath(abpath(), "figs/timedelay_etaresidual_alongrelprofitcurve.pdf")) 
+end
+
+
 #Figure 7 Amplification or muting of white to reddened noise with time delay
 #Variability along relative profits curves
 let 
@@ -328,22 +408,6 @@ let
     # return errorresistance
     savefig(joinpath(abpath(), "figs/errorresistance_relprofcurveymax.pdf"))
 end 
-
-let 
-    YmaxI0vals_low = calcYmaxI0vals_Ymaxrelprof(150, [1.08,1.33], EconomicPar())
-    YmaxI0vals_high = calcYmaxI0vals_Ymaxrelprof(200, [1.08,1.33], EconomicPar())
-    inputsyieldlow1 = maxprofitIII_vals(YmaxI0vals_low[1,1], YmaxI0vals_low[1,2], EconomicPar())
-    inputsyieldlow2 = maxprofitIII_vals(YmaxI0vals_low[2,1], YmaxI0vals_low[2,2], EconomicPar())
-    inputsyieldhigh1 = maxprofitIII_vals(YmaxI0vals_high[1,1], YmaxI0vals_high[1,2], EconomicPar())
-    inputsyieldhigh2 = maxprofitIII_vals(YmaxI0vals_high[2,1], YmaxI0vals_high[2,2], EconomicPar())
-    Irange = 0.0:0.01:20.0
-    Yrange = 0.0:0.1:180.0
-    Yieldlow1 = [yieldIII(I, YmaxI0vals_low[1,1], YmaxI0vals_low[1,2]) for I in Irange]
-    MClow1 = [margcostIII(I, YmaxI0vals_low[1,1], YmaxI0vals_low[1,2], EconomicPar()) for I in Irange]
-    AVClow1 = [avvarcostIII(I, YmaxI0vals_low[1,1], YmaxI0vals_low[1,2], EconomicPar()) for I in Irange]
-    return minimum(filter(!isnan, AVClow1))
-end
-
 
 let 
     YmaxI0vals_low = calcYmaxI0vals_Ymaxrelprof(150, [1.08,1.33], EconomicPar())
