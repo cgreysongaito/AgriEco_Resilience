@@ -461,6 +461,18 @@ function expectedterminalassets_residualstand(dataset)
     return data
 end
 
+function expectedterminalassets_residualstandyield(dataset, yield)
+    corrrange = dataset[:,1]
+    data=zeros(length(corrrange), 2)
+    @threads for ri in eachindex(corrrange)
+        expectedtermassetsdata_wNL = expectedterminalassets(dataset[ri,2], 30)
+        expectedtermassetsdata_woNL = expectedterminalassets(dataset[ri,3], 30)
+        data[ri,1] = corrrange[ri]
+        data[ri,2] = (expectedtermassetsdata_wNL-expectedtermassetsdata_woNL)/yield
+    end
+    return data
+end
+
 # function calcYield_relprofcurve_prep(singrelcurveYmaxI0vals)
 #     vals = zeros(3)
 #     for i in 1:3
