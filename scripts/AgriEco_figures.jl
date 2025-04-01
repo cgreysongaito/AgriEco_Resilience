@@ -578,6 +578,30 @@ let
     savefig(joinpath(abpath(), "figs/SIchangingI0c.pdf"))
 end    
 
+#Relative profits versus absolute profits
+let 
+    Irange = 0.0:0.01:20.0
+    Ymaxrange = 160.0:1.0:230.0
+    I0data225abs = [calc_I0_abs(225, Ymax, EconomicPar()) for Ymax in Ymaxrange]
+    I0data125abs = [calc_I0_abs(125, Ymax, EconomicPar()) for Ymax in Ymaxrange]
+    I0data25abs = [calc_I0_abs(25, Ymax, EconomicPar()) for Ymax in Ymaxrange]
+    I0data133rel = [calc_I0(1.33, Ymax, EconomicPar()) for Ymax in Ymaxrange]
+    I0data115rel = [calc_I0(1.15, Ymax, EconomicPar()) for Ymax in Ymaxrange]
+    I0data108rel = [calc_I0(1.08, Ymax, EconomicPar()) for Ymax in Ymaxrange]
+    relvsabsplot = figure(figsize = (6,4))
+    plot(1 ./ I0data25abs, Ymaxrange, color="#440154FF", label="Rev-Exp = \$25")
+    plot(1 ./ I0data125abs,Ymaxrange, color="#1F968BFF", label="Rev-Exp = \$125")
+    plot(1 ./ I0data225abs, Ymaxrange, color="#73D055FF", label="Rev-Exp = \$225")
+    plot(1 ./ I0data133rel, Ymaxrange, linewidth=3, linestyle="solid", color="black", label="Rev/Exp = 1.33")
+    plot(1 ./ I0data115rel, Ymaxrange, linewidth=3, linestyle="dashed", color="black", label="Rev/Exp = 1.15")
+    plot(1 ./ I0data108rel, Ymaxrange, linewidth=3, linestyle="dotted", color="black", label="Rev/Exp = 1.08")
+    xlabel("1/I0", fontsize = 15)
+    ylabel("Ymax", fontsize = 15)
+    legend()
+    # return relvsabsplot
+    savefig(joinpath(abpath(), "figs/relvsabsplot.pdf"))
+end
+
 # Separating CVwNL and CVwoNL
 #CVwoNL (NOTE that the CVwoNL is exactly the same whether generated from the positive feedback or time delay functions)
 let 
