@@ -73,7 +73,7 @@ end
 
 @with_kw mutable struct EconomicPar
     p = 6.70 # market price pert unit (not acre) #budget summary field crops budgets 2022 corn conventional
-    c = 863.5555555555555
+    c = 701.2330827067669
 end
 
 ### Production and Parginal functions
@@ -226,7 +226,7 @@ function calc_revexpintercept(origYmax, origI0, rise, run, revexpval, economicpa
     return I0intercept
 end
 
-function calcYmaxI0vals(constrain, origYmax, revexpratios, rise, run, economicpar, startrevexpval::Float64=1.08) #Returns I0 values (not the reciprocal)
+function calcYmaxI0vals(constrain, origYmax, revexpratios, rise, run, economicpar, startrevexpval::Float64=1.33) #Returns I0 values (not the reciprocal)
     origI0 = calc_I0(startrevexpval, origYmax, economicpar)
     vals = zeros(length(revexpratios), 2)
     if constrain == "Ymax"

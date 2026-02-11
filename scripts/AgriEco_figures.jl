@@ -3,12 +3,12 @@ include("AgriEco_commoncode.jl")
 
 #Data
 
-revexpcurve108_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_posfeed_data.csv"), DataFrame))
-revexpcurve108_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_posfeed_data.csv"), DataFrame))
-revexpcurve108_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_highymax_posfeed_data.csv"), DataFrame))
-revexpcurve133_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_lowymax_posfeed_data.csv"), DataFrame))
-revexpcurve133_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_medymax_posfeed_data.csv"), DataFrame))
-revexpcurve133_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_highymax_posfeed_data.csv"), DataFrame))
+revexpcurve108_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_posfeed_data33to08.csv"), DataFrame))
+revexpcurve108_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_posfeed_data33to08.csv"), DataFrame))
+revexpcurve108_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_highymax_posfeed_data33to08.csv"), DataFrame))
+revexpcurve133_lowymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_lowymax_posfeed_data33to08.csv"), DataFrame))
+revexpcurve133_medymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_medymax_posfeed_data33to08.csv"), DataFrame))
+revexpcurve133_highymax_posfeed_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve133_highymax_posfeed_data33to08.csv"), DataFrame))
 
 revexpcurve108_lowymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_lowymax_timedelay_data.csv"), DataFrame))
 revexpcurve108_medymax_timedelay_data = CSVtoArrayVector(CSV.read(joinpath(abpath(),"data/revexpcurve108_medymax_timedelay_data.csv"), DataFrame))
@@ -103,8 +103,8 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    # return posfeed_etaresidual_alongrelprof
-    savefig(joinpath(abpath(), "figs/posfeed_etaresidual_alongrelprof.pdf")) 
+    return posfeed_etaresidual_alongrelprof
+    # savefig(joinpath(abpath(), "figs/posfeed_etaresidual_alongrelprof.pdf")) 
 end
 
 let #ETA residual standardized by yield
