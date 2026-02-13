@@ -508,6 +508,16 @@ end
 ### Supporting Information
 include("AgriEco_supportinginformation.jl")
 
+##Table SI1
+df = DataFrame(RP = [1.33, 1.33, 1.33, 1.08, 1.08, 1.08], Ymax = [200, 174, 150, 200, 174, 150])
+
+@chain df begin
+  @transform!(@byrow :IO = calc_I0(:RP, :Ymax, EconomicPar()))
+  @transform!(@byrow :InEff=1/:IO)
+  @transform!(@byrow :FourFifthsInputs=2*sqrt(:IO))
+  @transform!(@byrow :DeltaFourFifths=(:FourFifthsInputs-1)*100)
+end;
+
 #Maintaining geometry while changing I₀ and c
 let 
     newI0 = 2500

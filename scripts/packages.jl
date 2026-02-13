@@ -15,3 +15,5 @@ using DataFrames
 using StatsBase
 using CSV
 using Tables
+using Chain
+using DataFramesMeta

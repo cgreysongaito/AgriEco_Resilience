@@ -57,8 +57,8 @@ end
 
 # lowrevexpratio = 1.08
 # defaultYmaxvalue = 174
-rise = 10
-run = 0.02
+# rise = 10
+# run = 0.02
 CV_posfeed = 0.2
 corrrange_posfeed = 0.0:0.01:0.85
 maxyears_posfeed = 50
