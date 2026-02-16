@@ -73,7 +73,7 @@ end
 
 @with_kw mutable struct EconomicPar
     p = 6.70 # market price per unit (not acre) #budget summary field crops budgets 2022 corn conventional
-    c = 701.2330827067669
+    c = 666.1714285714287
 end
 
 ### Production and Marginal functions
