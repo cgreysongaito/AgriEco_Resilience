@@ -193,34 +193,6 @@ function expenses_calc(inputs, c)
 end
 
 #Experiment set up functions
-# function find_yintercept(slope, Ymax, I0)#takes I0 not reciprocal of I0 - but sets up yintercept for reciprocal
-#     return Ymax - slope * 1/I0
-# end
-
-# function guess_revexpintercept(OERatio, economicpar, linslope, linint)#Returns I0 (not the reciprocal)
-#     Ymaxrange = 100.0:2.0:170.0
-#     linerecipI0 = [(Ymax - linint)/linslope for Ymax in Ymaxrange]
-#     curverecipI0 = 1 ./ [calc_I0(OERatio, Ymax, economicpar) for Ymax in Ymaxrange]
-#     for i in eachindex(linerecipI0)
-#         for j in eachindex(curverecipI0)
-#             if isapprox(linerecipI0[i], curverecipI0[j], atol=0.05) == true
-#                 return 1/curverecipI0[j]
-#             end
-#         end
-#     end
-# end
-
-# function find_revexpintercept(OERatio, economicpar, linslope, linint, guess) #Returns I0 (not the reciprocal)
-#     return find_zero(I0 -> linslope * (1/I0) + linint - (2 * economicpar.c * I0^(1/2))/(economicpar.p * OERatio), guess)
-# end
-
-# function calc_revexpintercept(origYmax, origI0, rise, run, OERatio, economicpar) #Returns I0 (not the reciprocal)
-#     linslope = rise/run
-#     linint = find_yintercept(linslope, origYmax, origI0)
-#     guess = guess_revexpintercept(OERatio, economicpar, linslope, linint)
-#     I0intercept = find_revexpintercept(OERatio, economicpar, linslope, linint, guess)
-#     return I0intercept
-# end
 
 function calcYmaxI0vals_YmaxOERatio(Ymaxval, OERatios, economicpar) #Returns I0 values (not the reciprocal)
     vals = zeros(length(OERatios), 2)
@@ -249,18 +221,18 @@ function calcYmaxI0vals_OERatiocurve_final(OERatios, Ymaxvals, economicpar) #Ret
 end
 
 #Variability amplification and muting functions
-function variabilityterminalassets(distributiondata)
+function variabilityfinalassets(distributiondata)
     meandata = abs(mean(distributiondata))
     sddata = std(distributiondata)
     return sddata/meandata
 end
 
-function variabilityterminalassets_rednoise(dataset)
+function variabilityfinalassets_rednoise(dataset)
     corrrange = dataset[:,1]
     data=zeros(length(corrrange), 4)
     @threads for ri in eachindex(corrrange)
-        variabilityassetsdata_NL = variabilityterminalassets(dataset[ri,2])
-        variabilityassetsdata_woNL = variabilityterminalassets(dataset[ri,3])
+        variabilityassetsdata_NL = variabilityfinalassets(dataset[ri,2])
+        variabilityassetsdata_woNL = variabilityfinalassets(dataset[ri,3])
         data[ri,1] = corrrange[ri]
         data[ri,2] = variabilityassetsdata_NL
         data[ri,3] = variabilityassetsdata_woNL
@@ -269,7 +241,7 @@ function variabilityterminalassets_rednoise(dataset)
     return data
 end
 
-function variabilityterminalassets_breakdown(dataset)
+function variabilityfinalassets_breakdown(dataset)
     corrrange = dataset[:,1]
     data=zeros(length(corrrange), 7)
     @threads for ri in eachindex(corrrange)
@@ -343,7 +315,7 @@ function marginalcurves(ymaxval, I0val, par)
 end
 
 
-## Expected Terminal Assets
+## Expected Final Assets
 function distribution_prob_convert(histogramdata)
     sumcounts = sum(histogramdata.weights)
     probdata = zeros(length(histogramdata.weights))
@@ -353,7 +325,7 @@ function distribution_prob_convert(histogramdata)
     return probdata
 end
 
-function expectedterminalassets(distributiondata, numbins)
+function expectedfinalassets(distributiondata, numbins)
     histogramdata = fit(Histogram, distributiondata, nbins=numbins)
     probdata = distribution_prob_convert(histogramdata)
     expectedassets = 0
@@ -364,49 +336,49 @@ function expectedterminalassets(distributiondata, numbins)
     return expectedassets
 end
 
-function expectedterminalassets_absolute(dataset)
+function expectedfinalassets_absolute(dataset)
     corrrange = dataset[:,1]
     data=zeros(length(corrrange), 2)
     @threads for ri in eachindex(corrrange)
-        expectedtermassetsdata = expectedterminalassets(dataset[ri,2], 30)
+        expectedfinalassetsdata = expectedfinalassets(dataset[ri,2], 30)
         data[ri,1] = corrrange[ri]
-        data[ri,2] = expectedtermassetsdata
+        data[ri,2] = expectedfinalassetsdata
     end
     return data
 end
 
-function expectedterminalassets_residual(dataset)
+function expectedfinalassets_residual(dataset)
     corrrange = dataset[:,1]
     data=zeros(length(corrrange), 2)
     @threads for ri in eachindex(corrrange)
-        expectedtermassetsdata_wNL = expectedterminalassets(dataset[ri,2], 30)
-        expectedtermassetsdata_woNL = expectedterminalassets(dataset[ri,3], 30)
+        expectedfinalassetsdata_wNL = expectedfinalassets(dataset[ri,2], 30)
+        expectedfinalassetsdata_woNL = expectedfinalassets(dataset[ri,3], 30)
         data[ri,1] = corrrange[ri]
-        data[ri,2] = expectedtermassetsdata_wNL-expectedtermassetsdata_woNL
+        data[ri,2] = expectedfinalassetsdata_wNL-expectedfinalassetsdata_woNL
     end
     return data
 end
 
-function expectedterminalassets_residualstand(dataset)
+function expectedfinalassets_residualstand(dataset)
     corrrange = dataset[:,1]
     data=zeros(length(corrrange), 2)
     @threads for ri in eachindex(corrrange)
-        expectedtermassetsdata_wNL = expectedterminalassets(dataset[ri,2], 30)
-        expectedtermassetsdata_woNL = expectedterminalassets(dataset[ri,3], 30)
+        expectedfinalassetsdata_wNL = expectedfinalassets(dataset[ri,2], 30)
+        expectedfinalassetsdata_woNL = expectedfinalassets(dataset[ri,3], 30)
         data[ri,1] = corrrange[ri]
-        data[ri,2] = (expectedtermassetsdata_wNL-expectedtermassetsdata_woNL)/expectedtermassetsdata_woNL
+        data[ri,2] = (expectedfinalassetsdata_wNL-expectedfinalassetsdata_woNL)/expectedfinalassetsdata_woNL
     end
     return data
 end
 
-function expectedterminalassets_residualstandyield(dataset, yield)
+function expectedfinalassets_residualstandyield(dataset, yield)
     corrrange = dataset[:,1]
     data=zeros(length(corrrange), 2)
     @threads for ri in eachindex(corrrange)
-        expectedtermassetsdata_wNL = expectedterminalassets(dataset[ri,2], 30)
-        expectedtermassetsdata_woNL = expectedterminalassets(dataset[ri,3], 30)
+        expectedfinalassetsdata_wNL = expectedfinalassets(dataset[ri,2], 30)
+        expectedfinalassetsdata_woNL = expectedfinalassets(dataset[ri,3], 30)
         data[ri,1] = corrrange[ri]
-        data[ri,2] = (expectedtermassetsdata_wNL-expectedtermassetsdata_woNL)/yield
+        data[ri,2] = (expectedfinalassetsdata_wNL-expectedfinalassetsdata_woNL)/yield
     end
     return data
 end
