@@ -45,11 +45,11 @@ let
     plot(1 ./ I0data071OERatio, Ymaxrange, linestyle="solid", color="black", label="rev/exp = 1.10")
     xlabel("1/I0", fontsize = 20)
     ylabel("Ymax", fontsize = 20)
-    # xticks([])
-    # yticks([])
+    xticks([])
+    yticks([])
     tight_layout()
-    return figure2schematicprep
-    # savefig(joinpath(abpath(), "figs/figure2schematicprep.pdf"))
+    # return figure2schematicprep
+    savefig(joinpath(abpath(), "figs/figure2schematicprep.pdf"))
 end
 
 ## Positive feedbacks ##
@@ -65,7 +65,7 @@ let
     lowymax_071 = expectedfinalassets_residual(OERatiocurve071_lowymax_posfeed_data)
     medymax_071 = expectedfinalassets_residual(OERatiocurve071_medymax_posfeed_data)
     highymax_071 = expectedfinalassets_residual(OERatiocurve071_highymax_posfeed_data)
-    posfeed_etaresidual_alongOERatiocurve = figure(figsize=(4,6))    
+    posfeed_efaresidual_alongOERatiocurve = figure(figsize=(4,6))    
     subplot(2,1,1)
     plot(lowymax_071[:,1], lowymax_071[:,2], linestyle="solid", color="black", label="Low Ymax")
     plot(medymax_071[:,1], medymax_071[:,2], linestyle="dashed", color="black", label="Med Ymax")
@@ -87,12 +87,12 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return posfeed_etaresidual_alongOERatiocurve
-    # savefig(joinpath(abpath(), "figs/posfeed_etaresidual_alongOERatiocurve.pdf")) 
+    # return posfeed_efaresidual_alongOERatiocurve
+    savefig(joinpath(abpath(), "figs/posfeed_efaresidual_alongOERatiocurve.pdf")) 
 end
 
 #Figure 4 Amplification or muting of white to reddened noise with positive feedback
-#Variability along revenue/expenses curve
+#Variability along OER curve
 let 
     lowymax_09 = variabilityfinalassets_rednoise(OERatiocurve09_lowymax_posfeed_data)
     medymax_09 = variabilityfinalassets_rednoise(OERatiocurve09_medymax_posfeed_data)
@@ -124,8 +124,8 @@ let
     title("OER = 0.90")
     legend()
     tight_layout()
-    return posfeed_var_alongOERatiocurve
-    # savefig(joinpath(abpath(), "figs/posfeed_var_alongOERatiocurve.pdf")) 
+    # return posfeed_var_alongOERatiocurve
+    savefig(joinpath(abpath(), "figs/posfeed_var_alongOERatiocurve.pdf")) 
 end 
 
 #Figure 5 Resistance to yield disturbance
@@ -179,8 +179,8 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return yielddisturbanceresistance
-    # savefig(joinpath(abpath(), "figs/yielddisturbanceresistance_relprofcurve.pdf"))
+    # return yielddisturbanceresistance
+    savefig(joinpath(abpath(), "figs/yielddisturbanceresistance_OERcurve.pdf"))
 end 
 
 ## Time Delay ##
@@ -193,7 +193,7 @@ let
     lowymax_071 = expectedfinalassets_residual(OERatiocurve071_lowymax_timedelay_data)
     medymax_071 = expectedfinalassets_residual(OERatiocurve071_medymax_timedelay_data)
     highymax_071 = expectedfinalassets_residual(OERatiocurve071_highymax_timedelay_data)
-    timedelay_etaresidual_alongOERatiocurve = figure(figsize=(4,6))    
+    timedelay_efaresidual_alongOERatiocurve = figure(figsize=(4,6))    
     subplot(2,1,1)
     plot(lowymax_071[:,1], lowymax_071[:,2], linestyle="solid", color="black", label="Low Ymax")
     plot(medymax_071[:,1], medymax_071[:,2], linestyle="dashed", color="black", label="Med Ymax")
@@ -217,8 +217,8 @@ let
     ylim(-400,850)
     legend()
     tight_layout()
-    return timedelay_etaresidual_alongOERatiocurve
-    # savefig(joinpath(abpath(), "figs/timedelay_etaresidual_alongOERatiocurve.pdf")) 
+    # return timedelay_efaresidual_alongOERatiocurve
+    savefig(joinpath(abpath(), "figs/timedelay_efaresidual_alongOERatiocurve.pdf")) 
 end
 
 
@@ -258,8 +258,8 @@ let
     title("OER = 0.90")
     legend()
     tight_layout()
-    return timedelay_var_alongOERatiocurve
-    # savefig(joinpath(abpath(), "figs/timedelay_var_alongOERatiocurve.pdf")) 
+    # return timedelay_var_alongOERatiocurve
+    savefig(joinpath(abpath(), "figs/timedelay_var_alongOERatiocurve.pdf")) 
 end
 
 # Figure 8 - Resistance to error
@@ -313,8 +313,8 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return errorresistance
-    # savefig(joinpath(abpath(), "figs/errorresistance_OERatiocurveymax.pdf"))
+    # return errorresistance
+    savefig(joinpath(abpath(), "figs/errorresistance_OERatiocurveymax.pdf"))
 end 
 
 ### Supporting Information
@@ -358,8 +358,8 @@ let
     xlabel("Yield", fontsize = 15)
     ylabel("Revenue & Cost", fontsize = 15)
     tight_layout()
-    return costcurves
-    # savefig(joinpath(abpath(), "figs/SIchangingI0c.pdf"))
+    # return costcurves
+    savefig(joinpath(abpath(), "figs/SIchangingI0c.pdf"))
 end    
 
 ##Table SI1
@@ -392,8 +392,8 @@ let
     xlabel("1/I0", fontsize = 15)
     ylabel("Ymax", fontsize = 15)
     legend()
-    return OERvsabsplot
-    # savefig(joinpath(abpath(), "figs/OERvsabsplot.pdf"))
+    # return OERvsabsplot
+    savefig(joinpath(abpath(), "figs/OERvsabsplot.pdf"))
 end
 
 # Separating CVwNL and CVwoNL
@@ -443,8 +443,8 @@ let
     title("OER = 0.99")
     legend()
     tight_layout()
-    return varwoNL_OERcurve
-    # savefig(joinpath(abpath(), "figs/varwoNL_OERcurve.pdf")) 
+    # return varwoNL_OERcurve
+    savefig(joinpath(abpath(), "figs/varwoNL_OERcurve.pdf")) 
 end
 
 #CVwNL positive feedback
@@ -493,8 +493,8 @@ let
     legend()
     title("OER = 0.99")
     tight_layout()
-    return posfeed_varwNL_OERcurve
-    # savefig(joinpath(abpath(), "figs/posfeed_varwNL_OERcurve.pdf")) 
+    # return posfeed_varwNL_OERcurve
+    savefig(joinpath(abpath(), "figs/posfeed_varwNL_OERcurve.pdf")) 
 end
 
 #CVwNL time delay
@@ -543,8 +543,8 @@ let
     legend()
     title("OER = 0.99")
     tight_layout()
-    return timedelays_varwNL_OERcurve
-    # savefig(joinpath(abpath(), "figs/timedelays_varwNL_OERcurve.pdf")) 
+    # return timedelays_varwNL_OERcurve
+    savefig(joinpath(abpath(), "figs/timedelays_varwNL_OERcurve.pdf")) 
 end 
 
 ## OER = 0.99
@@ -576,8 +576,8 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return posfeed_efavar_alongOERatiocurve_099
-    # savefig(joinpath(abpath(), "figs/posfeed_efavar_alongOERatiocurve_099.pdf")) 
+    # return posfeed_efavar_alongOERatiocurve_099
+    savefig(joinpath(abpath(), "figs/posfeed_efavar_alongOERatiocurve_099.pdf")) 
 end
 
 #Time Delay
@@ -608,6 +608,6 @@ let
     yticks(fontsize=12)
     legend()
     tight_layout()
-    return timedelay_efavar_alongOERatiocurve_099
-    # savefig(joinpath(abpath(), "figs/timedelay_efavar_alongOERatiocurve_099.pdf")) 
+    # return timedelay_efavar_alongOERatiocurve_099
+    savefig(joinpath(abpath(), "figs/timedelay_efavar_alongOERatiocurve_099.pdf")) 
 end
