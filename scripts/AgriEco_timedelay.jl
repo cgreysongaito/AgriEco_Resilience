@@ -1,6 +1,5 @@
 include("packages.jl")
 include("AgriEco_commoncode.jl")
-# include("AgriEco_relprofitscurve.jl")
 
 function delayedinputs(defaultinputs, lastyrsactualyield, lastyrsprojectedyield, minfraction,)
     lastyrsoutcome = lastyrsactualyield/lastyrsprojectedyield
@@ -82,7 +81,7 @@ function terminalassets_timedelay_rednoise_dataset_CV(YmaxI0vals, economicpar, y
     return hcat(corrrange, data)
 end
 
-revexpcurve_vals = calcYmaxI0vals_relprofcurve_final([0.95,1.10,1.25,1.40], [150,174,200], EconomicPar())
+OERatiocurve_vals = calcYmaxI0vals_OERatiocurve_final([0.71,0.9,0.99], [150,174,200], EconomicPar())
 CV_timedelay = 0.2
 corrrange_timedelay = 0.0:0.01:0.85
 yearsdelay = 3
@@ -90,23 +89,33 @@ minfraction = 0.2
 maxyears_timedelay = 50
 reps_timedelay = 1000
 
-#Rev/Exp = 1.40 - along the curve
+#OERatio = 0.71 - along the curve
 let 
-    revexpcurve140_lowymax_timedelay_data40to10 = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[4][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/revexpcurve140_lowymax_timedelay_data40to10.csv"), revexpcurve140_lowymax_timedelay_data40to10)
-    revexpcurve140_medymax_timedelay_data40to10 = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[4][2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/revexpcurve140_medymax_timedelay_data40to10.csv"), revexpcurve140_medymax_timedelay_data40to10)
-    revexpcurve140_highymax_timedelay_data40to10 = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[4][3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/revexpcurve140_highymax_timedelay_data40to10.csv"), revexpcurve140_highymax_timedelay_data40to10)
+    OERatiocurve071_lowymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(OERatiocurve_vals[1][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/OERatiocurve071_lowymax_timedelay_data.csv"), OERatiocurve071_lowymax_timedelay_data)
+    OERatiocurve071_medymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(OERatiocurve_vals[1][2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/OERatiocurve071_medymax_timedelay_data.csv"), OERatiocurve071_medymax_timedelay_data)
+    OERatiocurve071_highymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(OERatiocurve_vals[1][3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/OERatiocurve071_highymax_timedelay_data.csv"), OERatiocurve071_highymax_timedelay_data)
 end
 
-#Rev/Exp = 1.10 - along the curve
+#OERatio = 0.9 - along the curve
 let 
-    revexpcurve110_lowymax_timedelay_data40to10 = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[2][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/revexpcurve110_lowymax_timedelay_data40to10.csv"), revexpcurve110_lowymax_timedelay_data40to10)
-    revexpcurve110_medymax_timedelay_data40to10 = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[2][2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/revexpcurve110_medymax_timedelay_data40to10.csv"), revexpcurve110_medymax_timedelay_data40to10)
-    revexpcurve110_highymax_timedelay_data40to10 = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(revexpcurve_vals[2][3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
-    CSV.write(joinpath(abpath(), "data/revexpcurve110_highymax_timedelay_data40to10.csv"), revexpcurve110_highymax_timedelay_data40to10)
+    OERatiocurve09_lowymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(OERatiocurve_vals[2][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/OERatiocurve09_lowymax_timedelay_data.csv"), OERatiocurve09_lowymax_timedelay_data)
+    OERatiocurve09_medymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(OERatiocurve_vals[2][2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/OERatiocurve09_medymax_timedelay_data.csv"), OERatiocurve09_medymax_timedelay_data)
+    OERatiocurve09_highymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(OERatiocurve_vals[2][3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/OERatiocurve09_highymax_timedelay_data.csv"), OERatiocurve09_highymax_timedelay_data)
+end
+
+#OERatio = 0.99 - along the curve
+let 
+    OERatiocurve099_lowymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(OERatiocurve_vals[3][1,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/OERatiocurve099_lowymax_timedelay_data.csv"), OERatiocurve099_lowymax_timedelay_data)
+    OERatiocurve099_medymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(OERatiocurve_vals[3][2,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/OERatiocurve099_medymax_timedelay_data.csv"), OERatiocurve099_medymax_timedelay_data)
+    OERatiocurve099_highymax_timedelay_data = prepDataFrame(terminalassets_timedelay_rednoise_dataset_CV(OERatiocurve_vals[3][3,:], EconomicPar(), CV_timedelay, corrrange_timedelay, yearsdelay, minfraction, maxyears_timedelay, reps_timedelay))
+    CSV.write(joinpath(abpath(), "data/OERatiocurve099_highymax_timedelay_data.csv"), OERatiocurve099_highymax_timedelay_data)
 end
 
