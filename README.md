@@ -1,4 +1,4 @@
-Resilience of incremental productivity versus sustainability in crop farms
+Crop farm financial health in response to reddening environmental variability
 =========
 
 #### Authors
@@ -19,9 +19,13 @@ Christopher J. Greyson-Gaito<sup>*1.</sup>, Aaron Delaporte<sup>2.</sup>, Alfons
 ## Julia scripts and datasets
 
 ### Folder and file structure
-* figs &ndash; empty folder for figures to be placed (created in bacteriophage_figures.jl)
+* figs &ndash; empty folder for figures to be placed (created in AgriEco_figures.jl)
 * scripts
     * packages.jl &ndash; list of packages required (file used in other scripts)
+    * AgriEco_commoncode.jl &ndash; functions used in simulations and producing figures
+    * AgriEco_positivefeedbacks.jl &ndash; creation of positive feedbacks data
+    * AgriEco_timedelay.jl &ndash; creation of time delay data
+    * AgriEco_figures.jl &ndash; script to create all figures
 * .gitignore &ndash; file containing files and folders that git should ignore
 * LICENSE.txt &ndash; CC by 4.0 License for this repository
 * README.md &ndash; this file
@@ -31,5 +35,5 @@ Christopher J. Greyson-Gaito<sup>*1.</sup>, Aaron Delaporte<sup>2.</sup>, Alfons
 1. Download the GitHub/Zenodo repo
 2. Open the repo in Visual Studio Code (if you haven't already done so, set up [Julia in Visual Studio Code](https://www.julia-vscode.org/))
 3. Most of the analysis here requires multiple cores. Thus to set up multiple cores on your computer, in Visual Studio Code find the Julia: Num Threads setting in the Extension Settings of the Visual Studio Code Julia Extension. Change this setting to at most the number of logical cores in your computer. Restart Julia. All parallel computing will run automatically regardless of the number of cores selected.
-4. Run AgriEco_positivefeedbacks.jl and AgriEco_timedelay.jl to create the date required for AgriEco_figures.jl. Note, depending on the number of cores in your computer, this may take a some time.
+4. Run scripts/AgriEco_positivefeedbacks.jl and scripts/AgriEco_timedelay.jl to create the date required for scripts/AgriEco_figures.jl. Note, depending on the number of cores in your computer, this may take a some time.
 5. Run scripts/AgriEco_figures.jl to produce the figures in the manuscript.
